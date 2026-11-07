@@ -29,10 +29,10 @@ from .models import Patient, RelatedPerson
 
 PER_PAGE = 50
 STATUSES = {
-    "ativos": Q(active=True, archived=False),
-    "inativos": Q(active=False, archived=False),
-    "todos": Q(archived=False),
-    "arquivados": Q(archived=True),  # clinic administrators only (see lista)
+    "active": Q(active=True, archived=False),
+    "inactive": Q(active=False, archived=False),
+    "all": Q(archived=False),
+    "archived": Q(archived=True),  # clinic administrators only (see lista)
 }
 
 
@@ -61,16 +61,16 @@ def filter_patients(patients, search, kind, status):
         patients = patients.filter(query_filter)
     if kind in Patient.Kind.values:
         patients = patients.filter(kind=kind)
-    return patients.filter(STATUSES.get(status, STATUSES["ativos"]))
+    return patients.filter(STATUSES.get(status, STATUSES["active"]))
 
 
 @requires_permission(Module.PATIENTS, Action.VIEW)
 def patient_list(request):
     search = request.GET.get("q", "").strip()
     kind = request.GET.get("kind", "")
-    status = request.GET.get("status", "ativos")
-    if status == "arquivados" and not _sees_archived(request):
-        status = "ativos"
+    status = request.GET.get("status", "active")
+    if status == "archived" and not _sees_archived(request):
+        status = "active"
     patients = filter_patients(Patient.objects.select_related("city__state"), search, kind, status)
     page = Paginator(patients, PER_PAGE).get_page(request.GET.get("page"))
     return render(
@@ -314,7 +314,7 @@ def suggestions(request):
     """Up to 10 active patients matching the text, for search-as-you-type fields (HTMX)."""
     search = request.GET.get("q", "").strip()
     patients = (
-        filter_patients(Patient.objects.all(), search, "", "ativos")[:10]
+        filter_patients(Patient.objects.all(), search, "", "active")[:10]
         if len(search) >= 2
         else []
     )

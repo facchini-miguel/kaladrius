@@ -4,6 +4,43 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.66.0
+  date: 2026-11-07
+  title:
+    pt-br: Auditoria traduz troca de senha e finalização
+    en: The audit log translates password changes and finalizing
+    es: La auditoría traduce el cambio de contraseña y la finalización
+  items:
+    - kind: improvement
+      module: Auditoria
+      audience: [staff]
+      text:
+        pt-br: >
+          A troca de senha e a finalização de um atendimento aparecem na auditoria no idioma de
+          quem consulta, também nas entradas antigas.
+        en: >
+          Password changes and a visit's finalizing show in the audit log in the reader's
+          language, old entries included.
+        es: >
+          El cambio de contraseña y la finalización de una atención aparecen en la auditoría en el
+          idioma de quien la consulta, también en las entradas antiguas.
+    - kind: improvement
+      module: Sistema
+      audience: []
+      text:
+        pt-br: >
+          Os outros códigos internos em inglês (decisão 199): tipos e públicos das novidades,
+          também na API (audience=staff|patient), papéis dos documentos, valores dos filtros e
+          das ações, chaves da sessão.
+        en: >
+          The other internal codes in English (decision 199): the release notes' kinds and
+          audiences, also in the API (audience=staff|patient), document roles, filter and action
+          values, session keys.
+        es: >
+          Los otros códigos internos en inglés (decisión 199): tipos y públicos de las novedades,
+          también en la API (audience=staff|patient), roles de los documentos, valores de los
+          filtros y de las acciones, claves de la sesión.
+
 - version: 0.65.0
   date: 2026-11-07
   title:
@@ -11,9 +48,9 @@
     en: Internal codes in English
     es: Códigos internos en inglés
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Manutenção interna: os códigos que o sistema grava para as opções (situação da consulta,
@@ -27,7 +64,7 @@
           Mantenimiento interno: se reorganizaron los códigos que el sistema guarda para las
           opciones (estado de la cita, forma de pago, rol en la clínica…). Nada cambia en el uso,
           en las pantallas ni en los datos.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -50,9 +87,9 @@
     en: The audit log shows the options' names
     es: La auditoría muestra el nombre de las opciones
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Auditoria
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Nas alterações da auditoria, campos de opções aparecem pelo nome, como "Compareceu" ou
@@ -63,7 +100,7 @@
         es: >
           En los cambios de la auditoría, los campos de opciones aparecen por su nombre, como
           "Asistió" o "Efectivo", en lugar del código interno guardado.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -84,9 +121,9 @@
     en: The API's old addresses removed
     es: Direcciones antiguas de la API eliminadas
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Manutenção interna: endereços antigos da API, que ninguém usava mais, foram retirados.
@@ -97,7 +134,7 @@
         es: >
           Mantenimiento interno: se retiraron direcciones antiguas de la API, que nadie usaba ya.
           Nada cambia en el uso, en las pantallas ni en los datos.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -118,9 +155,9 @@
     en: The modules' internal names in English
     es: Nombres internos de los módulos en inglés
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Manutenção interna: os nomes internos dos módulos foram reorganizados. Nada muda no uso,
@@ -131,7 +168,7 @@
         es: >
           Mantenimiento interno: se reorganizaron los nombres internos de los módulos. Nada cambia
           en el uso, en las pantallas ni en los datos.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -155,9 +192,9 @@
     en: Getting ready for the next version
     es: Preparación para la próxima versión
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Manutenção interna, que prepara a próxima versão. Nada muda no uso, nas telas nem nos
@@ -168,7 +205,7 @@
         es: >
           Mantenimiento interno que prepara la próxima versión. Nada cambia en el uso, en las
           pantallas ni en los datos.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -192,9 +229,9 @@
     en: A better schedule on phones
     es: Agenda mejor en el celular
   items:
-    - kind: correcao
+    - kind: fix
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           No celular, a visão da semana mostra os dias de forma curta (S 2, T 3…), sem um invadir
@@ -214,9 +251,9 @@
     en: Server health warning fixed
     es: Aviso de salud del servidor corregido
   items:
-    - kind: correcao
+    - kind: fix
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O aviso de recursos no limite, no topo das páginas, voltou a dizer se o problema é
@@ -228,7 +265,7 @@
           El aviso de recursos al límite, en la parte superior de las páginas, vuelve a decir si el
           problema es memoria, swap, disco o procesador. Desde la versión 0.60.0 siempre decía
           procesador.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -249,9 +286,9 @@
     en: Internal names in English
     es: Nombres internos en inglés
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Manutenção interna: nomes usados no código foram reorganizados. Nada muda no uso, nas
@@ -262,7 +299,7 @@
         es: >
           Mantenimiento interno: se reorganizaron nombres usados en el código. Nada cambia en el
           uso, en las pantallas ni en los datos.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -277,7 +314,7 @@
           La API de las novedades (/api/v1/releases) usa nombres en inglés en los campos y en los
           parámetros audience y since (decisión 189). Los parámetros antiguos publico y desde siguen
           valiendo.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -299,9 +336,9 @@
     en: Cities back in the patient form
     es: Ciudades de vuelta en el registro de paciente
   items:
-    - kind: correcao
+    - kind: fix
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           No cadastro de paciente, escolher a UF voltou a carregar a lista de cidades. Desde a
@@ -312,7 +349,7 @@
         es: >
           En el registro de paciente, elegir el estado vuelve a cargar la lista de ciudades. Desde
           la versión 0.57.0 la lista quedaba vacía.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -333,9 +370,9 @@
     en: The database in English
     es: Base de datos en inglés
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Manutenção interna: as tabelas do banco de dados foram reorganizadas. Nada muda no uso,
@@ -346,7 +383,7 @@
         es: >
           Mantenimiento interno: las tablas de la base de datos se reorganizaron. Nada cambia en
           el uso, en las pantallas ni en los datos; la actualización tarda unos segundos más.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -375,9 +412,9 @@
     en: Functions and variables in English
     es: Funciones y variables en inglés
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Manutenção interna: o código do sistema foi reorganizado. Nada muda no uso, nas telas
@@ -388,7 +425,7 @@
         es: >
           Mantenimiento interno: el código del sistema se reorganizó. Nada cambia en el uso, en
           las pantallas ni en los datos.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -412,9 +449,9 @@
     en: The code's names in English
     es: Nombres del código en inglés
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Em inglês e espanhol, o prontuário agora traduz três nomes de campo que apareciam em
@@ -431,7 +468,7 @@
           aparecían en portugués ("finalizado por", "tamaño" y "contenido"). Las direcciones con
           filtros (por ejemplo la fecha de la agenda) usan nombres nuevos; un marcador antiguo
           abre la pantalla normalmente, solo sin el filtro.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -461,9 +498,9 @@
     en: Addresses in English
     es: Direcciones en inglés
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Os endereços das telas agora são em inglês, como `/patients/` e `/schedule/` (antes
@@ -480,9 +517,9 @@
           `/schedule/` (antes `/pacientes/` y `/agenda/`). Los marcadores, los enlaces en
           correos y las pantallas abiertas antes de la actualización siguen funcionando: las
           direcciones antiguas llevan solas a las nuevas. Las pantallas siguen en portugués.
-    - kind: melhoria
+    - kind: improvement
       module: Auditoria
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Nos detalhes da auditoria, cada campo alterado aparece pelo nome da tela (por exemplo
@@ -493,7 +530,7 @@
         es: >
           En los detalles de la auditoría, cada campo cambiado aparece con su nombre de la
           pantalla (por ejemplo "profesión"), y ya no con el nombre interno del sistema.
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
       audience: []
       text:
@@ -517,9 +554,9 @@
     en: Server commands in English
     es: Comandos del servidor en inglés
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Os comandos do servidor da clínica agora têm nomes em inglês, como
@@ -544,9 +581,9 @@
     en: Updates from the package repository
     es: Actualizaciones desde el repositorio de paquetes
   items:
-    - kind: novo
+    - kind: new
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O servidor da clínica recebe as versões novas do Kaladrius junto com as atualizações
@@ -571,9 +608,9 @@
     en: Installation from the Linux package
     es: Instalación con el paquete Linux
   items:
-    - kind: novo
+    - kind: new
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A clínica pode instalar o Kaladrius no próprio servidor com um pacote do Linux
@@ -590,9 +627,9 @@
           (Debian, Ubuntu, Fedora y otros), respondiendo algunas preguntas en pantalla, para
           usarlo en la red interna o por internet, con copia de seguridad diaria y vuelta
           automática de una actualización que falle.
-    - kind: seguranca
+    - kind: security
       module: Acesso
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A senha do primeiro administrador, criada na instalação, segue as mesmas regras de
@@ -603,9 +640,9 @@
         es: >
           La contraseña del primer administrador, creada en la instalación, sigue las mismas
           reglas de contraseña fuerte que las demás.
-    - kind: correcao
+    - kind: fix
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Um servidor próprio sem o site de documentação não iniciava o HTTPS, e o teste semanal
@@ -624,9 +661,9 @@
     en: Review of database changes
     es: Revisión de los cambios en la base
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Toda mudança na estrutura do banco de dados é mostrada e testada antes de entrar,
@@ -645,9 +682,9 @@
     en: Server images locked
     es: Imágenes del servidor fijadas
   items:
-    - kind: seguranca
+    - kind: security
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           As imagens de base do servidor (Python, banco de dados, Caddy e as do site de
@@ -669,9 +706,9 @@
     en: Libraries locked
     es: Bibliotecas fijadas
   items:
-    - kind: seguranca
+    - kind: security
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Todas as bibliotecas do sistema, inclusive as indiretas, ficam travadas na versão
@@ -691,9 +728,9 @@
     en: Automatic rollback of updates
     es: Vuelta automática en las actualizaciones
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Se uma versão nova não subir no servidor, o sistema volta sozinho para a versão
@@ -713,9 +750,9 @@
     en: Monitoring of every address
     es: Monitoreo de todas las direcciones
   items:
-    - kind: correcao
+    - kind: fix
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O monitoramento externo verifica o sistema, o site de documentação e os certificados
@@ -734,9 +771,9 @@
     en: Dependabot link in a new tab
     es: Enlace de Dependabot en una pestaña nueva
   items:
-    - kind: correcao
+    - kind: fix
       module: Novidades
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Nas Novidades, o selo "Dependabot" abre a proposta no GitHub numa aba nova, sem
@@ -755,9 +792,9 @@
     en: What came from Dependabot
     es: Lo que vino de Dependabot
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Novidades
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           As atualizações propostas pelo Dependabot, que mantém as bibliotecas do sistema em
@@ -779,9 +816,9 @@
     en: Made-up data updated
     es: Datos ficticios actualizados
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       source: dependabot
       pr: 5
       text:
@@ -805,9 +842,9 @@
     en: Libraries updated
     es: Bibliotecas actualizadas
   items:
-    - kind: seguranca
+    - kind: security
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       source: dependabot
       pr: 10
       text:
@@ -831,9 +868,9 @@
     en: Application server updated
     es: Servidor de aplicaciones actualizado
   items:
-    - kind: seguranca
+    - kind: security
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       source: dependabot
       pr: 6
       text:
@@ -854,9 +891,9 @@
     en: Python 3.14
     es: Python 3.14
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O sistema passa a rodar no Python 3.14, com a mesma versão nos testes automáticos e na
@@ -875,9 +912,9 @@
     en: Cheque in British English
     es: Cheque en inglés británico
   items:
-    - kind: correcao
+    - kind: fix
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Em inglês, a forma de pagamento aparece como "Cheque" no Reino Unido, no Canadá, na
@@ -896,9 +933,9 @@
     en: Each country's health plans and insurance
     es: Convenios y seguros de cada país
   items:
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O cadastro de convênios segue o país da clínica: o registro da operadora (ANS no
@@ -918,9 +955,9 @@
           nombre local del número de la credencial (Member ID, número de afiliado), el número de
           grupo de las credenciales de Estados Unidos y Canadá y el código del beneficiario de
           las credenciales familiares de Sudáfrica y Australia.
-    - kind: novo
+    - kind: new
       module: Orçamentos
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cada procedimento pode ter o código da codificação do país (TUSS no Brasil, CDT nos
@@ -942,9 +979,9 @@
     en: Each country's laws
     es: Leyes de cada país
   items:
-    - kind: novo
+    - kind: new
       module: Ajuda
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text:
         pt-br: >
           Fora do Brasil, a política de privacidade mostra antes a lei de proteção de dados do
@@ -961,9 +998,9 @@
           del país (como HIPAA, UK GDPR, PIPEDA, POPIA o la Ley 1581 de Colombia), la autoridad
           y el plazo de conservación de la historia clínica. La pantalla de eliminación del
           paciente cita la ley y el plazo del país.
-    - kind: melhoria
+    - kind: improvement
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O recibo mostra o profissional e o registro profissional dele. Na América Latina fora
@@ -985,9 +1022,9 @@
     en: Each country's payment methods
     es: Formas de pago de cada país
   items:
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Ao receber ou pagar, a lista de formas de pagamento é a do país da clínica, com o
@@ -1018,9 +1055,9 @@
     en: Tooth numbering
     es: Numeración de los dientes
   items:
-    - kind: novo
+    - kind: new
       module: Orçamentos
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O odontograma e os orçamentos podem mostrar os dentes na numeração FDI, na Universal
@@ -1046,9 +1083,9 @@
     en: Each country's documents
     es: Documentos de cada país
   items:
-    - kind: novo
+    - kind: new
       module: Clínica
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Fora do Brasil, pacientes, clínica, fornecedores e funcionários têm os documentos do
@@ -1068,9 +1105,9 @@
           Unido, EIN en Estados Unidos, CURP y RFC en México, DNI y CUIT en Argentina, RUT en
           Chile y los demás. En Brasil, CPF y CNPJ siguen como siempre, y la ficha muestra "CPF"
           o "CNPJ" según el tipo de persona elegido.
-    - kind: melhoria
+    - kind: improvement
       module: Profissionais
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O registro profissional traz os exemplos do país da clínica (CRO, CRM… no Brasil; GDC,
@@ -1091,9 +1128,9 @@
     en: Latin America
     es: América Latina
   items:
-    - kind: novo
+    - kind: new
       module: Clínica
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A clínica pode ficar no México, Argentina, Chile, Colômbia, Peru, Uruguai, Paraguai,
@@ -1114,9 +1151,9 @@
 - version: 0.46.2
   date: 2026-11-01
   items:
-    - kind: correcao
+    - kind: fix
       module: Acesso
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O navegador volta a oferecer salvar a senha depois de entrar, mesmo quando ela foi
@@ -1131,9 +1168,9 @@
 - version: 0.46.1
   date: 2026-11-01
   items:
-    - kind: correcao
+    - kind: fix
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O reinício diário da demonstração mantém as contas dos administradores do sistema:
@@ -1152,9 +1189,9 @@
     en: The clinic's country
     es: El país de la clínica
   items:
-    - kind: novo
+    - kind: new
       module: Clínica
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Nas Configurações da clínica, o país (Brasil, Estados Unidos, Reino Unido, Canadá,
@@ -1168,9 +1205,9 @@
           En la Configuración de la clínica, el país (Brasil, Estados Unidos, Reino Unido,
           Canadá, Australia o Sudáfrica) y la zona horaria. La agenda sigue la zona horaria de la
           clínica, y los teléfonos, códigos postales y fechas en inglés siguen el formato del país.
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Fora do Brasil, o estado e a cidade do paciente são digitados, o código postal segue o
@@ -1185,9 +1222,9 @@
 - version: 0.45.1
   date: 2026-11-01
   items:
-    - kind: correcao
+    - kind: fix
       module: Idioma
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Em inglês, os horários aparecem como 11:15 PM, sem o ponto duplo no fim das frases. Em
@@ -1201,9 +1238,9 @@
           En inglés, los horarios aparecen como 11:15 PM, sin el punto doble al final de las
           frases. En español, los presupuestos, cuotas y valores pendientes aparecen con la palabra
           correcta (Abierto, Abierta, Pendiente).
-    - kind: melhoria
+    - kind: improvement
       module: Orçamentos
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Com a Odontologia desligada, o administrador do sistema continua vendo e usando o
@@ -1218,9 +1255,9 @@
 - version: 0.45.0
   date: 2026-11-01
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Clínica
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O administrador do sistema continua vendo os módulos desligados, marcados como
@@ -1242,9 +1279,9 @@
     en: The clinic's currency
     es: La moneda de la clínica
   items:
-    - kind: novo
+    - kind: new
       module: Clínica
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O administrador escolhe nas Configurações da clínica a moeda em que ela trabalha: real,
@@ -1262,9 +1299,9 @@
 - version: 0.43.1
   date: 2026-10-31
   items:
-    - kind: correcao
+    - kind: fix
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Os tipos de atendimento padrão (Cirurgia, Ortodontia, Consulta…) aparecem no idioma
@@ -1286,9 +1323,9 @@
     en: Two-step verification required
     es: Verificación en dos pasos exigida
   items:
-    - kind: novo
+    - kind: new
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A clínica passa a exigir a verificação em duas etapas de quem acessa o prontuário ou o
@@ -1313,9 +1350,9 @@
     en: Login security
     es: Seguridad del ingreso
   items:
-    - kind: novo
+    - kind: new
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Verificação em duas etapas: além da senha, o sistema pode pedir um código de um
@@ -1328,9 +1365,9 @@
           Verificación en dos pasos: además de la contraseña, el sistema puede pedir un código de
           una aplicación autenticadora en el celular, activada leyendo un código QR en el menú
           con su nombre.
-    - kind: novo
+    - kind: new
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Depois de 30 minutos sem uso, o sistema sai sozinho, com um aviso 2 minutos antes, para
@@ -1341,9 +1378,9 @@
         es: >
           Después de 30 minutos sin uso, el sistema sale solo, con un aviso 2 minutos antes, para
           que los datos de los pacientes no queden en una pantalla sin nadie.
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Um olho ao lado de cada campo de senha mostra o que foi digitado.
@@ -1351,9 +1388,9 @@
           An eye beside each password field shows what was typed.
         es: >
           Un ojo al lado de cada campo de contraseña muestra lo que se escribió.
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           "Esqueci minha senha" envia um link por e-mail para criar uma senha nova, quando a
@@ -1375,9 +1412,9 @@
     en: Cancelled time for another patient
     es: Horario cancelado para otro paciente
   items:
-    - kind: correcao
+    - kind: fix
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Num agendamento desmarcado, o botão "Agendar outro paciente neste horário" abre um
@@ -1399,9 +1436,9 @@
     en: Phones with area code and ninth digit
     es: Teléfonos con código de área y noveno dígito
   items:
-    - kind: correcao
+    - kind: fix
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Telefones agora precisam de um DDD que exista, e um celular digitado com 8 dígitos
@@ -1424,9 +1461,9 @@
     en: Volume test
     es: Prueba de volumen
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Devedores agora tem busca por nome e páginas de 50, e abre bem mais rápido em clínicas
@@ -1437,9 +1474,9 @@
         es: >
           Deudores ahora tiene búsqueda por nombre y páginas de 50, y abre mucho más rápido en
           clínicas con años de uso.
-    - kind: melhoria
+    - kind: improvement
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A tela de comissões e a auditoria abrem muito mais rápido quando há anos de
@@ -1458,9 +1495,9 @@
     en: System administrator and other browsers review
     es: Revisión del administrador del sistema y otros navegadores
   items:
-    - kind: correcao
+    - kind: fix
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           No celular e no tablet, tocar num horário livre da agenda abre o novo agendamento;
@@ -1471,9 +1508,9 @@
         es: >
           En el celular y la tableta, tocar un horario libre de la agenda abre la nueva cita;
           antes había que mantener el dedo un segundo, y casi nadie lo descubría.
-    - kind: correcao
+    - kind: fix
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Quem acaba de entrar na equipe não vê mais o aviso "o sistema foi atualizado" com todo
@@ -1484,7 +1521,7 @@
         es: >
           Quien acaba de entrar al equipo ya no ve el aviso "el sistema se actualizó" con todo
           el historial de versiones; queda para las actualizaciones siguientes.
-    - kind: correcao
+    - kind: fix
       module: Geral
       audience: []
       text:
@@ -1505,9 +1542,9 @@
     en: No more cheques
     es: Sin cheques
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cheque saiu das formas de pagamento, porque não é mais usado. Pagamentos antigos em
@@ -1526,9 +1563,9 @@
     en: Phone and languages review
     es: Revisión en el celular y los idiomas
   items:
-    - kind: correcao
+    - kind: fix
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           No celular, a agenda põe a data numa linha própria acima dos botões, o odontograma rola
@@ -1542,9 +1579,9 @@
           En el celular, la agenda pone la fecha en su propia línea sobre los botones, el
           odontograma se desplaza dentro de su caja, y la ficha impresa, el recibo, el presupuesto
           impreso y el extracto de comisión caben en la pantalla.
-    - kind: correcao
+    - kind: fix
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A tela de estornar pagamento mostra o valor em reais e a data (antes, "1350.00").
@@ -1560,9 +1597,9 @@
     en: Administration review
     es: Revisión de la administración
   items:
-    - kind: correcao
+    - kind: fix
       module: Auditoria
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A exclusão dos dados de um paciente a pedido dele agora aparece na auditoria da
@@ -1573,9 +1610,9 @@
         es: >
           La eliminación de los datos de un paciente a su pedido ahora aparece en la auditoría
           de la clínica ("dados pessoais excluídos a pedido do titular"); antes quedaba oculta.
-    - kind: melhoria
+    - kind: improvement
       module: Equipe
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Quem teve o acesso retirado vê um aviso claro ao entrar, em vez de "ainda não está
@@ -1586,9 +1623,9 @@
         es: >
           Quien tuvo el acceso retirado ve un aviso claro al entrar, en vez de "todavía no está
           vinculado".
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Com todos os módulos desligados, a tela inicial não mostra mais o título "Resumo do
@@ -1607,9 +1644,9 @@
     en: Finance review
     es: Revisión del financiero
   items:
-    - kind: correcao
+    - kind: fix
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Valores podem ser digitados com ponto de milhar, como 1.500,00 ou R$ 1.500,00, em
@@ -1620,9 +1657,9 @@
         es: >
           Los valores pueden escribirse con punto de miles, como 1.500,00, en todos los campos;
           antes solo se aceptaba 1500,00.
-    - kind: correcao
+    - kind: fix
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Listas em ordem alfabética, como pacientes, categorias e fornecedores, punham nomes
@@ -1633,9 +1670,9 @@
         es: >
           Las listas en orden alfabético, como pacientes, categorías y proveedores, ponían los
           nombres con acento o en minúscula al final; ahora siguen el orden correcto.
-    - kind: correcao
+    - kind: fix
       module: Pessoal
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Só abrir a folha de um mês, mesmo futuro, já deixava folhas vazias no histórico dos
@@ -1646,9 +1683,9 @@
         es: >
           Solo abrir los sueldos de un mes, incluso futuro, dejaba hojas vacías en el historial
           de los empleados; ahora se guardan solo al guardar.
-    - kind: melhoria
+    - kind: improvement
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           No plano de contas, um grupo novo com o código em branco recebe o próximo número
@@ -1667,9 +1704,9 @@
     en: Front desk review
     es: Revisión de la recepción
   items:
-    - kind: correcao
+    - kind: fix
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Algumas listas de escolha, como sexo, vínculo e forma de pagamento, ainda mostravam
@@ -1680,9 +1717,9 @@
         es: >
           Algunas listas de opciones, como sexo, vínculo y forma de pago, todavía mostraban
           "Select an option" en inglés; ahora muestran "—", como las demás.
-    - kind: correcao
+    - kind: fix
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Em português, os meses agora aparecem em minúscula nas datas por extenso, como no
@@ -1701,9 +1738,9 @@
     en: Related people
     es: Personas relacionadas
   items:
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Na ficha do paciente, registre parentes e contatos: mãe, pai, responsável legal, contato
@@ -1726,9 +1763,9 @@
     en: Chart of accounts, yearly planning and the month's pay
     es: Plan de cuentas, planificación anual y sueldos del mes
   items:
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Plano de contas: as categorias ficam em grupos e subgrupos (como 2.1), e os relatórios
@@ -1739,9 +1776,9 @@
         es: >
           Plan de cuentas: las categorías quedan en grupos y subgrupos (como 2.1), y los informes
           muestran lo cobrado y lo pagado por grupo. Las clínicas empiezan con un plan básico.
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Em Financeiro > Planejamento, defina a meta do ano de cada grupo e acompanhe o realizado
@@ -1752,9 +1789,9 @@
         es: >
           En Financiero > Planificación, defina la meta del año de cada grupo y siga lo realizado
           y lo esperado hasta hoy. Las metas del año anterior pueden copiarse.
-    - kind: novo
+    - kind: new
       module: Pessoal
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Novo módulo Pessoal: funcionários com histórico de salários e a folha do mês, com horas
@@ -1765,9 +1802,9 @@
         es: >
           Nuevo módulo Personal: empleados con historial de salarios y los sueldos del mes, con
           horas extras y ausencias, registrados como cuentas por pagar. Las cargas, con el contador.
-    - kind: melhoria
+    - kind: improvement
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           No cadastro do paciente, ao escolher a cidade, bairro e rua sugerem os nomes conhecidos
@@ -1786,9 +1823,9 @@
     en: Closing the books and a printed registration sheet
     es: Cierre del financiero y ficha impresa
   items:
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Em Financeiro > Fechamento, feche o período já entregue ao contador: pagamentos e
@@ -1802,9 +1839,9 @@
           En Financiero > Cierre, cierre el período ya entregado al contador: los pagos y
           reversiones en esas fechas se rechazan y los informes ya no cambian. Reabrir pide un
           motivo, que queda en el historial.
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Imprimir ficha: a ficha cadastral do paciente pronta para imprimir ou salvar em PDF,
@@ -1815,9 +1852,9 @@
         es: >
           Imprimir ficha: la ficha de registro del paciente lista para imprimir o guardar en
           PDF, con contacto, dirección, convenios y línea para la firma.
-    - kind: melhoria
+    - kind: improvement
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Ao sair da agenda e voltar no mesmo dia, ela abre na semana que você estava vendo.
@@ -1835,9 +1872,9 @@
     en: Cost centers
     es: Centros de costo
   items:
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cadastre centros de custo em Cadastros > Centros de custo (um consultório, uma
@@ -1859,9 +1896,9 @@
     en: Modules you turn on and off, suppliers and health plans
     es: Módulos que se activan y desactivan, proveedores y convenios
   items:
-    - kind: novo
+    - kind: new
       module: Clínica
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Nas Configurações da clínica, ligue só Odontologia, só Medicina ou as duas, e desligue
@@ -1875,9 +1912,9 @@
           En la Configuración de la clínica, active solo Odontología, solo Medicina o las dos, y
           desactive los módulos que la clínica no usa (agenda, historia clínica, presupuestos,
           financiero, recordatorios, cumpleaños, convenios). Desactivar no borra nada.
-    - kind: novo
+    - kind: new
       module: Convênios
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cadastro de convênios em Cadastros > Convênios e carteirinhas na ficha do paciente,
@@ -1888,9 +1925,9 @@
         es: >
           Registro de convenios en Registros > Convenios y credenciales en la ficha del paciente,
           con plan, número y validez. La ficha avisa cuando la credencial está vencida.
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cadastro de fornecedores em Cadastros > Fornecedores. Na nova despesa, escolha o
@@ -1901,9 +1938,9 @@
         es: >
           Registro de proveedores en Registros > Proveedores. En el nuevo gasto, elija el
           proveedor; su ficha muestra el valor pendiente y todas sus cuentas por pagar.
-    - kind: melhoria
+    - kind: improvement
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Novo campo WhatsApp no cadastro do paciente. A ficha e as rechamadas da tela inicial
@@ -1922,9 +1959,9 @@
     en: One demo login per role
     es: Una cuenta de demostración por perfil
   items:
-    - kind: novo
+    - kind: new
       module: Equipe
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A demonstração ganhou contas públicas de financeiro e de administrador da clínica.
@@ -1946,9 +1983,9 @@
     en: Finance role
     es: Perfil financiero
   items:
-    - kind: novo
+    - kind: new
       module: Equipe
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Novo perfil Financeiro na equipe: todo o financeiro (contas a receber e a pagar,
@@ -1970,9 +2007,9 @@
     en: The system administrator does everything, the medical record included
     es: El administrador del sistema hace todo, incluida la historia clínica
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O administrador do sistema agora vê e faz tudo no prontuário. Ao registrar um
@@ -1998,9 +2035,9 @@
     en: The demo resets every day
     es: La demostración se reinicia todos los días
   items:
-    - kind: novo
+    - kind: new
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A demonstração pública volta todo dia, de madrugada, aos dados fictícios originais,
@@ -2022,9 +2059,9 @@
     en: Demo accounts
     es: Cuentas de demostración
   items:
-    - kind: novo
+    - kind: new
       module: Equipe
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A demonstração tem contas públicas de recepção e de profissional, com a senha
@@ -2046,9 +2083,9 @@
     en: Exam requests and attachments in the medical record
     es: Solicitud de exámenes y adjuntos en la historia clínica
   items:
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           No atendimento, quem atendeu emite o pedido de exames, impresso como o atestado e a
@@ -2071,9 +2108,9 @@
     en: Medical record printing, certificates and prescriptions
     es: Impresión de la historia clínica, certificados y recetas
   items:
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O atendimento finalizado pode ser impresso ou salvo em PDF, com o cabeçalho da
@@ -2098,9 +2135,9 @@
     en: Medical record
     es: Historia clínica
   items:
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Os profissionais registram a anamnese de cada atendimento (queixa principal, história
@@ -2126,9 +2163,9 @@
     en: Clinic area (Dentistry, Medicine and others)
     es: Área de la clínica (Odontología, Medicina y otras)
   items:
-    - kind: novo
+    - kind: new
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Em Configurações da clínica, escolha a área: Odontologia, Medicina ou outra área da
@@ -2153,9 +2190,9 @@
     en: Archive a patient only with their entries settled
     es: Archivar al paciente solo con las cuentas resueltas
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Um paciente com contas em aberto no financeiro só pode ser arquivado depois que elas
@@ -2175,9 +2212,9 @@
     en: Estimate discount for the whole team
     es: Descuento en el presupuesto para todo el equipo
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Orçamentos
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Quem escreve o orçamento (recepção, profissional ou administrador) agora também pode
@@ -2196,9 +2233,9 @@
     en: Help on the documentation site
     es: Ayuda en el sitio de documentación
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O manual do usuário e toda a documentação do Kaladrius agora ficam no site
@@ -2220,9 +2257,9 @@
     en: Server names
     es: Nombres del servidor
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Por dentro, o servidor também passou a usar o nome Kaladrius. Nada muda no uso do
@@ -2241,9 +2278,9 @@
     en: One clinic per installation and system health for everyone
     es: Una clínica por instalación y salud del sistema para todos
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O sistema atende uma clínica: ninguém precisa mais escolher a clínica ao entrar, e o
@@ -2257,9 +2294,9 @@
           El sistema atiende a una clínica: ya nadie tiene que elegir la clínica al ingresar, y
           el selector de clínicas salió de la barra superior. En una instalación nueva, el
           primer acceso pide los datos de la clínica.
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A tela Saúde do sistema (processador, memória, disco, rede e último backup do
@@ -2278,9 +2315,9 @@
     en: The system is now called Kaladrius
     es: El sistema ahora se llama Kaladrius
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text:
         pt-br: >
           O Medical System passou a se chamar Kaladrius, o nome da ave das lendas medievais
@@ -2306,9 +2343,9 @@
     en: New logo
     es: Logo nuevo
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text:
         pt-br: >
           O logo do sistema mudou: agora é a cabeça de uma ave, o caladrius, dentro do círculo
@@ -2330,9 +2367,9 @@
     en: Easier-to-read schedule
     es: Agenda más fácil de leer
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           As linhas de horário da agenda ficaram com o dobro da altura, para o nome do
@@ -2351,9 +2388,9 @@
     en: Summary of the day on the home page and attendance on the schedule
     es: Resumen del día en la pantalla de inicio y asistencia en la agenda
   items:
-    - kind: novo
+    - kind: new
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A tela de início virou um resumo do dia: atalhos e busca de paciente, pacientes
@@ -2381,9 +2418,9 @@
           administrador ve además lo pagado hoy, el resultado del día y del mes (comparado con
           el mes pasado), lo vencido, las cuentas por pagar en 7 días y el saldo en las
           cuentas.
-    - kind: novo
+    - kind: new
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Marque se o paciente compareceu, faltou ou desmarcou, na janela do agendamento ou
@@ -2405,9 +2442,9 @@
     en: Fixes from the code review
     es: Correcciones de la revisión de código
   items:
-    - kind: correcao
+    - kind: fix
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cancelar uma comissão depois que uma comissão posterior já descontou o estorno de um
@@ -2427,9 +2464,9 @@
           sistema pide cancelar primero la comisión posterior. Cancelar un asiento, revertir
           un pago o rechazar un presupuesto dos veces seguidas (o mientras otra persona cobra
           o aprueba) también quedó seguro.
-    - kind: correcao
+    - kind: fix
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Na importação do extrato OFX, linhas sem data ou valor legível eram puladas sem
@@ -2443,9 +2480,9 @@
           Al importar el extracto OFX, las líneas sin fecha o importe legible se omitían sin
           aviso. Ahora el sistema indica cuántas quedaron fuera, y los importes escritos como
           1.234,56 se leen.
-    - kind: seguranca
+    - kind: security
       module: Pacientes
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text:
         pt-br: >
           A exclusão definitiva dos dados de um paciente, a pedido dele, agora também apaga as
@@ -2456,9 +2493,9 @@
         es: >
           La eliminación definitiva de los datos de un paciente, a su pedido, ahora también
           borra las observaciones de sus citas, asientos y pagos.
-    - kind: seguranca
+    - kind: security
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Proteções extras no servidor: as páginas só executam scripts do próprio sistema
@@ -2482,9 +2519,9 @@
     en: New logo
     es: Nuevo logo
   items:
-    - kind: novo
+    - kind: new
       module: Geral
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text:
         pt-br: >
           O Medical System ganhou um logo: um círculo com uma linha de batimento. Ele aparece na
@@ -2503,9 +2540,9 @@
     en: System health in the last hour
     es: Salud del sistema en la última hora
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Os gráficos da saúde do sistema ganharam o período de 1 hora, que abre por padrão, e
@@ -2527,9 +2564,9 @@
     en: System health charts
     es: Gráficos de la salud del sistema
   items:
-    - kind: correcao
+    - kind: fix
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O gráfico do processador acompanha o uso real (escala a partir de 10%), as linhas
@@ -2548,9 +2585,9 @@
     en: System health
     es: Salud del sistema
   items:
-    - kind: novo
+    - kind: new
       module: Sistema
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Para superusuários, em Administração > Saúde do sistema: processador, memória, swap,
@@ -2575,9 +2612,9 @@
     en: Privacy policy revised
     es: Política de privacidad revisada
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Ajuda
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text:
         pt-br: >
           A política de privacidade foi revisada: termos explicados, base legal de cada uso,
@@ -2599,9 +2636,9 @@
     en: Privacy policy
     es: Política de privacidad
   items:
-    - kind: novo
+    - kind: new
       module: Ajuda
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text:
         pt-br: >
           Política de privacidade (LGPD) com o contato da clínica: quais dados são guardados,
@@ -2624,9 +2661,9 @@
     en: Bank statement import
     es: Importación del extracto bancario
   items:
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Novo em Financeiro > Extrato bancário: importe o extrato OFX do banco e concilie cada
@@ -2651,9 +2688,9 @@
     en: Practitioner commission
     es: Comisión de los profesionales
   items:
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Novo em Financeiro > Comissões: defina o percentual de cada profissional sobre o valor
@@ -2672,9 +2709,9 @@
           en Por pagar. Cada cobro se comisiona una sola vez, y una reversión después de pagada
           se descuenta en la próxima comisión. El extracto de cada comisión puede imprimirse
           para el profesional.
-    - kind: novo
+    - kind: new
       module: Cadastros
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Nova categoria de despesa padrão "Comissões".
@@ -2690,9 +2727,9 @@
     en: Estimates with a dental chart
     es: Presupuestos con odontograma
   items:
-    - kind: novo
+    - kind: new
       module: Orçamentos
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Novo em Pacientes > Orçamentos: monte o orçamento clicando nos dentes do odontograma e
@@ -2706,9 +2743,9 @@
           Nuevo en Pacientes > Presupuestos: arme el presupuesto haciendo clic en los dientes del
           odontograma y eligiendo los procedimientos de la tabla, imprímalo para que el paciente
           lo firme y, cuando lo apruebe, pasa a ser una cuenta por cobrar en las cuotas acordadas.
-    - kind: novo
+    - kind: new
       module: Cadastros
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Tabela de procedimentos com valores e categorias, em Cadastros.
@@ -2716,9 +2753,9 @@
           Procedure price list with prices and categories, in Records.
         es: >
           Tabla de procedimientos con valores y categorías, en Registros.
-    - kind: melhoria
+    - kind: improvement
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O menu Pacientes agora reúne a lista de pacientes, os orçamentos e os aniversariantes,
@@ -2737,9 +2774,9 @@
     en: More complete backup warning
     es: Aviso de copia de seguridad más completo
   items:
-    - kind: correcao
+    - kind: fix
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O superusuário agora também é avisado quando o servidor nunca registrou um backup,
@@ -2758,9 +2795,9 @@
     en: Finance, step 3 — daily cash
     es: Financiero, etapa 3 — caja del día
   items:
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Caixa do dia: abra o caixa com o dinheiro contado, registre retiradas (sangria) e
@@ -2782,9 +2819,9 @@
     en: Finance, step 2 — payables, cash flow and reports
     es: Financiero, etapa 2 — cuentas por pagar, flujo de caja e informes
   items:
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O administrador lança as despesas da clínica (compras parceladas ou contas fixas de
@@ -2795,9 +2832,9 @@
         es: >
           El administrador registra los gastos de la clínica (compras en cuotas o cuentas fijas
           de cada mes, como el alquiler) y los paga en Financiero > Por pagar.
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Fluxo de caixa por dia ou por mês, com o que entrou e saiu, o que está previsto e o
@@ -2808,9 +2845,9 @@
         es: >
           Flujo de caja por día o por mes, con lo que entró y salió, lo previsto y el saldo;
           saldo actual de cada cuenta, a partir del saldo inicial indicado en Cuentas.
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Relatórios do período: recebido por forma de pagamento, por categoria e por
@@ -2821,9 +2858,9 @@
         es: >
           Informes del período: cobrado por forma de pago, por categoría y por profesional,
           gastos por categoría y el resultado.
-    - kind: correcao
+    - kind: fix
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           As listas de escolha mostravam "Select an option" em inglês; agora mostram "—".
@@ -2839,9 +2876,9 @@
     en: Finance, step 1 — receivables
     es: Financiero, etapa 1 — cuentas por cobrar
   items:
-    - kind: novo
+    - kind: new
       module: Financeiro
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Novo menu Financeiro: lance valores a receber em parcelas mensais, receba (dinheiro,
@@ -2855,9 +2892,9 @@
           Nuevo menú Financiero: registre valores por cobrar en cuotas mensuales, cóbrelos
           (efectivo, Pix, tarjeta, transferencia, boleto o cheque, también en parte) e imprima el
           recibo. En Deudores, vea quién debe y desde hace cuánto.
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A ficha do paciente mostra o que ele deve, as parcelas em aberto e os últimos
@@ -2867,9 +2904,9 @@
           payments.
         es: >
           La ficha del paciente muestra lo que debe, las cuotas abiertas y los últimos pagos.
-    - kind: novo
+    - kind: new
       module: Clínica
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O administrador cadastra categorias e contas do financeiro e o endereço da clínica,
@@ -2881,9 +2918,9 @@
           El administrador registra las categorías y cuentas del financiero y la dirección de
           la clínica, que sale en el recibo. Solo él da descuentos, revierte pagos y cancela
           cuentas.
-    - kind: melhoria
+    - kind: improvement
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A barra de menus fica fixa no topo da tela ao rolar a página.
@@ -2899,9 +2936,9 @@
     en: Help menu with the user manual
     es: Menú Ayuda con el manual del usuario
   items:
-    - kind: novo
+    - kind: new
       module: Ajuda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Novo menu Ajuda, com o manual do usuário no seu idioma (primeiros passos, agenda,
@@ -2912,7 +2949,7 @@
         es: >
           Nuevo menú Ayuda, con el manual del usuario en su idioma (primeros pasos, agenda,
           pacientes, recordatorios, equipo y configuración de la clínica) y las Novedades.
-    - kind: novo
+    - kind: new
       module: Documentação
       audience: []
       text:
@@ -2933,9 +2970,9 @@
     en: Language with flags in the top bar
     es: Idioma con banderas en la barra superior
   items:
-    - kind: melhoria
+    - kind: improvement
       module: Idioma
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O idioma agora fica num menu próprio na barra superior, entre a clínica e o seu nome,
@@ -2955,9 +2992,9 @@
     en: The system in Portuguese, English and Spanish
     es: El sistema en portugués, inglés y español
   items:
-    - kind: novo
+    - kind: new
       module: Idioma
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cada pessoa escolhe o idioma do sistema no menu com o seu nome: português, inglês ou
@@ -2981,9 +3018,9 @@
     en: Appointments in the patient record
     es: Citas en la ficha del paciente
   items:
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           A ficha do paciente mostra os próximos e os últimos agendamentos, com link para a
@@ -2994,7 +3031,7 @@
         es: >
           La ficha del paciente muestra las próximas y las últimas citas, con enlace a la
           semana en la agenda. El profesional ve solo las de su propia agenda.
-    - kind: novo
+    - kind: new
       module: Agenda
       audience: []
       text:
@@ -3015,9 +3052,9 @@
     en: Data anonymization for testing
     es: Anonimización de datos para pruebas
   items:
-    - kind: seguranca
+    - kind: security
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Os dados de uma clínica podem ser anonimizados pelo suporte: nomes, documentos,
@@ -3038,9 +3075,9 @@
     en: Clinic settings
     es: Configuración de la clínica
   items:
-    - kind: novo
+    - kind: new
       module: Clínica
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O administrador da clínica altera os dados da clínica e o horário e o intervalo da
@@ -3062,9 +3099,9 @@
     en: Archived patients and the practitioner's own schedule
     es: Pacientes archivados y agenda propia del profesional
   items:
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O administrador da clínica arquiva pacientes em vez de excluí-los: eles saem das listas,
@@ -3081,9 +3118,9 @@
           listas, la agenda, los cumpleaños y los recordatorios, pero todo el historial se
           conserva. Los archivados aparecen para el administrador en la lista de pacientes
           (Situación: Archivados) y pueden restaurarse.
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Quando o próprio paciente pedir a exclusão dos seus dados (LGPD), o administrador pode
@@ -3096,9 +3133,9 @@
           Cuando el propio paciente pida la eliminación de sus datos (LGPD), el administrador
           puede eliminar definitivamente un paciente archivado. Los datos personales también
           salen del registro de auditoría.
-    - kind: melhoria
+    - kind: improvement
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O profissional vê e altera só a própria agenda. Para isso, o cadastro do profissional
@@ -3112,9 +3149,9 @@
           El profesional ve y modifica solo su propia agenda. Para eso, su registro de
           profesional debe estar vinculado a su usuario (Registros > Profesionales). La
           recepción y los administradores siguen viendo todas las agendas.
-    - kind: seguranca
+    - kind: security
       module: Acesso
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Tentativas de entrada recusadas ficam registradas por 30 dias e depois são apagadas.
@@ -3130,9 +3167,9 @@
     en: Team and import fixes
     es: Ajustes en el equipo y en la importación
   items:
-    - kind: correcao
+    - kind: fix
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Os horários bloqueados trazidos do sistema antigo (como "Ocupado") podem ser
@@ -3143,9 +3180,9 @@
         es: >
           Los horarios bloqueados traídos del sistema antiguo (como "Ocupado") pueden editarse
           con normalidad.
-    - kind: correcao
+    - kind: fix
       module: Equipe
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Um administrador com a conta desativada não conta mais como o administrador que a
@@ -3164,9 +3201,9 @@
     en: Team, password change and legacy system import
     es: Equipo, cambio de contraseña e importación del sistema antiguo
   items:
-    - kind: novo
+    - kind: new
       module: Equipe
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O administrador da clínica cadastra a equipe, escolhe o perfil de cada pessoa
@@ -3180,9 +3217,9 @@
           El administrador de la clínica registra al equipo, elige el perfil de cada persona
           (recepción, profesional o administrador), define contraseñas y quita el acceso de
           quien se va (Registros > Equipo).
-    - kind: novo
+    - kind: new
       module: Acesso
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cada pessoa pode trocar a própria senha no menu com o seu nome, no canto da tela.
@@ -3192,9 +3229,9 @@
         es: >
           Cada persona puede cambiar su propia contraseña en el menú con su nombre, en la
           esquina de la pantalla.
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Os pacientes, a agenda e as rechamadas do Odonto System antigo podem ser trazidos
@@ -3205,9 +3242,9 @@
         es: >
           Los pacientes, la agenda y los recordatorios del antiguo Odonto System pueden traerse
           al sistema. Lo que no tiene un campo propio queda en las observaciones del paciente.
-    - kind: seguranca
+    - kind: security
       module: Acesso
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Proteção contra tentativas de adivinhar senhas reforçada.
@@ -3215,9 +3252,9 @@
           Stronger protection against password-guessing attempts.
         es: >
           Protección reforzada contra los intentos de adivinar contraseñas.
-    - kind: correcao
+    - kind: fix
       module: Geral
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Algumas buscas e formulários com dados incomuns mostravam uma página de erro.
@@ -3233,9 +3270,9 @@
     en: Audit log and security (end of phase 1)
     es: Auditoría y seguridad (fin de la fase 1)
   items:
-    - kind: novo
+    - kind: new
       module: Auditoria
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O administrador da clínica consulta quem criou, alterou, excluiu ou abriu cada
@@ -3248,9 +3285,9 @@
           El administrador de la clínica consulta quién creó, modificó, eliminó o abrió cada
           registro, cuándo y qué cambió (Registros > Auditoría). Los registros no se pueden
           modificar.
-    - kind: seguranca
+    - kind: security
       module: Acesso
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Depois de 5 tentativas com senha errada, o acesso daquele usuário fica bloqueado
@@ -3260,9 +3297,9 @@
         es: >
           Después de 5 intentos con una contraseña incorrecta, el acceso de ese usuario queda
           bloqueado durante 1 hora.
-    - kind: melhoria
+    - kind: improvement
       module: Novidades
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Aviso de versão nova no topo das telas até você abrir as Novidades, e filtro das
@@ -3281,9 +3318,9 @@
     en: Recalls and birthdays
     es: Recordatorios y cumpleaños
   items:
-    - kind: novo
+    - kind: new
       module: Rechamadas
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cadastro de rechamadas (retornos) por paciente, com lista de pendentes, atrasadas e
@@ -3296,9 +3333,9 @@
           Registro de recordatorios (regresos) por paciente, con lista de pendientes, atrasados
           y completados, filtros por período y botón para completarlos. También aparecen en la
           ficha del paciente.
-    - kind: novo
+    - kind: new
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           As rechamadas pendentes aparecem no cabeçalho de cada dia da agenda (📞), ao lado
@@ -3309,9 +3346,9 @@
         es: >
           Los recordatorios pendientes aparecen en el encabezado de cada día de la agenda (📞),
           junto a los cumpleaños (🎂). Haga clic para ver la lista.
-    - kind: novo
+    - kind: new
       module: Aniversariantes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Consulta dos aniversariantes por mês, com a idade que cada paciente completa,
@@ -3330,9 +3367,9 @@
     en: Schedule
     es: Agenda
   items:
-    - kind: novo
+    - kind: new
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Agenda semanal por profissional, com as cores dos tipos de atendimento. Clique em um
@@ -3346,9 +3383,9 @@
           Agenda semanal por profesional, con los colores de los tipos de atención. Haga clic
           en un horario libre (o arrastre sobre varios) para agendar; haga clic en una cita
           para editarla. En el celular, la agenda se abre en la vista del día.
-    - kind: novo
+    - kind: new
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Repetição semanal ("repetir por N semanas") e exclusão de um agendamento ou dele e
@@ -3359,9 +3396,9 @@
         es: >
           Repetición semanal ("repetir durante N semanas") y eliminación de una cita o de ella
           y las próximas de la misma repetición.
-    - kind: novo
+    - kind: new
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O sistema impede dois agendamentos no mesmo horário para o mesmo profissional e
@@ -3373,9 +3410,9 @@
           El sistema impide dos citas en el mismo horario para el mismo profesional y muestra
           con quién es el conflicto. Si una de las repeticiones entra en conflicto, no se
           guarda nada.
-    - kind: novo
+    - kind: new
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Busca do paciente enquanto você digita e aniversariantes do dia (🎂) no cabeçalho de
@@ -3394,9 +3431,9 @@
     en: Patient records
     es: Registro de pacientes
   items:
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cadastro de pacientes pessoa física ou jurídica, com documentos, contatos, endereço
@@ -3408,9 +3445,9 @@
           Registro de pacientes, personas físicas o jurídicas, con documentos, contactos,
           dirección (elija el estado y la ciudad se filtra) y observaciones. La ficha muestra
           la edad.
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Busca por nome (sem precisar de acentos), código ou CPF/CNPJ, com filtros por tipo
@@ -3421,9 +3458,9 @@
         es: >
           Búsqueda por nombre (sin necesidad de acentos), código o CPF/CNPJ, con filtros por
           tipo y situación. El CPF y el CNPJ pueden escribirse con o sin puntuación.
-    - kind: novo
+    - kind: new
       module: Pacientes
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Validação de CPF e CNPJ, inclusive do novo CNPJ com letras, e aviso de CPF/CNPJ
@@ -3442,9 +3479,9 @@
     en: Base tables and appointment types
     es: Tablas base y tipos de atención
   items:
-    - kind: novo
+    - kind: new
       module: Tipos de atendimento
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cada clínica tem seus tipos de atendimento (cirurgia, consulta inicial…) com a cor que
@@ -3456,9 +3493,9 @@
           Cada clínica tiene sus tipos de atención (cirugía, consulta inicial…) con el color que
           aparecerá en la agenda. Las clínicas nuevas comienzan con los 10 tipos del sistema
           antiguo.
-    - kind: novo
+    - kind: new
       module: Tabelas base
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Consulta das cidades brasileiras (lista oficial do IBGE) e dos bancos (lista do Banco
@@ -3477,9 +3514,9 @@
     en: Several clinics, access roles and practitioner records
     es: Varias clínicas, perfiles de acceso y registro de profesionales
   items:
-    - kind: novo
+    - kind: new
       module: Clínicas
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           O sistema agora atende várias clínicas. Cada pessoa vê somente os dados das clínicas
@@ -3491,9 +3528,9 @@
           El sistema ahora atiende a varias clínicas. Cada persona ve solo los datos de las
           clínicas en las que trabaja; quien atiende en más de una cambia de clínica en el menú
           superior.
-    - kind: novo
+    - kind: new
       module: Permissões
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Perfis de acesso por clínica: administrador, recepção e profissional. Cada perfil
@@ -3504,9 +3541,9 @@
         es: >
           Perfiles de acceso por clínica: administrador, recepción y profesional. Cada perfil
           ve solo las pantallas y los botones que puede usar.
-    - kind: novo
+    - kind: new
       module: Profissionais
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Cadastro dos profissionais da clínica, com registro (CRO, CRM…), cor usada na agenda
@@ -3518,9 +3555,9 @@
           Registro de los profesionales de la clínica, con registro profesional (CRO, CRM…),
           color usado en la agenda y usuario de acceso. Los profesionales inactivos quedan
           ocultos sin perder el historial.
-    - kind: seguranca
+    - kind: security
       module: Acesso
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Reforço na separação dos dados entre clínicas.
@@ -3536,9 +3573,9 @@
     en: First version of the new system
     es: Primera versión del nuevo sistema
   items:
-    - kind: novo
+    - kind: new
       module: Acesso
-      audience: [equipe]
+      audience: [staff]
       text:
         pt-br: >
           Entrada no sistema com usuário e senha. As senhas são guardadas com criptografia
@@ -3549,9 +3586,9 @@
         es: >
           Acceso al sistema con usuario y contraseña. Las contraseñas se guardan con cifrado
           moderno y la sesión expira después de 8 horas o al cerrar el navegador.
-    - kind: novo
+    - kind: new
       module: Novidades
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text:
         pt-br: >
           Página de Novidades com o que mudou em cada versão. A versão atual aparece no
@@ -3562,7 +3599,7 @@
         es: >
           Página de Novedades con lo que cambió en cada versión. La versión actual aparece en el
           pie de página; haga clic en ella para ver los detalles.
-    - kind: novo
+    - kind: new
       module: Documentação
       audience: []
       text:

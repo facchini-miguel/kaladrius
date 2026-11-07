@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
 from django.utils.http import urlencode
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.permissions import Action, Module, requires_permission
 from apps.core.values import VALUES, code_value
@@ -91,16 +92,40 @@ def _shown(choice, value):
     return labels.get(value, value)
 
 
+# Changes logged by hand, not a field's: their names and values, by the codes of decision 199
+# and the Portuguese words entries stored before it.
+EXTRA_LABELS = {
+    "password": _("senha"),
+    "senha": _("senha"),
+    "finalized": _("finalizado"),
+    "finalizado": _("finalizado"),
+}
+EXTRA_VALUES = {
+    "hidden": _("(oculta)"),
+    "(oculta)": _("(oculta)"),
+    "changed": _("(alterada)"),
+    "(alterada)": _("(alterada)"),
+    "yes": _("sim"),
+    "sim": _("sim"),
+}
+
+
+def _extra(field, value):
+    if field in EXTRA_LABELS and isinstance(value, str):
+        return EXTRA_VALUES.get(value, value)
+    return value
+
+
 def changed_fields(record):
     """The entry's changes as (label, before, after), in the user's language. A field the
-    model no longer has (or "senha") shows its stored name."""
-    labels = _labels().get(record.model_name, {})
+    model no longer has shows its stored name."""
+    labels = {**EXTRA_LABELS, **_labels().get(record.model_name, {})}
     choices = _choices().get(record.model_name, {})
     return [
         (
             labels.get(field, field),
-            _shown(choices.get(field), values[0]),
-            _shown(choices.get(field), values[1]),
+            _extra(field, _shown(choices.get(field), values[0])),
+            _extra(field, _shown(choices.get(field), values[1])),
         )
         for field, values in record.changes.items()
     ]

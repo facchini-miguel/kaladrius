@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-04 21:59-0300\n"
+"POT-Creation-Date: 2026-11-07 01:21-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -151,6 +151,21 @@ msgstr "registro de auditoría"
 
 msgid "registros de auditoria"
 msgstr "registros de auditoría"
+
+msgid "senha"
+msgstr "contraseña"
+
+msgid "finalizado"
+msgstr "finalizado"
+
+msgid "(oculta)"
+msgstr "(oculta)"
+
+msgid "(alterada)"
+msgstr "(cambiada)"
+
+msgid "sim"
+msgstr "sí"
 
 msgid "- Select an option -"
 msgstr "- Seleccione una opción -"

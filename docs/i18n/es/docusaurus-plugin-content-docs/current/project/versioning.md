@@ -26,7 +26,7 @@ El archivo [`../../releases.yaml`](https://github.com/facchini-miguel/kaladrius/
 - el número de versión que aparece en el pie de página del sistema;
 - las *Releases* de GitHub, en inglés (comando `release_notes`).
 
-Los textos se escriben en los **tres idiomas de la interfaz** (`pt-br`, `en`, `es`; decisión 049). Los nombres de los campos están en inglés (decisión 189); los valores (`novo`, `equipe`, los módulos) quedan en portugués.
+Los textos se escriben en los **tres idiomas de la interfaz** (`pt-br`, `en`, `es`; decisión 049). Los nombres de los campos están en inglés (decisión 189); los valores también (`new`, `staff`; decisión 199), y los módulos son textos de las pantallas, traducidos.
 
 ### Formato
 
@@ -38,9 +38,9 @@ Los textos se escriben en los **tres idiomas de la interfaz** (`pt-br`, `en`, `e
     en: Recall reminders in the app
     es: Recordatorios de regreso en la app
   items:
-    - kind: novo            # novo | melhoria | correcao | seguranca
+    - kind: new             # new | improvement | fix | security
       module: Rechamadas    # uno de los nombres de MODULES en apps/whats_new/releases.py
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text:
         pt-br: >
           O paciente recebe no celular um aviso 7 dias antes da data de retorno.
@@ -55,9 +55,9 @@ Los textos se escriben en los **tres idiomas de la interfaz** (`pt-br`, `en`, `e
 | `version` | sí | Número en el formato `MAYOR.MENOR.CORRECCIÓN` |
 | `date` | sí | Fecha de publicación (AAAA-MM-DD) |
 | `title` | no | Lo más destacado de la versión, en una frase, en los tres idiomas |
-| `items[].kind` | sí | `novo`, `melhoria`, `correcao` o `seguranca` |
+| `items[].kind` | sí | `new` (nuevo), `improvement` (mejora), `fix` (corrección) o `security` (seguridad) |
 | `items[].module` | sí | Área del sistema (Agenda, Pacientes…), en portugués; la pantalla muestra la traducción |
-| `items[].audience` | sí | Quién ve el ítem: `equipe`, `paciente` o ambos |
+| `items[].audience` | sí | Quién ve el ítem: `staff` (equipo), `patient` (paciente) o ambos |
 | `items[].source` | no | `dependabot` para una actualización propuesta por Dependabot; se omite en los cambios del propio proyecto (decisión 133) |
 | `items[].pr` | con `source` | Número del pull request; la página y el release de GitHub enlazan a él |
 | `items[].text` | sí | **Pocas líneas**, en lenguaje de usuario: qué cambió y cómo usarlo. Un texto por idioma (`pt-br`, `en`, `es`); una prueba exige los tres |
@@ -67,7 +67,7 @@ Los textos se escriben en los **tres idiomas de la interfaz** (`pt-br`, `en`, `e
 - Como máximo 3 líneas por ítem.
 - Las correcciones de seguridad no describen la falla, solo que se corrigió.
 - Los ítems solo internos (infraestructura, refactorización) no entran, o entran con `audience: []`, y entonces no aparecen para nadie.
-- Los pacientes solo ven ítems con `paciente` en `audience`.
+- Los pacientes solo ven ítems con `patient` en `audience`.
 - Todo ítem de un pull request de Dependabot tiene `source: dependabot` y su `pr`: las Novedades muestran la etiqueta "Dependabot · #N" y el release de GitHub agrega "(Dependabot, #N)", para distinguir los cambios del titular de los de Dependabot.
 
 ## Cómo aparece
@@ -77,7 +77,7 @@ Los textos se escriben en los **tres idiomas de la interfaz** (`pt-br`, `en`, `e
 **App:** pantalla **Novedades** en el menú y, al abrir una versión nueva por primera vez, un resumen "Qué hay de nuevo". Usa el endpoint (los textos vienen en el idioma de `Accept-Language`):
 
 ```
-GET /api/v1/releases?since=1.4.0&audience=paciente
+GET /api/v1/releases?since=1.4.0&audience=patient
 ```
 
 ## Proceso para publicar una versión

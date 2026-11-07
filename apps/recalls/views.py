@@ -15,7 +15,7 @@ from .forms import RecallForm
 from .models import Recall
 
 PER_PAGE = 50
-STATUSES = {"pendentes": {"done": False}, "concluidas": {"done": True}, "todas": {}}
+STATUSES = {"pending": {"done": False}, "done": {"done": True}, "all": {}}
 
 
 def _date(value):
@@ -36,11 +36,11 @@ def _back(request, default="recalls:list"):
 
 @requires_permission(Module.RECALLS, Action.VIEW)
 def recall_list(request):
-    status = request.GET.get("status", "pendentes")
+    status = request.GET.get("status", "pending")
     search = request.GET.get("q", "").strip()
     since, until = _date(request.GET.get("since")), _date(request.GET.get("until"))
     recalls = Recall.objects.select_related("patient").filter(
-        **STATUSES.get(status, STATUSES["pendentes"]), patient__archived=False
+        **STATUSES.get(status, STATUSES["pending"]), patient__archived=False
     )
     if search:
         recalls = recalls.filter(patient__name__unaccent__icontains=search)
@@ -138,7 +138,7 @@ def summary(request):
     """Number of pending recalls per day, for the schedule day headers."""
     since, until = _date(request.GET.get("start", "")[:10]), _date(request.GET.get("end", "")[:10])
     if since is None or until is None or not 0 < (until - since).days <= 62:
-        return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
+        return JsonResponse({"error": _("Parâmetros inválidos.")}, status=400)
     counts = {}
     pending = Recall.objects.filter(
         done=False, date__gte=since, date__lt=until, patient__archived=False

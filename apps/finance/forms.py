@@ -230,8 +230,8 @@ class SupplierForm(BootstrapForm, forms.ModelForm):
         self.documents = identification.for_country(countries.clinic_country(clinic))
         document_by_kind(
             self.fields["tax_id"],
-            self.documents.pessoa,
-            self.documents.empresa,
+            self.documents.person,
+            self.documents.company,
             self["kind"].value(),
         )
 
@@ -248,7 +248,7 @@ class SupplierForm(BootstrapForm, forms.ModelForm):
         data = super().clean()
         # A type without a document in this country (an individual in the UK) keeps none.
         is_company = data.get("kind") == Supplier.Kind.COMPANY
-        of_kind = self.documents.empresa if is_company else self.documents.pessoa
+        of_kind = self.documents.company if is_company else self.documents.person
         document = ""
         if of_kind is not None:
             try:

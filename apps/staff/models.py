@@ -51,7 +51,7 @@ class Employee(ClinicModel):
     def __str__(self):
         return self.name
 
-    document_role = "funcionario"  # see apps/core/identification.py
+    document_role = "employee"  # see apps/core/identification.py
 
     def salary_on(self, date):
         """The salary in force on `data` (the newest one starting on or before it)."""

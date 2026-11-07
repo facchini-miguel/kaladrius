@@ -181,3 +181,23 @@ def test_a_cancelled_appointment_frees_the_slot_in_either_spelling(appointment, 
     sync_values()  # both now in the code's spelling: the cancelled one still frees the slot
     appointment.refresh_from_db()
     assert appointment.status == cancelled
+
+
+def test_audit_names_the_changes_logged_by_hand(appointment):
+    """Decision 199: a password change and a visit's finalizing store English codes; entries
+    from before stored Portuguese words. Both show translated."""
+    entry = AuditEntry.objects.filter(object_id=str(appointment.pk)).latest("pk")
+    entry.changes = {
+        "password": ["hidden", "changed"],
+        "senha": ["(oculta)", "(alterada)"],
+        "finalized": [None, "yes"],
+    }
+    with translation.override("en"):
+        shown = [
+            (str(label), str(before), str(after)) for label, before, after in changed_fields(entry)
+        ]
+    assert shown == [
+        ("password", "(hidden)", "(changed)"),
+        ("password", "(hidden)", "(changed)"),
+        ("finalized", "None", "yes"),
+    ]

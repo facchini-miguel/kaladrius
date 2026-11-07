@@ -64,7 +64,7 @@
   {% if can_change %}
   <div class="d-flex flex-wrap gap-2">
     <button type="submit" class="btn btn-primary">{% translate "Salvar metas" %}</button>
-    {% if has_previous_targets %}<button type="submit" name="action" value="copiar" class="btn btn-outline-secondary">{% blocktranslate with ano_anterior=previous_year %}Copiar as metas de {{ ano_anterior }}{% endblocktranslate %}</button>{% endif %}
+    {% if has_previous_targets %}<button type="submit" name="action" value="copy" class="btn btn-outline-secondary">{% blocktranslate with ano_anterior=previous_year %}Copiar as metas de {{ ano_anterior }}{% endblocktranslate %}</button>{% endif %}
   </div>
   <p class="text-body-secondary small mt-2">{% translate "Deixe em branco o grupo sem meta. Copiar só preenche os grupos que ainda não têm meta neste ano. O total soma as metas dos grupos mais altos, sem contar duas vezes a meta de um subgrupo." %}</p>
   {% endif %}

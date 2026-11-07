@@ -27,7 +27,7 @@
       <h2 class="h6">{% translate "Desativar" %}</h2>
       <form method="post" novalidate>
         {% csrf_token %}
-        <input type="hidden" name="action" value="desativar">
+        <input type="hidden" name="action" value="disable">
         {% include "includes/form.html" with form=disable_form %}
         <button type="submit" class="btn btn-outline-danger">{% translate "Desativar a verificação em duas etapas" %}</button>
       </form>
@@ -55,7 +55,7 @@
 <ol start="3"><li>{% translate "Digite o código de 6 números que o aplicativo mostra:" %}</li></ol>
 <form method="post" style="max-width: 20rem;" novalidate>
   {% csrf_token %}
-  <input type="hidden" name="action" value="ativar">
+  <input type="hidden" name="action" value="enable">
   {% include "includes/form.html" %}
   <button type="submit" class="btn btn-primary">{% translate "Ativar" %}</button>
 </form>

@@ -182,7 +182,7 @@ def test_partial_payment_interest_and_balance(scenario):
     assert user_client.post(url, {**data, "amount": "60", "interest": "10"}).status_code == 302
     first_one = installments_of(scenario, entry)[0]
     assert (first_one.paid, first_one.balance) == (Decimal("50.00"), Decimal("50.00"))
-    assert services.status(first_one)[0] == "parcial"
+    assert services.status(first_one)[0] == "partial"
     # Paying more than what is left is refused.
     response = user_client.post(url, {**data, "amount": "50,01"})
     assert "passa do que falta" in response.content.decode()
@@ -281,7 +281,7 @@ def test_receivables_list_and_filters(scenario):
     user_client = log_in(scenario, "reception")
     results = reverse("finance:receivables")
     assert len(user_client.get(results).context["page"]) == 3
-    assert len(user_client.get(results, {"status": "vencidas"}).context["page"]) == 2
+    assert len(user_client.get(results, {"status": "overdue"}).context["page"]) == 2
     assert len(user_client.get(results, {"q": "devedora"}).context["page"]) == 3
     assert len(user_client.get(results, {"q": "ninguem"}).context["page"]) == 0
 
@@ -514,7 +514,8 @@ def test_cash_flow_actual_and_forecast(scenario):
     assert flow["closing_balance"] == Decimal("800.00")
     assert rent.total_amount == Decimal("300.00")
     response = log_in(scenario, "admin").get(
-        reverse("finance:cash_flow"), {"since": "2031-03-01", "until": "2031-03-31", "group": "mes"}
+        reverse("finance:cash_flow"),
+        {"since": "2031-03-01", "until": "2031-03-31", "group": "month"},
     )
     assert response.status_code == 200 and response.context["by_month"]
 

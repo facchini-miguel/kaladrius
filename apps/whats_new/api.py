@@ -25,21 +25,21 @@ class ReleaseOut(Schema):
     items: list[ItemOut]
 
 
-AUDIENCES = ("equipe", "paciente")
+AUDIENCES = ("staff", "patient")
 
 
 @router.get("/releases", response=list[ReleaseOut], auth=None)
 def list_releases(
     request,
-    audience: Literal["equipe", "paciente"] | None = None,
+    audience: Literal["staff", "patient"] | None = None,
     since: str | None = None,
 ):
     """Release notes per version, newest first, in the language of Accept-Language.
 
     Use `since` to receive only the versions after the one the app already showed. `audience` is
-    `paciente` (the default) or `equipe`.
+    `patient` (the default) or `staff`.
     """
-    audience = audience or "paciente"
+    audience = audience or "patient"
     if audience not in AUDIENCES:
         raise HttpError(422, f"audience: use {' or '.join(AUDIENCES)}.")
     try:

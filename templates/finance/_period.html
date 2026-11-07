@@ -11,8 +11,8 @@
   <div class="col-6 col-md-3">
     <label class="form-label small" for="group">{% translate "Agrupar por" %}</label>
     <select id="group" name="group" class="form-select">
-      <option value="dia"{% if not by_month %} selected{% endif %}>{% translate "Dia" %}</option>
-      <option value="mes"{% if by_month %} selected{% endif %}>{% translate "Mês" %}</option>
+      <option value="day"{% if not by_month %} selected{% endif %}>{% translate "Dia" %}</option>
+      <option value="month"{% if by_month %} selected{% endif %}>{% translate "Mês" %}</option>
     </select>
   </div>
   {% endif %}

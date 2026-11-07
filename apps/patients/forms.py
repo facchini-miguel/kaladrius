@@ -97,8 +97,8 @@ class PatientForm(BootstrapForm, forms.ModelForm):
         self.documents = identification.for_country(self.country)
         document_by_kind(
             self.fields["tax_id"],
-            self.documents.paciente,
-            self.documents.empresa,
+            self.documents.patient,
+            self.documents.company,
             self["kind"].value(),
         )
         for field in self.OUTSIDE_BRAZIL if self.country == "BR" else self.BRAZIL_ONLY:
@@ -167,9 +167,7 @@ class PatientForm(BootstrapForm, forms.ModelForm):
         kind = data.get("kind")
         # Checked here because it depends on the person type; a type without a document in
         # this country (an individual in the United States) keeps none.
-        of_kind = (
-            self.documents.empresa if kind == Patient.Kind.COMPANY else self.documents.paciente
-        )
+        of_kind = self.documents.company if kind == Patient.Kind.COMPANY else self.documents.patient
         document = ""
         if of_kind is not None:
             try:

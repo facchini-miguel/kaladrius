@@ -173,13 +173,13 @@ class Clinic(models.Model):
         """The name of its document, in its country: "CNPJ", "EIN" (decision 121)."""
         from .identification import abbreviation
 
-        return abbreviation(self.document, ("pessoa", "empresa"), self.country)
+        return abbreviation(self.document, ("person", "company"), self.country)
 
     @property
     def written_document(self):
         from .identification import write
 
-        return write(self.document, ("pessoa", "empresa"), self.country)
+        return write(self.document, ("person", "company"), self.country)
 
     @property
     def dentistry(self):

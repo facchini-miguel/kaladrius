@@ -22,10 +22,10 @@
   </div>
   <div class="col-6 col-md-3">
     <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
-      <option value="abertas"{% if status == "abertas" %} selected{% endif %}>{% translate "Em aberto" %}</option>
-      <option value="vencidas"{% if status == "vencidas" %} selected{% endif %}>{% translate "Vencidas" %}</option>
-      <option value="pagas"{% if status == "pagas" %} selected{% endif %}>{% translate "Pagas" %}</option>
-      <option value="todas"{% if status == "todas" %} selected{% endif %}>{% translate "Todas" %}</option>
+      <option value="open"{% if status == "open" %} selected{% endif %}>{% translate "Em aberto" %}</option>
+      <option value="overdue"{% if status == "overdue" %} selected{% endif %}>{% translate "Vencidas" %}</option>
+      <option value="paid"{% if status == "paid" %} selected{% endif %}>{% translate "Pagas" %}</option>
+      <option value="all"{% if status == "all" %} selected{% endif %}>{% translate "Todas" %}</option>
     </select>
   </div>
   <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>

@@ -15,7 +15,7 @@ class LoginForm(AuthenticationForm):
         if self.request is not None and services.address_blocked(self.request):
             raise ValidationError(
                 _("Muitas tentativas erradas a partir deste endereço. Tente de novo em 1 hora."),
-                code="endereco_bloqueado",
+                code="address_locked",
             )
         return super().clean()
 

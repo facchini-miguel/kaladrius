@@ -208,14 +208,14 @@ def status(installment, today=None):
     """Status of an installment annotated with com_saldo() (code, label)."""
     today = today or timezone.localdate()
     if installment.entry.cancelled:
-        return "cancelada", _("Cancelada")
+        return "cancelled", _("Cancelada")
     if installment.balance <= 0:
-        return "paga", _("Paga")
+        return "paid", _("Paga")
     if installment.due_date < today:
-        return "vencida", _("Vencida")
+        return "overdue", _("Vencida")
     if installment.paid > 0:
-        return "parcial", _("Paga em parte")
-    return "aberta", pgettext("parcela", "Em aberto")
+        return "partial", _("Paga em parte")
+    return "open", pgettext("parcela", "Em aberto")
 
 
 def debtors(today=None):

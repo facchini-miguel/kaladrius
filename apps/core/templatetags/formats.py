@@ -11,7 +11,7 @@ register = template.Library()
 @register.filter
 def document(value, roles=""):
     """A document written the country's way: 123.456.789-09, 12-3456789, 943 476 5919. The
-    roles ("paciente", "empresa,pessoa"; see apps/core/identification.py) say which documents
+    roles ("patient", "company,person"; see apps/core/identification.py) say which documents
     it may be; all of the country's by default."""
     return identification.write(value, identification.roles(roles))
 

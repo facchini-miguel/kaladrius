@@ -30,7 +30,7 @@ def test_every_country_has_its_documents():
     assert identification.DOCUMENTS.keys() == countries.COUNTRIES.keys()
     for code, documents in identification.DOCUMENTS.items():
         # Every country identifies a company (a company patient, the clinic, a supplier).
-        assert documents.empresa is not None, code
+        assert documents.company is not None, code
         assert documents.professional_registration, code
 
 
@@ -47,34 +47,34 @@ def test_field_examples_are_valid_and_written_as_the_system_writes():
 @pytest.mark.parametrize(
     ("country", "role", "typed", "written"),
     [
-        ("MX", "paciente", "boxw310820hnerxn09", "BOXW310820HNERXN09"),
-        ("MX", "pessoa", "GODE-561231-GR8", "GODE561231GR8"),
-        ("MX", "empresa", "ABC 680524 P76", "ABC680524P76"),
-        ("AR", "paciente", "20.123.456", "20.123.456"),
-        ("AR", "empresa", "20123456786", "20-12345678-6"),
-        ("CL", "paciente", "12345678-5", "12.345.678-5"),
-        ("CO", "paciente", "1234567890", "1.234.567.890"),
-        ("CO", "empresa", "2131234321", "213.123.432-1"),
-        ("PE", "paciente", "12345678", "12345678"),
-        ("PE", "empresa", "20512333797", "20512333797"),
-        ("UY", "paciente", "1234567-2", "1.234.567-2"),
-        ("UY", "empresa", "211003420017", "21-100342-001-7"),
-        ("PY", "paciente", "1234567", "1.234.567"),
-        ("PY", "empresa", "800280610", "80028061-0"),
-        ("BO", "paciente", "1234567 lp", "1234567LP"),
-        ("EC", "paciente", "1710034065", "1710034065"),
-        ("EC", "empresa", "1792060346-001", "1792060346001"),
-        ("US", "funcionario", "536904399", "536-90-4399"),
-        ("US", "empresa", "911144442", "91-1144442"),
-        ("GB", "paciente", "9434765919", "943 476 5919"),
-        ("GB", "funcionario", "ab123456c", "AB 12 34 56 C"),
-        ("GB", "empresa", "SC123456", "SC123456"),
-        ("CA", "funcionario", "123 456 782", "123-456-782"),
-        ("CA", "empresa", "123456782rt0001", "123456782 RT0001"),
-        ("AU", "paciente", "2123456701", "2123 45670 1"),
-        ("AU", "empresa", "83914571673", "83 914 571 673"),
-        ("ZA", "paciente", "7503305044089", "7503305044089"),
-        ("ZA", "empresa", "2001/123456/07", "2001/123456/07"),
+        ("MX", "patient", "boxw310820hnerxn09", "BOXW310820HNERXN09"),
+        ("MX", "person", "GODE-561231-GR8", "GODE561231GR8"),
+        ("MX", "company", "ABC 680524 P76", "ABC680524P76"),
+        ("AR", "patient", "20.123.456", "20.123.456"),
+        ("AR", "company", "20123456786", "20-12345678-6"),
+        ("CL", "patient", "12345678-5", "12.345.678-5"),
+        ("CO", "patient", "1234567890", "1.234.567.890"),
+        ("CO", "company", "2131234321", "213.123.432-1"),
+        ("PE", "patient", "12345678", "12345678"),
+        ("PE", "company", "20512333797", "20512333797"),
+        ("UY", "patient", "1234567-2", "1.234.567-2"),
+        ("UY", "company", "211003420017", "21-100342-001-7"),
+        ("PY", "patient", "1234567", "1.234.567"),
+        ("PY", "company", "800280610", "80028061-0"),
+        ("BO", "patient", "1234567 lp", "1234567LP"),
+        ("EC", "patient", "1710034065", "1710034065"),
+        ("EC", "company", "1792060346-001", "1792060346001"),
+        ("US", "employee", "536904399", "536-90-4399"),
+        ("US", "company", "911144442", "91-1144442"),
+        ("GB", "patient", "9434765919", "943 476 5919"),
+        ("GB", "employee", "ab123456c", "AB 12 34 56 C"),
+        ("GB", "company", "SC123456", "SC123456"),
+        ("CA", "employee", "123 456 782", "123-456-782"),
+        ("CA", "company", "123456782rt0001", "123456782 RT0001"),
+        ("AU", "patient", "2123456701", "2123 45670 1"),
+        ("AU", "company", "83914571673", "83 914 571 673"),
+        ("ZA", "patient", "7503305044089", "7503305044089"),
+        ("ZA", "company", "2001/123456/07", "2001/123456/07"),
     ],
 )
 def test_valid_document_is_written_the_country_way(country, role, typed, written):
@@ -86,20 +86,20 @@ def test_valid_document_is_written_the_country_way(country, role, typed, written
 @pytest.mark.parametrize(
     ("country", "role", "typed"),
     [
-        ("MX", "paciente", "BOXW310820HNERXN08"),  # check digit
-        ("MX", "empresa", "GODE561231GR8"),  # an individual's RFC is not a company's
-        ("AR", "empresa", "20123456785"),
-        ("CL", "paciente", "12345678-K"),
-        ("CO", "empresa", "2131234325"),
-        ("UY", "paciente", "1234567-3"),
-        ("EC", "paciente", "1710034066"),
-        ("US", "funcionario", "000-12-3456"),
-        ("GB", "paciente", "9434765918"),
-        ("GB", "funcionario", "QQ123456C"),  # Q never starts one
-        ("CA", "funcionario", "123456789"),
-        ("AU", "paciente", "2123456711"),
-        ("AU", "empresa", "83914571674"),
-        ("ZA", "paciente", "7503305044088"),
+        ("MX", "patient", "BOXW310820HNERXN08"),  # check digit
+        ("MX", "company", "GODE561231GR8"),  # an individual's RFC is not a company's
+        ("AR", "company", "20123456785"),
+        ("CL", "patient", "12345678-K"),
+        ("CO", "company", "2131234325"),
+        ("UY", "patient", "1234567-3"),
+        ("EC", "patient", "1710034066"),
+        ("US", "employee", "000-12-3456"),
+        ("GB", "patient", "9434765918"),
+        ("GB", "employee", "QQ123456C"),  # Q never starts one
+        ("CA", "employee", "123456789"),
+        ("AU", "patient", "2123456711"),
+        ("AU", "company", "83914571674"),
+        ("ZA", "patient", "7503305044088"),
     ],
 )
 def test_invalid_document_is_refused(country, role, typed):
@@ -111,18 +111,17 @@ def test_invalid_document_is_refused(country, role, typed):
 def test_value_that_is_not_a_country_document_stays_as_is():
     # A CPF kept from when the clinic was Brazilian, now in the United States.
     assert identification.write("52998224725", None, "US") == "52998224725"
-    assert identification.abbreviation("52998224725", ("pessoa", "empresa"), "US") == "EIN"
+    assert identification.abbreviation("52998224725", ("person", "company"), "US") == "EIN"
     assert (
-        identification.abbreviation("", ("paciente", "empresa"), "GB")
-        == "NHS number/Company number"
+        identification.abbreviation("", ("patient", "company"), "GB") == "NHS number/Company number"
     )
 
 
 def test_template_filters(clinic_a):
     in_country(clinic_a, "AR")
     template = Template(
-        '{% load formats %}{{ a|document:"paciente" }} · {{ b|document }} · '
-        '{{ b|document_abbreviation:"empresa" }} · {% document_label "paciente" "empresa" %}'
+        '{% load formats %}{{ a|document:"patient" }} · {{ b|document }} · '
+        '{{ b|document_abbreviation:"company" }} · {% document_label "patient" "company" %}'
     )
     with use_clinic(clinic_a):
         text = template.render(Context({"a": "20123456", "b": "20123456786"}))

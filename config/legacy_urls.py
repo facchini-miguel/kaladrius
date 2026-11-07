@@ -11,7 +11,7 @@ CATALOGS = {"categorias": "categories", "contas": "accounts", "centros-de-custo"
 ACTIONS = {"conciliar": "reconcile", "ignorar": "ignore", "desfazer": "undo"}
 CATALOG_PATTERN = "|".join(CATALOGS)
 CASH_KINDS = {"retirada": "withdrawal", "reforco": "top-up"}
-# Old query names (decisions 166 and 184); their values did not change.
+# Old query names (decisions 166 and 184) and the old values of the filters (decision 199).
 QUERY_NAMES = {
     "pagina": "page",
     "de": "since",
@@ -23,6 +23,21 @@ QUERY_NAMES = {
     "situacao": "status",
     "data": "date",
     "paciente": "patient",
+}
+QUERY_VALUES = {
+    "status": {
+        "abertas": "open",
+        "vencidas": "overdue",
+        "pagas": "paid",
+        "todas": "all",
+        "ativos": "active",
+        "inativos": "inactive",
+        "todos": "all",
+        "arquivados": "archived",
+        "pendentes": "pending",
+        "concluidas": "done",
+    },
+    "group": {"mes": "month", "dia": "day"},
 }
 
 
@@ -40,7 +55,9 @@ def redirect_to(name, values=None):
         if request.GET:
             query = QueryDict(mutable=True)
             for key, query_values in request.GET.lists():
-                query.setlist(QUERY_NAMES.get(key, key), query_values)
+                new_key = QUERY_NAMES.get(key, key)
+                values_of = QUERY_VALUES.get(new_key, {})
+                query.setlist(new_key, [values_of.get(v, v) for v in query_values])
             destination += "?" + query.urlencode()
         return PermanentRedirect(destination)
 

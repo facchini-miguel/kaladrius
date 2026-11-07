@@ -8,11 +8,11 @@
     <p class="mb-2"><strong>{{ appointment.title }}</strong> · {% blocktranslate with inicio=appointment.start|date:"SHORT_DATETIME_FORMAT" fim=appointment.end|date:"TIME_FORMAT" %}{{ inicio }} às {{ fim }}{% endblocktranslate %}</p>
     {% if following_count %}
     <div class="form-check">
-      <input class="form-check-input" type="radio" name="scope" id="scope-this" value="este" checked>
+      <input class="form-check-input" type="radio" name="scope" id="scope-this" value="this" checked>
       <label class="form-check-label" for="scope-this">{% translate "Somente este" %}</label>
     </div>
     <div class="form-check">
-      <input class="form-check-input" type="radio" name="scope" id="scope-series" value="serie">
+      <input class="form-check-input" type="radio" name="scope" id="scope-series" value="series">
       <label class="form-check-label" for="scope-series">{% blocktranslate with proximos=following_count %}Este e os próximos {{ proximos }} da mesma repetição{% endblocktranslate %}</label>
     </div>
     {% else %}

@@ -6,7 +6,7 @@ from . import releases
 
 @login_required
 def whats_new_list(request):
-    versions = releases.for_audience("equipe")
+    versions = releases.for_audience("staff")
     modules = sorted({(item.module, item.module_name) for _, items in versions for item in items})
     module = request.GET.get("module", "")
     if module:

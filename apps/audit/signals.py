@@ -130,7 +130,7 @@ def after_save(sender, instance, created, raw=False, update_fields=None, **kwarg
         None,
         getattr(instance, "password", None),
     ):
-        changes["senha"] = ["(oculta)", "(alterada)"]  # the hash itself is never stored
+        changes["password"] = ["hidden", "changed"]  # the hash itself is never stored
     if changes:
         log_event(Action.CHANGE, instance, changes=changes)
 
@@ -145,7 +145,7 @@ def after_delete(sender, instance, **kwargs):
 
 
 for model in AUDITED:
-    uid = f"auditoria_{model._meta.label_lower}"
+    uid = f"audit_{model._meta.label_lower}"
     pre_save.connect(before_save, sender=model, dispatch_uid=f"{uid}_pre")
     post_save.connect(after_save, sender=model, dispatch_uid=f"{uid}_post")
     post_delete.connect(after_delete, sender=model, dispatch_uid=f"{uid}_delete")
@@ -172,4 +172,4 @@ def _login_failed(sender, credentials, request=None, **kwargs):
 
 user_logged_in.connect(_logged_in, dispatch_uid="auditoria_login")
 user_logged_out.connect(_logged_out, dispatch_uid="auditoria_logout")
-user_login_failed.connect(_login_failed, dispatch_uid="auditoria_login_falhou")
+user_login_failed.connect(_login_failed, dispatch_uid="audit_login_failed")

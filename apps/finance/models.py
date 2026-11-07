@@ -260,7 +260,7 @@ class Supplier(ClinicModel):
     @property
     def document_role(self):
         """Its document's role in apps/core/identification.py."""
-        return "empresa" if self.kind == self.Kind.COMPANY else "pessoa"
+        return "company" if self.kind == self.Kind.COMPANY else "person"
 
 
 class Entry(ClinicModel):

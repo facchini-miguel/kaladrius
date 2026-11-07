@@ -21,8 +21,8 @@ from django.utils.translation import gettext as _
 
 from . import countries
 
-STATE = "estado"
-PROVINCE = "provincia"
+STATE = "state"
+PROVINCE = "province"
 
 
 @dataclass(frozen=True)

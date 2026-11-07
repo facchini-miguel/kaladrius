@@ -97,9 +97,9 @@ def latest():
 def level(key, value):
     warning, critical = THRESHOLDS[key]
     if value >= critical:
-        return "critico"
+        return "critical"
     if value >= warning:
-        return "atencao"
+        return "warning"
     return "ok"
 
 

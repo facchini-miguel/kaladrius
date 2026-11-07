@@ -57,7 +57,7 @@ def receive(clinic, installment, date, amount="100"):
 
 def test_closing_locks_payments_and_reversals_in_the_period(clinic_a, installment, admin):
     old = receive(clinic_a, installment, DAY_BEFORE_YESTERDAY)
-    assert admin.post(URL, {"action": "fechar", "until": YESTERDAY.isoformat()}).status_code == 302
+    assert admin.post(URL, {"action": "close", "until": YESTERDAY.isoformat()}).status_code == 302
     with use_clinic(clinic_a):
         assert services.closed_until(clinic_a.pk) == YESTERDAY
     with pytest.raises(ValidationError, match="fechado"):
@@ -105,7 +105,7 @@ def test_close_again_only_forward_and_reopen_with_reason(clinic_a, admin):
             services.reopen_books(clinic_a, YESTERDAY, reason="erro", user=None)
     assert (
         admin.post(
-            URL, {"action": "reabrir", "until": "", "reason": "Lançamento esquecido"}
+            URL, {"action": "reopen", "until": "", "reason": "Lançamento esquecido"}
         ).status_code
         == 302
     )
@@ -133,7 +133,7 @@ def test_who_can_see_close_and_reopen(clinic_a, create_user, client_for):
     assert reception.get(URL).status_code == 403
     finance_user = client_for(create_user("fin_fechamento", clinic_a, Role.FINANCE))
     assert (
-        finance_user.post(URL, {"action": "fechar", "until": YESTERDAY.isoformat()}).status_code
+        finance_user.post(URL, {"action": "close", "until": YESTERDAY.isoformat()}).status_code
         == 302
     )
     assert finance_user.post(URL, {"action": "other"}).status_code == 403
@@ -143,6 +143,6 @@ def test_demo_only_views(clinic_a, create_user, client_for):
     demo = client_for(create_user("demo_fechamento", clinic_a, Role.ADMIN, demo=True))
     page = demo.get(URL)
     assert page.status_code == 200 and page.context["close_form"] is None
-    assert demo.post(URL, {"action": "fechar", "until": YESTERDAY.isoformat()}).status_code == 403
+    assert demo.post(URL, {"action": "close", "until": YESTERDAY.isoformat()}).status_code == 403
     with use_clinic(clinic_a):
         assert not BookClosing.objects.exists()
