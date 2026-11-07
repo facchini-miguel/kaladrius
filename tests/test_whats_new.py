@@ -156,19 +156,23 @@ def test_api_releases(client):
 
 
 @pytest.mark.django_db
-def test_api_releases_accepts_the_old_query_names(client):
-    """Decision 189: `publico` and `desde` still work, as `audience` and `since`."""
+def test_api_releases_filters(client):
     since = releases.all_releases()[3].version
-    new = client.get(f"/api/v1/releases?audience=equipe&since={since}").json()
-    old = client.get(f"/api/v1/releases?publico=equipe&desde={since}").json()
-    assert old == new and 0 < len(new) <= 3
+    staff = client.get(f"/api/v1/releases?audience=equipe&since={since}").json()
+    assert 0 < len(staff) <= 3
     assert client.get("/api/v1/releases?audience=todos").status_code == 422
 
 
 @pytest.mark.django_db
 def test_api_version(client):
     assert client.get("/api/v1/version").json() == {"version": releases.current_version()}
-    assert client.get("/api/v1/versao").json() == {"versao": releases.current_version()}
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("path", ["/api/v1/versao", "/api/v1/saude"])
+def test_api_addresses_before_decision_155_are_gone(client, path):
+    """Decision 196: nothing used them any more."""
+    assert client.get(path).status_code == 404
 
 
 DEPENDABOT = """

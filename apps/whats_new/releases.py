@@ -240,7 +240,7 @@ def has_news_for(last_seen, audience="equipe"):
 
 
 def for_audience(audience, since=None):
-    """Versions with items for the audience, newest first, optionally only after `desde`."""
+    """Versions with items for the audience, newest first, optionally only after `since`."""
     minimum = version_tuple(since) if since else None
     result = []
     for release in all_releases():

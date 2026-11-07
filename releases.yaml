@@ -4,6 +4,40 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.63.0
+  date: 2026-11-07
+  title:
+    pt-br: Endereços antigos da API removidos
+    en: The API's old addresses removed
+    es: Direcciones antiguas de la API eliminadas
+  items:
+    - kind: melhoria
+      module: Geral
+      audience: [equipe]
+      text:
+        pt-br: >
+          Manutenção interna: endereços antigos da API, que ninguém usava mais, foram retirados.
+          Nada muda no uso, nas telas nem nos dados.
+        en: >
+          Internal maintenance: old API addresses, which nothing used any more, were removed.
+          Nothing changes in use, on the screens or in the data.
+        es: >
+          Mantenimiento interno: se retiraron direcciones antiguas de la API, que nadie usaba ya.
+          Nada cambia en el uso, en las pantallas ni en los datos.
+    - kind: melhoria
+      module: Sistema
+      audience: []
+      text:
+        pt-br: >
+          /api/v1/versao e /api/v1/saude respondem 404, e /api/v1/releases não lê mais publico e
+          desde: use /api/v1/version, /api/v1/health, audience e since (decisão 196).
+        en: >
+          /api/v1/versao and /api/v1/saude answer 404, and /api/v1/releases no longer reads publico
+          and desde: use /api/v1/version, /api/v1/health, audience and since (decision 196).
+        es: >
+          /api/v1/versao y /api/v1/saude responden 404, y /api/v1/releases ya no lee publico ni
+          desde: use /api/v1/version, /api/v1/health, audience y since (decisión 196).
+
 - version: 0.62.0
   date: 2026-11-06
   title:

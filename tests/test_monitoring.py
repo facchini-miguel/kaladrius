@@ -213,7 +213,6 @@ def test_health_for_monitors_queries_the_database(client, monkeypatch):
 
     response = client.get("/api/v1/health")
     assert response.status_code == 200 and response.json()["database"] is True
-    assert client.get("/api/v1/saude").json()["banco"] is True  # the old address (decision 155)
 
     import config.api
 
@@ -227,5 +226,3 @@ def test_health_for_monitors_queries_the_database(client, monkeypatch):
     monkeypatch.setattr(config.api.connection, "cursor", lambda: BrokenCursor())
     response = client.get("/api/v1/health")
     assert response.status_code == 503 and response.json() == {"database": False}
-    response = client.get("/api/v1/saude")
-    assert response.status_code == 503 and response.json() == {"banco": False}

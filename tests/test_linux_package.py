@@ -821,16 +821,20 @@ def test_manage_uses_old_name_only_in_app_that_lacks_it(tmp_path, known, expecte
     assert calls.read_text().splitlines() == [expected, "health"]
 
 
+CURL_ONLY_NEW = """#!/bin/sh
+case "$*" in *"/api/v1/health"*) exit 0 ;; *) exit 22 ;; esac
+"""
 CURL_ONLY_OLD = """#!/bin/sh
-# Only the health page's address before decision 155 answers (an app rolled back to 0.55).
+# Only the health page's address before decision 155 answers: no longer read (decision 196).
 case "$*" in *"/api/v1/saude"*) exit 0 ;; *) exit 22 ;; esac
 """
 
 
 @pytest.mark.parametrize(
-    ("curl", "answers"), [(CURL_ONLY_OLD, "sim"), ("#!/bin/sh\nexit 22\n", "nao")]
+    ("curl", "answers"),
+    [(CURL_ONLY_NEW, "sim"), (CURL_ONLY_OLD, "nao"), ("#!/bin/sh\nexit 22\n", "nao")],
 )
-def test_health_by_new_or_old_address(tmp_path, curl, answers):
+def test_health_by_its_address(tmp_path, curl, answers):
     shared = shared_in(tmp_path)
     (tmp_path / "path").mkdir()
     fake = tmp_path / "path" / "curl"
