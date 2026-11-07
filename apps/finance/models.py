@@ -223,7 +223,7 @@ class Supplier(ClinicModel):
         INDIVIDUAL = "PF", _("Pessoa física")
         COMPANY = "PJ", _("Pessoa jurídica")
 
-    kind = models.CharField(_("tipo"), max_length=2, choices=Kind.choices, default=Kind.COMPANY)
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, default=Kind.COMPANY)
     name = models.CharField(
         _("nome"),
         max_length=200,

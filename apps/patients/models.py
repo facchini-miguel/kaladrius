@@ -20,7 +20,7 @@ class Patient(ClinicModel):
         MALE = "M", _("Masculino")
         OTHER = "O", _("Outro")
 
-    kind = models.CharField(_("tipo"), max_length=2, choices=Kind.choices, default=Kind.INDIVIDUAL)
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, default=Kind.INDIVIDUAL)
     name = models.CharField(
         _("nome"),
         max_length=200,

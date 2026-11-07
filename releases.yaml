@@ -4,6 +4,40 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.64.0
+  date: 2026-11-07
+  title:
+    pt-br: Auditoria mostra o nome das opções
+    en: The audit log shows the options' names
+    es: La auditoría muestra el nombre de las opciones
+  items:
+    - kind: melhoria
+      module: Auditoria
+      audience: [equipe]
+      text:
+        pt-br: >
+          Nas alterações da auditoria, campos de opções aparecem pelo nome, como "Compareceu" ou
+          "Dinheiro", em vez do código interno gravado.
+        en: >
+          In the audit log's changes, option fields show their name, such as "Came" or "Cash",
+          instead of the internal code stored.
+        es: >
+          En los cambios de la auditoría, los campos de opciones aparecen por su nombre, como
+          "Asistió" o "Efectivo", en lugar del código interno guardado.
+    - kind: melhoria
+      module: Sistema
+      audience: []
+      text:
+        pt-br: >
+          O migrate converte os valores gravados dos campos de opções para os do código, nos dois
+          sentidos, preparando os valores em inglês da 0.65.0 (decisão 197).
+        en: >
+          migrate converts the choice fields' stored values to the code's, both ways, preparing the
+          English values of 0.65.0 (decision 197).
+        es: >
+          migrate convierte los valores guardados de los campos de opciones a los del código, en
+          ambos sentidos, preparando los valores en inglés de la 0.65.0 (decisión 197).
+
 - version: 0.63.0
   date: 2026-11-07
   title:

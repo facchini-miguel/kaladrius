@@ -9,6 +9,7 @@ from apps.dentistry.teeth import FDI, NUMBERINGS
 
 from . import countries, currencies
 from .isolation import ClinicModel
+from .values import both_spellings
 
 
 class User(AbstractUser):
@@ -242,7 +243,10 @@ class ClinicModule(ClinicModel):
         constraints = [
             models.UniqueConstraint(fields=["clinic", "code"], name="clinic_module_unique"),
             models.CheckConstraint(
-                condition=models.Q(code__in=ModuleCode.values),
+                # Both spellings while the stored values change (decision 197).
+                condition=models.Q(
+                    code__in=both_spellings("core.ClinicModule.code", ModuleCode.values)
+                ),
                 name="clinic_module_known",
             ),
         ]
