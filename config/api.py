@@ -40,17 +40,3 @@ def health(request):
     if not _database_answers():
         return api.create_response(request, {"database": False}, status=503)
     return {"database": True, "version": current_version()}
-
-
-# The addresses and fields before decision 155, for monitors and scripts still using them: the
-# server scripts of the previous version check a rolled-back app through /saude.
-@api.get("/versao", auth=None, include_in_schema=False)
-def version_old(request):
-    return {"versao": current_version()}
-
-
-@api.get("/saude", auth=None, include_in_schema=False)
-def health_old(request):
-    if not _database_answers():
-        return api.create_response(request, {"banco": False}, status=503)
-    return {"banco": True, "versao": current_version()}

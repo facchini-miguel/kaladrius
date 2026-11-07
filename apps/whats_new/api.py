@@ -37,11 +37,9 @@ def list_releases(
     """Release notes per version, newest first, in the language of Accept-Language.
 
     Use `since` to receive only the versions after the one the app already showed. `audience` is
-    `paciente` (the default) or `equipe`. The names before decision 189, `publico` and `desde`,
-    are still accepted.
+    `paciente` (the default) or `equipe`.
     """
-    audience = audience or request.GET.get("publico") or "paciente"
-    since = since or request.GET.get("desde")
+    audience = audience or "paciente"
     if audience not in AUDIENCES:
         raise HttpError(422, f"audience: use {' or '.join(AUDIENCES)}.")
     try:
