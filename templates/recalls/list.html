@@ -13,9 +13,9 @@
   <div class="col-md-4"><input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="{% translate 'Nome do paciente' %}" aria-label="{% translate 'Nome do paciente' %}"></div>
   <div class="col-6 col-md-2">
     <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
-      <option value="pendentes"{% if filters.status == "pendentes" %} selected{% endif %}>{% translate "Pendentes" %}</option>
-      <option value="concluidas"{% if filters.status == "concluidas" %} selected{% endif %}>{% translate "Concluídas" %}</option>
-      <option value="todas"{% if filters.status == "todas" %} selected{% endif %}>{% translate "Todas" %}</option>
+      <option value="pending"{% if filters.status == "pending" %} selected{% endif %}>{% translate "Pendentes" %}</option>
+      <option value="done"{% if filters.status == "done" %} selected{% endif %}>{% translate "Concluídas" %}</option>
+      <option value="all"{% if filters.status == "all" %} selected{% endif %}>{% translate "Todas" %}</option>
     </select>
   </div>
   <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filters.since }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>

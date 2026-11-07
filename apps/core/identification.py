@@ -86,15 +86,15 @@ class Document:
         return self.format_amount(value)
 
 
-DOCUMENT_ROLES = ("paciente", "funcionario", "pessoa", "empresa")
+DOCUMENT_ROLES = ("patient", "employee", "person", "company")
 
 
 @dataclass(frozen=True)
 class Documents:
-    paciente: Document | None
-    funcionario: Document | None
-    pessoa: Document | None
-    empresa: Document | None
+    patient: Document | None
+    employee: Document | None
+    person: Document | None
+    company: Document | None
     # Examples for the practitioner's professional registration (free text).
     professional_registration: str = ""
 
@@ -269,7 +269,7 @@ def for_country(country=None):
 
 
 def roles(text):
-    """ "paciente,empresa" → ("paciente", "empresa"); empty: every role."""
+    """ "patient,company" → ("patient", "company"); empty: every role."""
     return tuple(p.strip() for p in (text or "").split(",") if p.strip()) or DOCUMENT_ROLES
 
 

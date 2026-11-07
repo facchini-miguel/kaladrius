@@ -203,8 +203,8 @@ def test_kind_and_status_filters(admin_a, clinic_a):
         return sorted(p.name for p in admin_a.get(url, params).context["page"])
 
     assert names() == ["Ativo PF", "Empresa"]
-    assert names(status="inativos") == ["Inativo PF"]
-    assert names(status="todos", kind="company") == ["Empresa"]
+    assert names(status="inactive") == ["Inativo PF"]
+    assert names(status="all", kind="company") == ["Empresa"]
 
 
 # --- Isolation and permissions ---------------------------------------------------
@@ -246,7 +246,7 @@ def test_admin_archives_and_restores(admin_a, clinic_a, create_user, client_for)
     assert patient.archived and patient.archived_by.username == "admin_a"
 
     patient_list = reverse("patients:list")
-    for status, expected in (("todos", []), ("arquivados", [patient])):
+    for status, expected in (("all", []), ("archived", [patient])):
         assert list(admin_a.get(patient_list, {"status": status}).context["page"]) == expected
     patient_record = admin_a.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "Restaurar" in patient_record and "Excluir definitivamente" in patient_record
@@ -261,7 +261,7 @@ def test_team_does_not_see_archived_patient(clinic_a, create_user, client_for):
     patient = create_patient(clinic_a, name="Fulano Escondido", tax_id="52998224725", archived=True)
     user_client = client_for(create_user("recepcao", clinic_a, Role.FRONT_DESK))
     patient_list = reverse("patients:list")
-    for status in ("ativos", "todos", "arquivados"):
+    for status in ("active", "all", "archived"):
         assert "Escondido" not in user_client.get(patient_list, {"status": status}).content.decode()
     assert user_client.get(reverse("patients:record", args=[patient.pk])).status_code == 404
     # The same CPF cannot be registered again: the message points to the administrator.

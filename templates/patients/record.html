@@ -45,10 +45,10 @@
         <dl class="row mb-0">
           {% if patient.kind == "company" %}
           <dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ patient.legal_name|default:"—" }}</dd>
-          {% if country_documents.empresa or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|document_abbreviation:"empresa" }}</dt><dd class="col-sm-7">{{ patient.tax_id|document:"empresa"|default:"—" }}</dd>{% endif %}
+          {% if country_documents.company or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|document_abbreviation:"company" }}</dt><dd class="col-sm-7">{{ patient.tax_id|document:"company"|default:"—" }}</dd>{% endif %}
           {% if in_brazil or patient.state_registration %}<dt class="col-sm-5">{% translate "Inscrição estadual" %}</dt><dd class="col-sm-7">{{ patient.state_registration|default:"—" }}</dd>{% endif %}
           {% else %}
-          {% if country_documents.paciente or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|document_abbreviation:"paciente" }}</dt><dd class="col-sm-7">{{ patient.tax_id|document:"paciente"|default:"—" }}</dd>{% endif %}
+          {% if country_documents.patient or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|document_abbreviation:"patient" }}</dt><dd class="col-sm-7">{{ patient.tax_id|document:"patient"|default:"—" }}</dd>{% endif %}
           {% if in_brazil or patient.rg %}<dt class="col-sm-5">{% translate "RG" %}</dt><dd class="col-sm-7">{{ patient.rg|default:"—" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Nascimento" %}</dt>
           <dd class="col-sm-7">

@@ -16,7 +16,7 @@
   <div class="col-6 col-md-3">
     <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
       {% for value, name in statuses %}<option value="{{ value }}"{% if value == status %} selected{% endif %}>{{ name }}</option>{% endfor %}
-      <option value="todos"{% if status == "todos" %} selected{% endif %}>{% translate "Todos" %}</option>
+      <option value="all"{% if status == "all" %} selected{% endif %}>{% translate "Todos" %}</option>
     </select>
   </div>
   <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>

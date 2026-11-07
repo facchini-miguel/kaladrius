@@ -55,8 +55,8 @@ def edit_member(request, pk):
     user = membership.user
     exclusive = exclusive_account(user, request.clinic)
     data = request.POST or None
-    form = MembershipForm(data, instance=membership, editor=request.user, prefix="vinculo")
-    account = UserAccountForm(data, instance=user, prefix="conta") if exclusive else None
+    form = MembershipForm(data, instance=membership, editor=request.user, prefix="membership")
+    account = UserAccountForm(data, instance=user, prefix="account") if exclusive else None
     if request.method == "POST" and form.is_valid() and (account is None or account.is_valid()):
         with transaction.atomic():
             form.save()

@@ -100,9 +100,9 @@ def test_list_filters(scenario):
         return [r.patient.name for r in scenario["client"].get(url, params).context["page"]]
 
     assert names() == ["João Rechamada", "Ana Outra"]  # pending, ordered by date
-    assert names(status="concluidas") == ["João Rechamada"]
-    assert names(status="todas", q="ana") == ["Ana Outra"]
-    assert names(status="todas", since="2031-03-06", until="2031-04-30") == ["João Rechamada"]
+    assert names(status="done") == ["João Rechamada"]
+    assert names(status="all", q="ana") == ["Ana Outra"]
+    assert names(status="all", since="2031-03-06", until="2031-04-30") == ["João Rechamada"]
 
 
 def test_overdue_status(scenario):
@@ -138,7 +138,7 @@ def test_isolation(scenario, clinic_b):
     user_client = scenario["client"]
     assert user_client.get(reverse("recalls:edit", args=[of_b.pk])).status_code == 404
     assert user_client.post(reverse("recalls:complete", args=[of_b.pk])).status_code == 404
-    assert len(user_client.get(reverse("recalls:list"), {"status": "todas"}).context["page"]) == 0
+    assert len(user_client.get(reverse("recalls:list"), {"status": "all"}).context["page"]) == 0
     response = user_client.post(
         reverse("recalls:new"),
         {"patient": patient_b.pk, "date": DAY.isoformat(), "description": "x"},

@@ -57,7 +57,7 @@ def _finalize(request, visit):
     visit.finalized_at = timezone.now()
     visit.finalized_by = request.user
     visit.save(update_fields=["finalized_at", "finalized_by", "updated_at"])
-    log_event(Action.CHANGE, visit, changes={"finalizado": [None, "sim"]})
+    log_event(Action.CHANGE, visit, changes={"finalized": [None, "yes"]})
     messages.success(
         request, _("Atendimento finalizado. A partir de agora, correções são feitas por adendo.")
     )
@@ -87,7 +87,7 @@ def new_visit(request, practitioner, patient):
         visit.created_by = request.user
         visit.save()
         _audit(Action.CREATE, visit, [c for c in ANAMNESIS_FIELDS if getattr(visit, c)])
-        if request.POST.get("action") == "finalizar":
+        if request.POST.get("action") == "finalize":
             _finalize(request, visit)
         else:
             messages.success(request, _("Atendimento salvo."))
@@ -116,7 +116,7 @@ def visit(request, practitioner, pk):
             changed_ones = list(form.changed_data)
             form.save()
             _audit(Action.CHANGE, visit, changed_ones)
-            if request.POST.get("action") == "finalizar":
+            if request.POST.get("action") == "finalize":
                 _finalize(request, visit)
             else:
                 messages.success(request, _("Atendimento salvo."))

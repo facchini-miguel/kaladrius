@@ -115,10 +115,10 @@ def test_activate_with_qr_code(client, person):
     page = client.get(reverse("account:two_factor")).content.decode()
     assert "<svg" in page and "otpauth" not in page  # the secret is in the QR, not text
     device = TwoFactor.objects.get(user=person)
-    wrong = client.post(reverse("account:two_factor"), {"action": "ativar", "code": "000000"})
+    wrong = client.post(reverse("account:two_factor"), {"action": "enable", "code": "000000"})
     assert "Código incorreto" in wrong.content.decode()
     response = client.post(
-        reverse("account:two_factor"), {"action": "ativar", "code": current_code(device)}
+        reverse("account:two_factor"), {"action": "enable", "code": current_code(device)}
     )
     text = response.content.decode()
     assert "Verificação em duas etapas ativada" in text
@@ -172,7 +172,7 @@ def test_code_step_expires(client, person):
     device, _ = enable_two_factor(person)
     log_in(client, person)
     session = client.session
-    session["duas_etapas_pendente"]["momento"] -= 10 * 60
+    session["two_factor_pending"]["time"] -= 10 * 60
     session.save()
     assert client.post(reverse("account:code"), {"code": current_code(device)}).url == (
         reverse("login")
@@ -190,13 +190,13 @@ def test_deactivate_and_generate_new_codes(client, person):
     assert not services.verify_recovery(person, old_ones[1])  # old ones stop working
     wrong = client.post(
         reverse("account:two_factor"),
-        {"action": "desativar", "disable-password": "errada", "disable-code": "000000"},
+        {"action": "disable", "disable-password": "errada", "disable-code": "000000"},
     )
     assert "Senha incorreta" in wrong.content.decode()
     response = client.post(
         reverse("account:two_factor"),
         {
-            "action": "desativar",
+            "action": "disable",
             "disable-password": PASSWORD,
             "disable-code": current_code(device, offset=1),
         },
@@ -310,7 +310,7 @@ def test_required_cannot_be_deactivated(client, required, create_user):
     client.post(
         reverse("account:two_factor"),
         {
-            "action": "desativar",
+            "action": "disable",
             "disable-password": PASSWORD,
             "disable-code": current_code(device),
         },

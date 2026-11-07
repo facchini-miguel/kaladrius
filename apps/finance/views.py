@@ -75,10 +75,10 @@ from .ofx import InvalidFile
 
 PER_PAGE = 50
 STATUSES = {
-    "abertas": Q(balance__gt=0, entry__cancelled=False),
-    "vencidas": Q(balance__gt=0, entry__cancelled=False),  # + due date before today
-    "pagas": Q(balance__lte=0, entry__cancelled=False),
-    "todas": Q(),
+    "open": Q(balance__gt=0, entry__cancelled=False),
+    "overdue": Q(balance__gt=0, entry__cancelled=False),  # + due date before today
+    "paid": Q(balance__lte=0, entry__cancelled=False),
+    "all": Q(),
 }
 
 
@@ -104,15 +104,15 @@ def payables(request):
 
 def _entry_list(request, kind):
     today = timezone.localdate()
-    status = request.GET.get("status", "abertas")
+    status = request.GET.get("status", "open")
     search = request.GET.get("q", "").strip()
     installments = (
         Installment.objects.with_balance()
         .filter(entry__kind=kind)
         .select_related("entry__patient", "entry")
-        .filter(STATUSES.get(status, STATUSES["abertas"]))
+        .filter(STATUSES.get(status, STATUSES["open"]))
     )
-    if status == "vencidas":
+    if status == "overdue":
         installments = installments.filter(due_date__lt=today)
     if search:
         installments = installments.filter(
@@ -549,7 +549,7 @@ def _period(request):
 @requires_permission(Module.FINANCE, Action.VIEW)
 def cash_flow(request):
     since, until = _period(request)
-    by_month = request.GET.get("group") == "mes"
+    by_month = request.GET.get("group") == "month"
     return render(
         request,
         "finance/cash_flow.html",
@@ -597,7 +597,7 @@ def planning(request):
     if request.method == "POST":
         if not can_change:
             raise PermissionDenied
-        if request.POST.get("action") == "copiar":
+        if request.POST.get("action") == "copy":
             copied = services.copy_targets(year)
             messages.success(
                 request,
@@ -644,13 +644,13 @@ def book_closing(request):
     can_reopen = can(request, Module.FINANCE, Action.DELETE) and not demo
     if request.method == "POST":
         action = request.POST.get("action")
-        if not {"fechar": can_close, "reabrir": can_reopen}.get(action):
+        if not {"close": can_close, "reopen": can_reopen}.get(action):
             raise PermissionDenied
-        form = (CloseBooksForm if action == "fechar" else ReopenBooksForm)(request.POST)
+        form = (CloseBooksForm if action == "close" else ReopenBooksForm)(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             try:
-                if action == "fechar":
+                if action == "close":
                     services.close_books(request.clinic, data["until"], user=request.user)
                     messages.success(request, _("Financeiro fechado."))
                 else:

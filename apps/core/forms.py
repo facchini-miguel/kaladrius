@@ -161,9 +161,9 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
         # in Brazil, "EIN" in the United States... of the country chosen now.
         if "document" in self.fields:
             documents = identification.for_country(self._chosen_country())
-            self.clinic_documents = documents.of_roles("pessoa", "empresa")
+            self.clinic_documents = documents.of_roles("person", "company")
             field = self.fields["document"]
-            field.label = documents.label("pessoa", "empresa")
+            field.label = documents.label("person", "company")
             field.widget.attrs["placeholder"] = " · ".join(d.example for d in self.clinic_documents)
 
     def clean_document(self):

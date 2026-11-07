@@ -19,7 +19,7 @@ from apps.audit.record import log_event
 from . import services
 from .forms import CodeForm, DisableTwoFactorForm, LoginForm, NewPasswordForm, RecoverPasswordForm
 
-PENDING = "duas_etapas_pendente"
+PENDING = "two_factor_pending"
 PENDING_VALIDITY = 5 * 60  # seconds to type the code after the password
 CODE_ATTEMPTS = 5
 
@@ -35,8 +35,8 @@ class ClinicLoginView(auth_views.LoginView):
         self.request.session[PENDING] = {
             "usuario": user.pk,
             "backend": user.backend,
-            "momento": time.time(),
-            "tentativas": 0,
+            "time": time.time(),
+            "attempts": 0,
             "proximo": self.get_success_url(),
         }
         return redirect("account:code")
@@ -46,7 +46,7 @@ class ClinicLoginView(auth_views.LoginView):
         errors = context["form"].non_field_errors().as_data()
         return {
             **context,
-            "address_locked": any(e.code == "endereco_bloqueado" for e in errors),
+            "address_locked": any(e.code == "address_locked" for e in errors),
             "recovery_by_email": settings.PASSWORD_RECOVERY_BY_EMAIL,
             "idle": self.request.GET.get("idle") == "1",
             "minutos": settings.IDLE_MINUTES,
@@ -56,7 +56,7 @@ class ClinicLoginView(auth_views.LoginView):
 def code(request):
     """Second step of the login: the 6-digit code of the app or a recovery code."""
     pending_login = request.session.get(PENDING)
-    if not pending_login or time.time() - pending_login["momento"] > PENDING_VALIDITY:
+    if not pending_login or time.time() - pending_login["time"] > PENDING_VALIDITY:
         request.session.pop(PENDING, None)
         messages.info(request, _("Entre de novo com o usuário e a senha."))
         return redirect("login")
@@ -71,8 +71,8 @@ def code(request):
         user_login_failed.send(
             sender=__name__, credentials={"username": user.get_username()}, request=request
         )
-        pending_login["tentativas"] += 1
-        if pending_login["tentativas"] >= CODE_ATTEMPTS:
+        pending_login["attempts"] += 1
+        if pending_login["attempts"] >= CODE_ATTEMPTS:
             del request.session[PENDING]
             messages.error(request, _("Muitos códigos errados. Entre de novo."))
             return redirect("login")
@@ -105,11 +105,11 @@ def two_factor(request):
             None
             if is_required
             else DisableTwoFactorForm(
-                request.POST if action == "desativar" else None, user=user, prefix="disable"
+                request.POST if action == "disable" else None, user=user, prefix="disable"
             )
         )
         new_ones = CodeForm(request.POST if action == "codigos" else None, prefix="codes")
-        if action == "desativar" and deactivate is not None and deactivate.is_valid():
+        if action == "disable" and deactivate is not None and deactivate.is_valid():
             services.deactivate(user)
             log_event(
                 AuditEntry.Action.CHANGE,
@@ -139,8 +139,8 @@ def two_factor(request):
             },
         )
     device = services.prepare(user, new=request.GET.get("new") == "1")
-    form = CodeForm(request.POST if action == "ativar" else None)
-    if action == "ativar" and form.is_valid():
+    form = CodeForm(request.POST if action == "enable" else None)
+    if action == "enable" and form.is_valid():
         if services.verify_app(device, form.cleaned_data["code"]):
             codes = services.activate(device)
             log_event(

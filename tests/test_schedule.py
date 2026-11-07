@@ -215,12 +215,14 @@ def test_delete_one_or_the_series_from_then_on(scenario, create_user, client_for
     created_list = appointment_list(scenario)
     admin = client_for(create_user("admin", scenario["clinic"], Role.ADMIN))
 
-    admin.post(reverse("schedule:delete", args=[created_list[0].pk]), {"scope": "este"})
+    admin.post(reverse("schedule:delete", args=[created_list[0].pk]), {"scope": "this"})
     assert len(appointment_list(scenario)) == 3
 
     page = admin.get(reverse("schedule:delete", args=[created_list[1].pk])).content.decode()
     assert "os próximos 2" in page
-    response = admin.post(reverse("schedule:delete", args=[created_list[1].pk]), {"scope": "serie"})
+    response = admin.post(
+        reverse("schedule:delete", args=[created_list[1].pk]), {"scope": "series"}
+    )
     assert json.loads(response["HX-Trigger"])["scheduleUpdated"]["message"] == (
         "3 agendamentos excluídos."
     )

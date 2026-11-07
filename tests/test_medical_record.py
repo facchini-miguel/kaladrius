@@ -105,7 +105,7 @@ def test_register_save_and_finalize(scenario):
     assert response.url == reverse("medical_records:visit", args=[visit.pk])
 
     url = reverse("medical_records:visit", args=[visit.pk])
-    scenario["dra"].post(url, {**ANAMNESIS, "plan": "Retorno em 15 dias", "action": "finalizar"})
+    scenario["dra"].post(url, {**ANAMNESIS, "plan": "Retorno em 15 dias", "action": "finalize"})
     visit.refresh_from_db()
     assert visit.is_finalized and visit.plan == "Retorno em 15 dias"
 
@@ -173,7 +173,7 @@ def test_print_only_after_finalized(scenario):
     assert url not in page.content.decode()
     scenario["dra"].post(
         reverse("medical_records:visit", args=[visit.pk]),
-        {**ANAMNESIS, "action": "finalizar"},
+        {**ANAMNESIS, "action": "finalize"},
     )
     printout = scenario["dr"].get(url)
     content = printout.content.decode()
@@ -315,7 +315,7 @@ def test_attachment_removed_only_by_uploader_before_finalizing(scenario):
     assert scenario["dr"].post(remove_(first)).status_code == 403
     scenario["dra"].post(remove_(first))
     scenario["dra"].post(
-        reverse("medical_records:visit", args=[visit.pk]), {**ANAMNESIS, "action": "finalizar"}
+        reverse("medical_records:visit", args=[visit.pk]), {**ANAMNESIS, "action": "finalize"}
     )
     assert scenario["dra"].post(remove_(second_one)).status_code == 403
     with use_clinic(scenario["clinic"]):
@@ -353,7 +353,7 @@ def test_system_admin_sees_and_does_everything(scenario, django_user_model):
         == 302
     )
 
-    root.post(url, {**ANAMNESIS, "action": "finalizar"})
+    root.post(url, {**ANAMNESIS, "action": "finalize"})
     response = root.post(
         reverse("medical_records:certificate_new", args=[visit.pk]),
         {

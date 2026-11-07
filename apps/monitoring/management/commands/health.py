@@ -8,6 +8,7 @@ from apps.core.models import Backup
 from apps.monitoring import health
 
 # The report keeps its Portuguese words (it was written with the old internal names).
+LEVEL_NAMES = {"critical": "critico", "warning": "atencao"}
 LABELS = {"cpu": "cpu", "memory": "memoria", "swap": "swap", "disk": "disco"}
 
 
@@ -40,7 +41,7 @@ class Command(BaseCommand):
                 f"{filesizeformat(summary['sent'])} enviados"
             )
             alerts = [
-                f"{LABELS[key]}: {level}"
+                f"{LABELS[key]}: {LEVEL_NAMES[level]}"
                 for key, level in health.levels(latest).items()
                 if level != "ok"
             ]

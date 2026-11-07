@@ -19,7 +19,7 @@
       <div class="card-body">
         <dl class="row mb-0">
           <dt class="col-sm-5">{% translate "Cargo" %}</dt><dd class="col-sm-7">{{ employee.job_title|default:"—" }}</dd>
-          {% if country_documents.funcionario or employee.tax_id %}<dt class="col-sm-5">{{ employee.tax_id|document_abbreviation:"funcionario" }}</dt><dd class="col-sm-7">{{ employee.tax_id|document:"funcionario"|default:"—" }}</dd>{% endif %}
+          {% if country_documents.employee or employee.tax_id %}<dt class="col-sm-5">{{ employee.tax_id|document_abbreviation:"employee" }}</dt><dd class="col-sm-7">{{ employee.tax_id|document:"employee"|default:"—" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Admissão" %}</dt><dd class="col-sm-7">{{ employee.hired_on|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
           {% if employee.left_on %}<dt class="col-sm-5">{% translate "Desligamento" %}</dt><dd class="col-sm-7">{{ employee.left_on|date:"SHORT_DATE_FORMAT" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ employee.phone|phone|default:"—" }}</dd>

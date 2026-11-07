@@ -140,7 +140,7 @@ class Patient(ClinicModel):
     @property
     def document_role(self):
         """Its document's role in apps/core/identification.py."""
-        return "empresa" if self.kind == self.Kind.COMPANY else "paciente"
+        return "company" if self.kind == self.Kind.COMPANY else "patient"
 
     @property
     def age(self):

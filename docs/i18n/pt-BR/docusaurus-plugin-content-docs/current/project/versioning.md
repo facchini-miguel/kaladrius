@@ -26,7 +26,7 @@ O arquivo [`../../releases.yaml`](https://github.com/facchini-miguel/kaladrius/b
 - o número da versão exibido no rodapé do sistema;
 - as *Releases* do GitHub, em inglês (comando `release_notes`).
 
-Os textos das novidades são escritos nos **três idiomas da interface** (`pt-br`, `en`, `es`; decisão 049). Os nomes dos campos são em inglês (decisão 189); os valores (`novo`, `equipe`, os módulos) ficam em português.
+Os textos das novidades são escritos nos **três idiomas da interface** (`pt-br`, `en`, `es`; decisão 049). Os nomes dos campos são em inglês (decisão 189); os valores também (`new`, `staff`; decisão 199), e os módulos são textos das telas, traduzidos.
 
 ### Formato
 
@@ -38,9 +38,9 @@ Os textos das novidades são escritos nos **três idiomas da interface** (`pt-br
     en: Recall reminders in the app
     es: Recordatorios de regreso en la app
   items:
-    - kind: novo            # novo | melhoria | correcao | seguranca
+    - kind: new             # new | improvement | fix | security
       module: Rechamadas    # um dos nomes de MODULES em apps/whats_new/releases.py
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text:
         pt-br: >
           O paciente recebe no celular um aviso 7 dias antes da data de retorno.
@@ -55,9 +55,9 @@ Os textos das novidades são escritos nos **três idiomas da interface** (`pt-br
 | `version` | sim | Número no formato `MAIOR.MENOR.CORREÇÃO` |
 | `date` | sim | Data da publicação (AAAA-MM-DD) |
 | `title` | não | Destaque da versão, numa frase, nos três idiomas |
-| `items[].kind` | sim | `novo`, `melhoria`, `correcao` ou `seguranca` |
+| `items[].kind` | sim | `new` (novo), `improvement` (melhoria), `fix` (correção) ou `security` (segurança) |
 | `items[].module` | sim | Área do sistema (Agenda, Pacientes…), em português; a tela mostra a tradução |
-| `items[].audience` | sim | Quem vê o item: `equipe`, `paciente` ou ambos |
+| `items[].audience` | sim | Quem vê o item: `staff` (equipe), `patient` (paciente) ou ambos |
 | `items[].source` | não | `dependabot` para uma atualização proposta pelo Dependabot; fica de fora nas mudanças do próprio projeto (decisão 133) |
 | `items[].pr` | com `source` | Número do pull request; a página e a release do GitHub apontam para ele |
 | `items[].text` | sim | **Poucas linhas**, em linguagem de usuário: o que mudou e como usar. Um texto por idioma (`pt-br`, `en`, `es`); um teste exige os três |
@@ -67,7 +67,7 @@ Os textos das novidades são escritos nos **três idiomas da interface** (`pt-br
 - No máximo 3 linhas por item.
 - Correções de segurança não descrevem a falha, só que foi corrigida.
 - Itens só internos (infraestrutura, refatoração) não entram, ou entram com `audience: []`, e aí não aparecem para ninguém.
-- Pacientes só veem itens com `paciente` em `audience`.
+- Pacientes só veem itens com `patient` em `audience`.
 - Todo item de um pull request do Dependabot tem `source: dependabot` e o `pr`: as Novidades mostram o selo "Dependabot · #N" e a release do GitHub acrescenta "(Dependabot, #N)", para separar as mudanças do titular das do Dependabot.
 
 ## Como aparece
@@ -77,7 +77,7 @@ Os textos das novidades são escritos nos **três idiomas da interface** (`pt-br
 **App:** tela **Novidades** no menu e, ao abrir uma versão nova pela primeira vez, um resumo "O que há de novo". Usa o endpoint:
 
 ```
-GET /api/v1/releases?since=1.4.0&audience=paciente
+GET /api/v1/releases?since=1.4.0&audience=patient
 ```
 
 ## Processo para publicar uma versão

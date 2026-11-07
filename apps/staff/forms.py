@@ -60,7 +60,7 @@ class EmployeeForm(BootstrapForm, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # None in Australia: the law restricts who may record the tax file number.
-        self.document = identification.for_country().funcionario
+        self.document = identification.for_country().employee
         if self.document is None:
             del self.fields["tax_id"]
         else:

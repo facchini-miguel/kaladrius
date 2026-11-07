@@ -36,9 +36,9 @@ def new_data(**extra):
 
 
 def edit_data(role=Role.FRONT_DESK, active=True, **account):
-    data = {"vinculo-role": role, **{f"conta-{k}": v for k, v in account.items()}}
+    data = {"membership-role": role, **{f"account-{k}": v for k, v in account.items()}}
     if active:
-        data["vinculo-active"] = "on"
+        data["membership-active"] = "on"
     return data
 
 

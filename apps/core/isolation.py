@@ -15,8 +15,8 @@ from contextvars import ContextVar
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-_current_clinic = ContextVar("clinica_atual", default=None)
-_isolation_off = ContextVar("isolamento_desligado", default=False)
+_current_clinic = ContextVar("current_clinic", default=None)
+_isolation_off = ContextVar("isolation_off", default=False)
 
 
 class NoCurrentClinic(RuntimeError):

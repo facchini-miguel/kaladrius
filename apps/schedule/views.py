@@ -72,7 +72,7 @@ def delete_appointment_type(request, pk):
 
 # --- Schedule ----------------------------------------------------------------------
 
-SESSION_PRACTITIONER = "agenda_profissional"
+SESSION_PRACTITIONER = "schedule_practitioner"
 # The week last looked at, as in the legacy system: leaving the schedule and coming back
 # shows it again. Only on the same day; the next day the schedule opens on today.
 SESSION_DATE = "agenda_data"
@@ -169,7 +169,7 @@ def events(request):
     period = _range(request)
     practitioner = request.GET.get("practitioner", "")
     if period is None or not practitioner.isdecimal():
-        return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
+        return JsonResponse({"error": _("Parâmetros inválidos.")}, status=400)
     start, end = period
     # The middle of the visible range falls inside the week (or month) on the screen; when the
     # range holds today, today: the day view, the first one on a phone, then opens on it.
@@ -313,7 +313,7 @@ def delete_appointment(request, pk):
     )
     if request.method == "POST":
         excluded = Appointment.objects.filter(pk=appointment.pk)
-        if request.POST.get("scope") == "serie" and appointment.series:
+        if request.POST.get("scope") == "series" and appointment.series:
             # This one and the following ones of the same series.
             excluded = Appointment.objects.filter(
                 series=appointment.series, start__gte=appointment.start
@@ -353,7 +353,7 @@ def birthdays(request):
     """Number of birthdays per day in the period shown by the calendar."""
     period = _range(request)
     if period is None:
-        return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
+        return JsonResponse({"error": _("Parâmetros inválidos.")}, status=400)
     start = timezone.localdate(period[0])
     total_days = (timezone.localdate(period[1]) - start).days
     days = [start + datetime.timedelta(days=n) for n in range(total_days)]

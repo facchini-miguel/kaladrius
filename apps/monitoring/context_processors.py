@@ -16,6 +16,6 @@ def health_alert(request):
         return {"health_alert": {"stopped": latest["time"]}}
     # Not the processor: a busy moment is normal, and it does not break anything by itself.
     critical = [
-        key for key, level in health.levels(latest).items() if level == "critico" and key != "cpu"
+        key for key, level in health.levels(latest).items() if level == "critical" and key != "cpu"
     ]
     return {"health_alert": {"critical": critical}} if critical else {}

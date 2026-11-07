@@ -15,10 +15,10 @@ from django.utils.translation import get_language, gettext, gettext_noop
 from django.utils.translation import gettext_lazy as _
 
 KINDS = {
-    "novo": _("Novo"),
-    "melhoria": _("Melhoria"),
-    "correcao": _("Correção"),
-    "seguranca": _("Segurança"),
+    "new": _("Novo"),
+    "improvement": _("Melhoria"),
+    "fix": _("Correção"),
+    "security": _("Segurança"),
 }
 # Modules named in releases.yaml, translated when shown (tests check every one is here).
 MODULES = [
@@ -48,7 +48,7 @@ MODULES = [
     gettext_noop("Tipos de atendimento"),
 ]
 SOURCE_LANGUAGE = "pt-br"
-AUDIENCES = {"equipe", "paciente"}
+AUDIENCES = {"staff", "patient"}
 # Where an item came from (decision 133): no `origem` is a change made by the project; Dependabot
 # items carry the number of their pull request, so owner and readers tell them apart.
 SOURCES = {"dependabot": "Dependabot"}
@@ -231,7 +231,7 @@ def current_version():
     return all_releases()[0].version
 
 
-def has_news_for(last_seen, audience="equipe"):
+def has_news_for(last_seen, audience="staff"):
     """Whether there are release notes for the audience newer than the last version seen."""
     try:
         return bool(for_audience(audience, since=last_seen or None))

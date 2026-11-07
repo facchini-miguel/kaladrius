@@ -11,7 +11,7 @@
   {% endif %}
 </div>
 
-{% document_label "paciente" "empresa" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Nome, código ou {{ documentos }}{% endblocktranslate %}
+{% document_label "patient" "company" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Nome, código ou {{ documentos }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-6">
     <input type="search" name="q" value="{{ search }}" class="form-control" autofocus
@@ -27,11 +27,11 @@
   </div>
   <div class="col-6 col-md-2">
     <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
-      <option value="ativos"{% if status == "ativos" %} selected{% endif %}>{% translate "Ativos" %}</option>
-      <option value="inativos"{% if status == "inativos" %} selected{% endif %}>{% translate "Inativos" %}</option>
-      <option value="todos"{% if status == "todos" %} selected{% endif %}>{% translate "Todos" %}</option>
+      <option value="active"{% if status == "active" %} selected{% endif %}>{% translate "Ativos" %}</option>
+      <option value="inactive"{% if status == "inactive" %} selected{% endif %}>{% translate "Inativos" %}</option>
+      <option value="all"{% if status == "all" %} selected{% endif %}>{% translate "Todos" %}</option>
       {% if can.patients.delete %}
-      <option value="arquivados"{% if status == "arquivados" %} selected{% endif %}>{% translate "Arquivados" %}</option>
+      <option value="archived"{% if status == "archived" %} selected{% endif %}>{% translate "Arquivados" %}</option>
       {% endif %}
     </select>
   </div>
@@ -47,7 +47,7 @@
       <tr>
         <th>{% translate "Código" %}</th>
         <th>{% translate "Nome" %}</th>
-        <th>{% document_label "paciente" "empresa" %}</th>
+        <th>{% document_label "patient" "company" %}</th>
         <th>{% translate "Telefone" %}</th>
         <th>{% translate "Cidade" %}</th>
         <th>{% translate "Idade" %}</th>

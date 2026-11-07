@@ -22,20 +22,20 @@ EXAMPLE = """
   date: 2027-03-10
   title: Lembretes
   items:
-    - kind: novo
+    - kind: new
       module: Rechamadas
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text: Aviso no celular.
-    - kind: melhoria
+    - kind: improvement
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text: Agenda mais rápida.
 - version: 1.4.7
   date: 2027-02-01
   items:
-    - kind: correcao
+    - kind: fix
       module: Agenda
-      audience: [equipe]
+      audience: [staff]
       text: Corrigido horário de verão.
 """
 
@@ -71,10 +71,10 @@ def test_reading_and_filtering_by_audience(file_path, settings):
     releases.all_releases.cache_clear()
     try:
         assert releases.current_version() == "1.5.0"
-        patient = releases.for_audience("paciente")
+        patient = releases.for_audience("patient")
         assert [r.version for r, _ in patient] == ["1.5.0"]
         assert [i.module for i in patient[0][1]] == ["Rechamadas"]
-        staff_since = releases.for_audience("equipe", since="1.4.7")
+        staff_since = releases.for_audience("staff", since="1.4.7")
         assert [r.version for r, _ in staff_since] == ["1.5.0"]
     finally:
         releases.all_releases.cache_clear()
@@ -86,36 +86,36 @@ def test_reading_and_filtering_by_audience(file_path, settings):
         ("- version: 1.0\n  date: 2027-01-01\n  items: []", "formato"),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
-            "    - {kind: x, module: A, audience: [equipe], text: t}",
+            "    - {kind: x, module: A, audience: [staff], text: t}",
             "tipo",
         ),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
-            "    - {kind: novo, module: A, audience: [todos], text: t}",
+            "    - {kind: new, module: A, audience: [todos], text: t}",
             "audience",
         ),
         # The format before decision 189 is refused, naming the field.
         ("- versao: 1.0.0\n  date: 2027-01-01\n  items: []", "desconhecido.*versao"),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
-            "    - {tipo: novo, module: A, audience: [equipe], text: t}",
+            "    - {tipo: new, module: A, audience: [staff], text: t}",
             "desconhecido.*tipo",
         ),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
-            "    - {kind: novo, module: A, audience: [equipe], text: t, source: robo, pr: 1}",
+            "    - {kind: new, module: A, audience: [staff], text: t, source: robo, pr: 1}",
             "origem",
         ),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
-            "    - {kind: novo, module: A, audience: [equipe], text: t, source: dependabot}",
+            "    - {kind: new, module: A, audience: [staff], text: t, source: dependabot}",
             "pr",
         ),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
-            "    - {kind: novo, module: A, audience: [equipe], text: t}\n"
+            "    - {kind: new, module: A, audience: [staff], text: t}\n"
             "- version: 1.1.0\n  date: 2027-01-02\n  items:\n"
-            "    - {kind: novo, module: A, audience: [equipe], text: t}",
+            "    - {kind: new, module: A, audience: [staff], text: t}",
             "Ordem",
         ),
     ],
@@ -142,11 +142,11 @@ def test_whats_new_page_requires_login(client):
 
 @pytest.mark.django_db
 def test_api_releases(client):
-    response = client.get("/api/v1/releases?audience=paciente")
+    response = client.get("/api/v1/releases?audience=patient")
     assert response.status_code == 200
     data = response.json()
     # Only versions with patient-facing items are returned, newest first.
-    expected_ones = [release.version for release, _ in releases.for_audience("paciente")]
+    expected_ones = [release.version for release, _ in releases.for_audience("patient")]
     assert [version["version"] for version in data] == expected_ones
     assert set(data[0]) == {"version", "date", "title", "items"}
     assert set(data[0]["items"][0]) == {"kind", "kind_name", "module", "text", "source", "pr"}
@@ -158,7 +158,7 @@ def test_api_releases(client):
 @pytest.mark.django_db
 def test_api_releases_filters(client):
     since = releases.all_releases()[3].version
-    staff = client.get(f"/api/v1/releases?audience=equipe&since={since}").json()
+    staff = client.get(f"/api/v1/releases?audience=staff&since={since}").json()
     assert 0 < len(staff) <= 3
     assert client.get("/api/v1/releases?audience=todos").status_code == 422
 
@@ -179,15 +179,15 @@ DEPENDABOT = """
 - version: 2.0.0
   date: 2027-05-01
   items:
-    - kind: seguranca
+    - kind: security
       module: Sistema
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       source: dependabot
       pr: 42
       text: Biblioteca atualizada.
-    - kind: novo
+    - kind: new
       module: Agenda
-      audience: [equipe, paciente]
+      audience: [staff, patient]
       text: Feito pelo projeto.
 """
 
@@ -208,7 +208,7 @@ def test_dependabot_items_show_marked(file_path, settings, client, django_user_m
         assert 'href="https://github.com/facchini-miguel/kaladrius/pull/42"' in page
         assert 'target="_blank" rel="noopener noreferrer"' in page  # opens in a new tab
         assert "Dependabot · #42" in page and page.count("Dependabot ·") == 1
-        data = client.get("/api/v1/releases?audience=paciente").json()
+        data = client.get("/api/v1/releases?audience=patient").json()
         assert [(i["source"], i["pr"]) for i in data[0]["items"]] == [
             ("Dependabot", 42),
             (None, None),

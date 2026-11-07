@@ -115,7 +115,7 @@ def test_password_is_never_stored(create_user):
     text = " ".join(str(r.changes) for r in records)
     assert "argon2" not in text and "nova-senha" not in text
     [change] = records.filter(action=Action.CHANGE)
-    assert change.changes == {"senha": ["(oculta)", "(alterada)"]}
+    assert change.changes == {"password": ["hidden", "changed"]}
 
 
 def test_screen_shows_only_the_current_clinic(admin_a, clinic_a, clinic_b):

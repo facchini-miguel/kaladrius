@@ -100,9 +100,9 @@ def test_levels_and_stopped_collection(folder):
     latest = health.latest()
     assert health.levels(latest) == {
         "cpu": "ok",
-        "memory": "critico",
-        "swap": "atencao",
-        "disk": "critico",
+        "memory": "critical",
+        "swap": "warning",
+        "disk": "critical",
     }
     assert health.stopped(latest)
 
