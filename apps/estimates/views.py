@@ -39,7 +39,7 @@ def _estimates():
 def _open_estimate(request, pk):
     estimate = get_object_or_404(_estimates(), pk=pk)
     if estimate.status != Estimate.Status.OPEN:
-        messages.error(request, _("Este orçamento já foi aprovado ou recusado."))
+        messages.error(request, _("This estimate was already approved or refused."))
         return None, redirect("estimates:detail", pk=estimate.pk)
     return estimate, None
 
@@ -93,7 +93,7 @@ def new_estimate(request):
     if request.method == "POST" and form.is_valid():
         form.instance.created_by = request.user
         estimate = form.save()
-        messages.success(request, _("Orçamento criado. Agora inclua os procedimentos."))
+        messages.success(request, _("Estimate created. Now add the procedures."))
         return redirect("estimates:detail", pk=estimate.pk)
     patient_amount = form["patient"].value()
     patient = (
@@ -112,7 +112,7 @@ def edit_estimate(request, pk):
     form = EstimateForm(request.POST or None, instance=estimate)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Orçamento salvo."))
+        messages.success(request, _("Estimate saved."))
         return redirect("estimates:detail", pk=estimate.pk)
     return render(
         request,
@@ -176,7 +176,7 @@ def add_item(request, pk):
         except ValidationError as error:
             messages.error(request, error.messages[0])
         else:
-            messages.success(request, _("Item incluído."))
+            messages.success(request, _("Item added."))
     else:
         errors = [str(error) for estimate_list in form.errors.values() for error in estimate_list]
         messages.error(request, " ".join(errors))
@@ -198,7 +198,7 @@ def remove_item(request, pk, item):
     except ValidationError as error:
         messages.error(request, error.messages[0])
     else:
-        messages.success(request, _("Item removido."))
+        messages.success(request, _("Item removed."))
     return redirect("estimates:detail", pk=estimate.pk)
 
 
@@ -212,11 +212,11 @@ def discount(request, pk):
     if form.is_valid():
         value = form.cleaned_data["discount"] or 0
         if value > estimate.subtotal:
-            messages.error(request, _("O desconto passa do total do orçamento."))
+            messages.error(request, _("The discount exceeds the estimate total."))
         else:
             estimate.discount = value
             estimate.save()
-            messages.success(request, _("Desconto aplicado."))
+            messages.success(request, _("Discount applied."))
     return redirect("estimates:detail", pk=estimate.pk)
 
 
@@ -251,7 +251,7 @@ def approve(request, pk):
         except ValidationError as error:
             form.add_error(None, error.messages[0])
         else:
-            messages.success(request, _("Orçamento aprovado e lançado em A receber."))
+            messages.success(request, _("Estimate approved and added to Receivables."))
             return redirect("finance:entry", pk=entry.pk)
     return render(request, "estimates/approve.html", {"form": form, "estimate": estimate})
 
@@ -267,7 +267,7 @@ def refuse(request, pk):
     except ValidationError as error:  # approved or refused by someone else a moment ago
         messages.error(request, error.messages[0])
     else:
-        messages.success(request, _("Orçamento marcado como recusado."))
+        messages.success(request, _("Estimate marked as refused."))
     return redirect("estimates:detail", pk=estimate.pk)
 
 
@@ -299,7 +299,7 @@ def procedure_form(request, pk=None):
     form = ProcedureForm(request.POST or None, instance=procedure)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Procedimento %(nome)s salvo.") % {"nome": form.instance.name})
+        messages.success(request, _("Procedure %(nome)s saved.") % {"nome": form.instance.name})
         return redirect("estimates:procedures")
     return render(
         request,

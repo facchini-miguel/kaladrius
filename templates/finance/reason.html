@@ -9,8 +9,8 @@
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <p class="text-body-secondary small">{% translate "Nada é apagado: o registro fica marcado, com o motivo, e aparece na auditoria." %}</p>
+  <p class="text-body-secondary small">{% translate "Nothing is deleted: the record is marked, with the reason, and shows in the audit log." %}</p>
   <button type="submit" class="btn btn-danger">{{ title }}</button>
-  <a class="btn btn-link" href="{% url 'finance:entry' back_entry %}">{% translate "Voltar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:entry' back_entry %}">{% translate "Back" %}</a>
 </form>
 {% endblock %}

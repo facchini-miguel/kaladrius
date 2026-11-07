@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Ficha cadastral" %} · {{ patient.name }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Registration sheet" %} · {{ patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
-  <button type="button" class="btn btn-primary" data-print>{% translate "Imprimir ou salvar em PDF" %}</button>
-  <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Voltar" %}</a>
+  <button type="button" class="btn btn-primary" data-print>{% translate "Print or save as PDF" %}</button>
+  <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Back" %}</a>
 </div>
 <div class="receipt bg-white border rounded p-4" style="max-width: 56rem;">
   <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
@@ -17,8 +17,8 @@
       {% if current_clinic.phone %}<div class="small">{{ current_clinic.phone }}</div>{% endif %}
     </div>
     <div class="text-end">
-      <div class="fs-4 fw-semibold">{% translate "FICHA CADASTRAL" %}</div>
-      <div class="small">{% translate "Código" %} {{ patient.pk }} · {{ today|date:"SHORT_DATE_FORMAT" }}</div>
+      <div class="fs-4 fw-semibold">{% translate "REGISTRATION SHEET" %}</div>
+      <div class="small">{% translate "Code" %} {{ patient.pk }} · {{ today|date:"SHORT_DATE_FORMAT" }}</div>
     </div>
   </div>
 
@@ -27,28 +27,28 @@
     <div class="col-12 col-sm-6">
       <dl class="row mb-0 small">
         {% if patient.kind == "company" %}
-        <dt class="col-5">{% translate "Razão social" %}</dt><dd class="col-7">{{ patient.legal_name|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Company name" %}</dt><dd class="col-7">{{ patient.legal_name|default:"—" }}</dd>
         {% if country_documents.company or patient.tax_id %}<dt class="col-5">{{ patient.tax_id|document_abbreviation:"company" }}</dt><dd class="col-7">{{ patient.tax_id|document:"company"|default:"—" }}</dd>{% endif %}
-        {% if in_brazil or patient.state_registration %}<dt class="col-5">{% translate "Inscrição estadual" %}</dt><dd class="col-7">{{ patient.state_registration|default:"—" }}</dd>{% endif %}
+        {% if in_brazil or patient.state_registration %}<dt class="col-5">{% translate "State registration" %}</dt><dd class="col-7">{{ patient.state_registration|default:"—" }}</dd>{% endif %}
         {% else %}
         {% if country_documents.patient or patient.tax_id %}<dt class="col-5">{{ patient.tax_id|document_abbreviation:"patient" }}</dt><dd class="col-7">{{ patient.tax_id|document:"patient"|default:"—" }}</dd>{% endif %}
-        {% if in_brazil or patient.rg %}<dt class="col-5">{% translate "RG" %}</dt><dd class="col-7">{{ patient.rg|default:"—" }}</dd>{% endif %}
-        <dt class="col-5">{% translate "Nascimento" %}</dt><dd class="col-7">{{ patient.birth_date|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Sexo" %}</dt><dd class="col-7">{{ patient.get_sex_display|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Estado civil" %}</dt><dd class="col-7">{{ patient.marital_status|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Profissão" %}</dt><dd class="col-7">{{ patient.occupation|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Responsável" %}</dt><dd class="col-7">{{ patient.guardian|default:"—" }}</dd>
+        {% if in_brazil or patient.rg %}<dt class="col-5">{% translate "ID card (RG)" %}</dt><dd class="col-7">{{ patient.rg|default:"—" }}</dd>{% endif %}
+        <dt class="col-5">{% translate "Birth date" %}</dt><dd class="col-7">{{ patient.birth_date|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Sex" %}</dt><dd class="col-7">{{ patient.get_sex_display|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Marital status" %}</dt><dd class="col-7">{{ patient.marital_status|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Occupation" %}</dt><dd class="col-7">{{ patient.occupation|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Guardian" %}</dt><dd class="col-7">{{ patient.guardian|default:"—" }}</dd>
         {% endif %}
       </dl>
     </div>
     <div class="col-12 col-sm-6">
       <dl class="row mb-0 small">
-        <dt class="col-5">{% translate "Celular" %}</dt><dd class="col-7">{{ patient.mobile_phone|phone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Mobile" %}</dt><dd class="col-7">{{ patient.mobile_phone|phone|default:"—" }}</dd>
         <dt class="col-5">{% translate "WhatsApp" %}</dt><dd class="col-7">{{ patient.whatsapp|phone|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Residencial" %}</dt><dd class="col-7">{{ patient.home_phone|phone|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Comercial" %}</dt><dd class="col-7">{{ patient.work_phone|phone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Home" context "phone" %}</dt><dd class="col-7">{{ patient.home_phone|phone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Work" %}</dt><dd class="col-7">{{ patient.work_phone|phone|default:"—" }}</dd>
         <dt class="col-5">{% translate "E-mail" %}</dt><dd class="col-7">{{ patient.email|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Endereço" %}</dt>
+        <dt class="col-5">{% translate "Address" %}</dt>
         <dd class="col-7">
           {% if patient.street %}{{ patient.street }}{% if patient.number %}, {{ patient.number }}{% endif %}{% if patient.complement %} - {{ patient.complement }}{% endif %}<br>{% endif %}
           {% if patient.neighborhood %}{{ patient.neighborhood }}<br>{% endif %}
@@ -61,9 +61,9 @@
   </div>
 
   {% if plan_cards %}
-  <h2 class="h6 mt-3">{% translate "Convênios" %}</h2>
+  <h2 class="h6 mt-3">{% translate "Health plans" %}</h2>
   <table class="table table-sm small">
-    <thead><tr><th>{% translate "Convênio" %}</th><th>{% translate "Plano" %}</th><th>{% translate "Número da carteirinha" %}</th><th>{% translate "Validade" %}</th><th>{% translate "Titular" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Health plan" %}</th><th>{% translate "Plan type" %}</th><th>{% translate "Card number" %}</th><th>{% translate "Valid until" %}</th><th>{% translate "Holder" %}</th></tr></thead>
     <tbody>
       {% for plan_card in plan_cards %}
       <tr><td>{{ plan_card.health_plan.name }}</td><td>{{ plan_card.plan|default:"—" }}</td><td>{{ plan_card.number }}</td><td>{{ plan_card.valid_until|date:"SHORT_DATE_FORMAT"|default:"—" }}</td><td>{{ plan_card.holder|default:"—" }}</td></tr>
@@ -73,9 +73,9 @@
   {% endif %}
 
   {% if related_people %}
-  <h2 class="h6 mt-3">{% translate "Pessoas relacionadas" %}</h2>
+  <h2 class="h6 mt-3">{% translate "Related people" %}</h2>
   <table class="table table-sm small">
-    <thead><tr><th>{% translate "Vínculo" %}</th><th>{% translate "Nome" %}</th><th>{% translate "Telefone" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Relationship" %}</th><th>{% translate "Name" %}</th><th>{% translate "Phone" %}</th></tr></thead>
     <tbody>
       {% for related in related_people %}
       <tr><td>{{ related.get_relationship_display }}</td><td>{{ related.display_name }}</td><td>{{ related.display_phone|phone|default:"—" }}</td></tr>
@@ -85,12 +85,12 @@
   {% endif %}
 
   {% if patient.notes %}
-  <h2 class="h6 mt-3">{% translate "Observações" %}</h2>
+  <h2 class="h6 mt-3">{% translate "Notes" %}</h2>
   <p class="small">{{ patient.notes|linebreaksbr }}</p>
   {% endif %}
 
   <div class="row mt-5 pt-4 small text-center">
-    <div class="col-6 offset-3 border-top pt-1">{% translate "Assinatura do paciente ou responsável" %}</div>
+    <div class="col-6 offset-3 border-top pt-1">{% translate "Signature of the patient or guardian" %}</div>
   </div>
 </div>
 {% endblock %}

@@ -88,15 +88,15 @@ def mark(appointment, status):
     slot back, so it is refused if another appointment took it meanwhile.
     """
     if status not in Appointment.Status.values:
-        raise ValidationError(_("Situação inválida."))
+        raise ValidationError(_("Invalid status."))
     if appointment.patient_id is None:
-        raise ValidationError(_("Só agendamentos com paciente têm situação."))
+        raise ValidationError(_("Only appointments with a patient have a status."))
     attendance = (Appointment.Status.ATTENDED, Appointment.Status.MISSED)
     if status in attendance and not appointment.attendance_markable:
         raise ValidationError(
-            _("Comparecimento e falta só podem ser marcados a partir do dia do atendimento.")
+            _("Came or missed can only be marked from the day of the appointment on.")
         )
-    busy = _("Este horário já foi ocupado por outro agendamento. Desmarque aquele antes.")
+    busy = _("This time slot has already been taken by another appointment. Cancel that one first.")
     if appointment.is_cancelled and status != Appointment.Status.CANCELLED:
         if conflicts(
             appointment.practitioner, [(appointment.start, appointment.end)], appointment.pk

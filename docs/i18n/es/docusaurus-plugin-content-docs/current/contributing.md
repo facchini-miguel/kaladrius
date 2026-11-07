@@ -24,14 +24,14 @@ docker compose exec app python manage.py makemigrations --check
 
 ## Convenciones
 
-- **Nombres en inglés** en el código nuevo (`Patient`, `Appointment`), **comentarios en inglés**; los textos de las pantallas en portugués, dentro de `_()`. Campos y funciones más antiguos aún tienen nombres en portugués (en renombrado, decisión 157).
-- **Carpetas y módulos de las apps con nombre en inglés** (`apps/patients/`, `apps/core/countries.py`). Cada app mantiene su **label** en portugués (`label = "pacientes"` en `apps.py`), el nombre con el que la conocen las tablas de la base de datos, las migraciones y los permisos, y los archivos de migración mantienen sus nombres: producción los tiene registrados (decisión 145).
+- **Todo nombre en inglés**: código, comentarios, códigos guardados en la base, URLs, campos de la API (decisiones 144 a 200). Una app nueva nace en inglés: su carpeta, su `label` (igual a la carpeta), modelos, campos y migraciones (decisión 193).
+- **Carpetas y módulos de las apps con nombre en inglés** (`apps/patients/`, `apps/core/countries.py`); el `label` de cada app es el nombre de su carpeta (decisión 195). Los nombres de los archivos de migración antiguos quedan como estaban.
 - **Comandos de gestión con nombre en inglés**, opciones incluidas (`python manage.py seed_sample_data --patients 50`) (decisión 148).
 - **Plantillas con nombre en inglés**, en una carpeta con el nombre de su app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); los nombres del propio Django se mantienen (`base.html`, `403.html`, `registration/login.html`) (decisión 146).
 - **Archivos de prueba con nombre en inglés**, según lo que prueban (`tests/test_patients.py`, `tests/test_schedule.py`), aunque el módulo probado tenga nombre en portugués (decisión 144). Las funciones de prueba también, diciendo lo que comprueban (`test_duplicate_cpf_refused_in_same_clinic_but_allowed_in_another`); los textos que la prueba busca en la pantalla siguen en portugués (decisión 181). Las fixtures, funciones auxiliares y variables de las pruebas también están en inglés (`clinic_a`, `create_user`, `client_for`, `scenario`; decisión 188), y los datos ficticios quedan en portugués (`"Maria Paciente"`).
-- **Todo texto de la pantalla** se escribe en portugués en el código y se traduce en `locale/en` y `locale/es`:
+- **Todo texto de la pantalla** se escribe en inglés en el código, dentro de `_()` o `{% translate %}`, y se traduce en `locale/pt_BR` y `locale/es` (decisión 200; el idioma predeterminado sigue siendo el portugués de Brasil):
   ```bash
-  docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests
+  docker compose exec app python manage.py makemessages -l pt_BR -l es --no-location --ignore=staticfiles --ignore=tests --ignore=docs
   ```
 - **Documentación en los tres idiomas:** todo está en este sitio (`docs/`): un cambio en una página de `docs/docs/` también cambia la misma página en `docs/i18n/pt-BR/` y `docs/i18n/es/`, en el mismo commit.
 - **Sin JavaScript incrustado en la página** (la Content Security Policy lo bloquea): los scripts van en `static/js/`.

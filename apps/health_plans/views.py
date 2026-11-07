@@ -39,7 +39,7 @@ def _health_plan_form(request, instance):
     form = HealthPlanForm(request.POST or None, instance=instance, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         health_plan = form.save()
-        messages.success(request, _("%(nome)s salvo.") % {"nome": health_plan.name})
+        messages.success(request, _("%(nome)s saved.") % {"nome": health_plan.name})
         return redirect("health_plans:list")
     return render(request, "health_plans/form.html", {"form": form, "instance": instance})
 
@@ -62,7 +62,7 @@ def _member_card_form(request, patient, instance):
     form = MemberCardForm(request.POST or None, instance=instance, patient=patient)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Carteirinha salva."))
+        messages.success(request, _("Card saved."))
         return redirect("patients:record", pk=patient.pk)
     return render(
         request,

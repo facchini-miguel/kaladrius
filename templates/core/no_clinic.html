@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Sem clínica" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "No clinic" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% translate "Nenhuma clínica disponível" %}</h1>
-<p>{% translate "Você não tem acesso a nenhuma clínica ativa: ainda não foi incluído na equipe ou o acesso foi retirado. Procure o administrador da sua clínica." %}</p>
-<p><a href="{% url 'home' %}">{% translate "Voltar ao início" %}</a></p>
+<h1 class="h3 mb-3">{% translate "No clinic available" %}</h1>
+<p>{% translate "You have no access to any active clinic: either you have not been added to the team yet or your access was removed. Please contact your clinic's administrator." %}</p>
+<p><a href="{% url 'home' %}">{% translate "Back to home" %}</a></p>
 {% endblock %}

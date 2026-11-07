@@ -28,7 +28,7 @@ class Country:
 
 COUNTRIES = {
     "BR": Country(
-        _("Brasil"),
+        _("Brazil"),
         "55",
         "BRL",
         (
@@ -46,7 +46,7 @@ COUNTRIES = {
     # Latin America (decision 120): Spanish with each country's numbers (1,234.56 in Mexico
     # and Peru, 1.234,56 in the others) and dates.
     "MX": Country(
-        _("México"),
+        _("Mexico"),
         "52",
         "MXN",
         (
@@ -77,16 +77,16 @@ COUNTRIES = {
         ("America/Santiago", "America/Punta_Arenas", "Pacific/Easter"),
         spanish="es-cl",
     ),
-    "CO": Country(_("Colômbia"), "57", "COP", ("America/Bogota",), spanish="es-co"),
+    "CO": Country(_("Colombia"), "57", "COP", ("America/Bogota",), spanish="es-co"),
     "PE": Country(_("Peru"), "51", "PEN", ("America/Lima",), spanish="es-pe"),
-    "UY": Country(_("Uruguai"), "598", "UYU", ("America/Montevideo",), spanish="es-uy"),
-    "PY": Country(_("Paraguai"), "595", "PYG", ("America/Asuncion",), spanish="es-py"),
-    "BO": Country(_("Bolívia"), "591", "BOB", ("America/La_Paz",), spanish="es-bo"),
+    "UY": Country(_("Uruguay"), "598", "UYU", ("America/Montevideo",), spanish="es-uy"),
+    "PY": Country(_("Paraguay"), "595", "PYG", ("America/Asuncion",), spanish="es-py"),
+    "BO": Country(_("Bolivia"), "591", "BOB", ("America/La_Paz",), spanish="es-bo"),
     "EC": Country(
-        _("Equador"), "593", "USD", ("America/Guayaquil", "Pacific/Galapagos"), spanish="es-ec"
+        _("Ecuador"), "593", "USD", ("America/Guayaquil", "Pacific/Galapagos"), spanish="es-ec"
     ),
     "US": Country(
-        _("Estados Unidos"),
+        _("United States"),
         "1",
         "USD",
         (
@@ -101,9 +101,9 @@ COUNTRIES = {
         "en",
         numbering="universal",
     ),
-    "GB": Country(_("Reino Unido"), "44", "GBP", ("Europe/London",), "en-gb"),
+    "GB": Country(_("United Kingdom"), "44", "GBP", ("Europe/London",), "en-gb"),
     "CA": Country(
-        _("Canadá"),
+        _("Canada"),
         "1",
         "CAD",
         (
@@ -118,7 +118,7 @@ COUNTRIES = {
         "en-ca",
     ),
     "AU": Country(
-        _("Austrália"),
+        _("Australia"),
         "61",
         "AUD",
         (
@@ -132,7 +132,7 @@ COUNTRIES = {
         ),
         "en-au",
     ),
-    "ZA": Country(_("África do Sul"), "27", "ZAR", ("Africa/Johannesburg",), "en-za"),
+    "ZA": Country(_("South Africa"), "27", "ZAR", ("Africa/Johannesburg",), "en-za"),
 }
 
 CHOICES = [(code, country.name) for code, country in COUNTRIES.items()]
@@ -175,27 +175,27 @@ def language_variant(language, country):
 # Stored as the national number (no country code, no trunk 0), which fits the 11 characters
 # of the existing fields: 8 to 10 digits. Brazil keeps validadores.normalizar_telefone.
 
-_TEN_DIGITS = _("Informe o código de área e o número (10 dígitos).")
+_TEN_DIGITS = _("Enter the area code and the number (10 digits).")
 _PHONE = {
     "MX": ((10,), "23456789", _TEN_DIGITS),
     "AR": ((10,), "123", _TEN_DIGITS),
-    "CL": ((9,), "2345679", _("Informe o número com o código de área (9 dígitos).")),
+    "CL": ((9,), "2345679", _("Enter the number with the area code (9 digits).")),
     "CO": ((10,), "36", _TEN_DIGITS),
-    "PE": ((8, 9), "1456789", _("Informe o número com o código de área (8 ou 9 dígitos).")),
-    "UY": ((8,), "249", _("Informe o número com o código de área (8 dígitos).")),
-    "PY": ((8, 9), "2345679", _("Informe o número com o código de área (8 ou 9 dígitos).")),
-    "BO": ((8,), "234567", _("Informe o número com o código de área (8 dígitos).")),
-    "EC": ((8, 9), "2345679", _("Informe o número com o código de área (8 ou 9 dígitos).")),
+    "PE": ((8, 9), "1456789", _("Enter the number with the area code (8 or 9 digits).")),
+    "UY": ((8,), "249", _("Enter the number with the area code (8 digits).")),
+    "PY": ((8, 9), "2345679", _("Enter the number with the area code (8 or 9 digits).")),
+    "BO": ((8,), "234567", _("Enter the number with the area code (8 digits).")),
+    "EC": ((8, 9), "2345679", _("Enter the number with the area code (8 or 9 digits).")),
     # country: (digits of the national number, its first digit, message)
     "US": ((10,), "23456789", _TEN_DIGITS),
     "CA": ((10,), "23456789", _TEN_DIGITS),
     "GB": (
         (9, 10),
         "123578",
-        _("Informe o número com o código de área (10 ou 11 dígitos com o 0)."),
+        _("Enter the number with the area code (10 or 11 digits with the 0)."),
     ),
-    "AU": ((9,), "23478", _("Informe o número com o código de área (10 dígitos com o 0).")),
-    "ZA": ((9,), "123456789", _("Informe o número com o código de área (10 dígitos com o 0).")),
+    "AU": ((9,), "23478", _("Enter the number with the area code (10 digits with the 0).")),
+    "ZA": ((9,), "123456789", _("Enter the number with the area code (10 digits with the 0).")),
 }
 
 
@@ -292,25 +292,25 @@ def whatsapp_link(number, country):
 # Stored without spaces or hyphens, letters in upper case (up to 9 characters: ZIP+4).
 
 _POSTAL_CODE = {
-    "BR": (r"\d{8}", _("O CEP deve ter 8 dígitos.")),
-    "US": (r"\d{5}(\d{4})?", _("O ZIP code tem 5 dígitos (ou 9, com a extensão).")),
-    "CA": (r"[A-Z]\d[A-Z]\d[A-Z]\d", _("O código postal canadense tem o formato A1A 1A1.")),
-    "GB": (r"[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}", _("Informe um postcode válido, como SW1A 1AA.")),
-    "AU": (r"\d{4}", _("O postcode australiano tem 4 dígitos.")),
-    "ZA": (r"\d{4}", _("O código postal sul-africano tem 4 dígitos.")),
-    "MX": (r"\d{5}", _("O código postal tem 5 dígitos.")),
+    "BR": (r"\d{8}", _("The postal code (CEP) must have 8 digits.")),
+    "US": (r"\d{5}(\d{4})?", _("The ZIP code has 5 digits (or 9, with the extension).")),
+    "CA": (r"[A-Z]\d[A-Z]\d[A-Z]\d", _("The Canadian postal code has the format A1A 1A1.")),
+    "GB": (r"[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}", _("Enter a valid postcode, such as SW1A 1AA.")),
+    "AU": (r"\d{4}", _("The Australian postcode has 4 digits.")),
+    "ZA": (r"\d{4}", _("The South African postal code has 4 digits.")),
+    "MX": (r"\d{5}", _("The postal code has 5 digits.")),
     "AR": (
         r"[A-Z]\d{4}[A-Z]{3}|\d{4}",
-        _("O código postal argentino tem o formato C1425ABC (ou 4 dígitos)."),
+        _("The Argentine postal code has the format C1425ABC (or 4 digits)."),
     ),
-    "CL": (r"\d{7}", _("O código postal tem 7 dígitos.")),
-    "CO": (r"\d{6}", _("O código postal tem 6 dígitos.")),
-    "PE": (r"\d{5}", _("O código postal tem 5 dígitos.")),
-    "UY": (r"\d{5}", _("O código postal tem 5 dígitos.")),
-    "PY": (r"\d{4}(\d{2})?", _("O código postal tem 6 dígitos (ou 4, no formato antigo).")),
+    "CL": (r"\d{7}", _("The postal code has 7 digits.")),
+    "CO": (r"\d{6}", _("The postal code has 6 digits.")),
+    "PE": (r"\d{5}", _("The postal code has 5 digits.")),
+    "UY": (r"\d{5}", _("The postal code has 5 digits.")),
+    "PY": (r"\d{4}(\d{2})?", _("The postal code has 6 digits (or 4, in the old format).")),
     # Bolivia has no national postal codes: whatever reference the address uses.
-    "BO": (r"[A-Z0-9]{1,9}", _("Use até 9 letras ou números.")),
-    "EC": (r"\d{6}", _("O código postal tem 6 dígitos.")),
+    "BO": (r"[A-Z0-9]{1,9}", _("Use up to 9 letters or numbers.")),
+    "EC": (r"\d{6}", _("The postal code has 6 digits.")),
 }
 
 
@@ -338,4 +338,4 @@ def format_postal_code(postal_code, country):
 
 def postal_code_label(country):
     """Field label: "CEP" in Brazil, a postal code anywhere else."""
-    return _("CEP") if country == "BR" else _("Código postal")
+    return _("Postal code (CEP)") if country == "BR" else _("Postal code")

@@ -1,34 +1,34 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Devedores" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Debtors" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-  <h1 class="h3 mb-0">{% translate "Devedores" %}</h1>
-  <a class="btn btn-outline-primary" href="{% url 'finance:receivables' %}">{% translate "A receber" %}</a>
+  <h1 class="h3 mb-0">{% translate "Debtors" %}</h1>
+  <a class="btn btn-outline-primary" href="{% url 'finance:receivables' %}">{% translate "Receivables" %}</a>
 </div>
 <div class="row g-3 mb-3">
-  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Total vencido" %}</div><div class="fs-5 text-danger">{{ total_overdue|currency }}</div></div></div></div>
-  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "A vencer" %}</div><div class="fs-5">{{ total_upcoming|currency }}</div></div></div></div>
+  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Total overdue" %}</div><div class="fs-5 text-danger">{{ total_overdue|currency }}</div></div></div></div>
+  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Not yet due" %}</div><div class="fs-5">{{ total_upcoming|currency }}</div></div></div></div>
 </div>
 <form method="get" class="row g-2 mb-2" role="search">
-  <div class="col-sm-8 col-md-6"><input type="search" name="q" value="{{ search }}" class="form-control" placeholder="{% translate 'Paciente ou pagador' %}" aria-label="{% translate 'Paciente ou pagador' %}"></div>
-  <div class="col-auto"><button type="submit" class="btn btn-primary">{% translate "Buscar" %}</button></div>
+  <div class="col-sm-8 col-md-6"><input type="search" name="q" value="{{ search }}" class="form-control" placeholder="{% translate "Patient or payer" %}" aria-label="{% translate "Patient or payer" %}"></div>
+  <div class="col-auto"><button type="submit" class="btn btn-primary">{% translate "Search" %}</button></div>
 </form>
-<p class="text-body-secondary small mb-2">{% blocktranslate count n=page.paginator.count %}{{ n }} devedor{% plural %}{{ n }} devedores{% endblocktranslate %}</p>
+<p class="text-body-secondary small mb-2">{% blocktranslate count n=page.paginator.count %}{{ n }} debtor{% plural %}{{ n }} debtors{% endblocktranslate %}</p>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead>
       <tr>
-        <th>{% translate "Paciente ou pagador" %}</th>
-        <th class="text-end">{% translate "Vencido" %}</th>
-        <th class="text-end">{% translate "Até 30 dias" %}</th>
-        <th class="text-end">{% translate "31 a 60" %}</th>
-        <th class="text-end">{% translate "61 a 90" %}</th>
-        <th class="text-end">{% translate "Mais de 90" %}</th>
-        <th class="text-end">{% translate "A vencer" %}</th>
-        <th>{% translate "Mais antigo" %}</th>
+        <th>{% translate "Patient or payer" %}</th>
+        <th class="text-end">{% translate "Overdue" %}</th>
+        <th class="text-end">{% translate "Up to 30 days" %}</th>
+        <th class="text-end">{% translate "31 to 60" %}</th>
+        <th class="text-end">{% translate "61 to 90" %}</th>
+        <th class="text-end">{% translate "Over 90" %}</th>
+        <th class="text-end">{% translate "Not yet due" %}</th>
+        <th>{% translate "Oldest" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -41,7 +41,7 @@
         <td class="text-nowrap">{{ row.oldest|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="8" class="text-body-secondary">{% translate "Ninguém está devendo." %}</td></tr>
+      <tr><td colspan="8" class="text-body-secondary">{% translate "Nobody owes anything." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

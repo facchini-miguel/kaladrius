@@ -14,15 +14,15 @@ class AuditEntry(models.Model):
     """
 
     class Action(models.TextChoices):
-        CREATE = "create", _("Criou")
-        CHANGE = "change", _("Alterou")
-        DELETE = "delete", _("Excluiu")
-        VIEWED = "viewed", _("Visualizou")
-        LOGIN = "login", _("Entrou no sistema")
-        LOGIN_FAILED = "login_failed", _("Tentativa de entrada recusada")
-        LOGOUT = "logout", _("Saiu do sistema")
+        CREATE = "create", _("Created")
+        CHANGE = "change", _("Changed")
+        DELETE = "delete", _("Deleted")
+        VIEWED = "viewed", _("Viewed")
+        LOGIN = "login", _("Logged in")
+        LOGIN_FAILED = "login_failed", _("Login attempt refused")
+        LOGOUT = "logout", _("Logged out")
 
-    timestamp = models.DateTimeField(_("quando"), auto_now_add=True, db_index=True)
+    timestamp = models.DateTimeField(_("when"), auto_now_add=True, db_index=True)
     # No database constraint: history keeps the ids even after a clinic or user is
     # deleted, and writing an entry never blocks a deletion.
     clinic = models.ForeignKey(
@@ -32,7 +32,7 @@ class AuditEntry(models.Model):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("clínica"),
+        verbose_name=_("clinic"),
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -41,21 +41,21 @@ class AuditEntry(models.Model):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("usuário"),
+        verbose_name=_("user"),
     )
     # Kept as text so the entry still says who it was if the user is deleted.
-    user_name = models.CharField(_("usuário (texto)"), max_length=150, blank=True)
-    action = models.CharField(_("ação"), max_length=20, choices=Action.choices)
-    model_name = models.CharField(_("tipo de registro"), max_length=50, blank=True)
-    object_id = models.CharField(_("código do registro"), max_length=40, blank=True)
-    object_repr = models.CharField(_("registro"), max_length=200, blank=True)
-    changes = models.JSONField(_("alterações"), default=dict, blank=True)
+    user_name = models.CharField(_("user (text)"), max_length=150, blank=True)
+    action = models.CharField(_("action"), max_length=20, choices=Action.choices)
+    model_name = models.CharField(_("record type"), max_length=50, blank=True)
+    object_id = models.CharField(_("record code"), max_length=40, blank=True)
+    object_repr = models.CharField(_("record"), max_length=200, blank=True)
+    changes = models.JSONField(_("changes"), default=dict, blank=True)
     ip = models.GenericIPAddressField(_("IP"), null=True, blank=True)
 
     class Meta:
         db_table = "audit_entry"
-        verbose_name = _("registro de auditoria")
-        verbose_name_plural = _("registros de auditoria")
+        verbose_name = _("audit entry")
+        verbose_name_plural = _("audit entries")
         ordering = ["-timestamp", "-pk"]
         indexes = [
             models.Index(fields=["clinic", "-timestamp"], name="audit_clinic_timestamp"),

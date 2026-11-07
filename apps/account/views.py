@@ -58,7 +58,7 @@ def code(request):
     pending_login = request.session.get(PENDING)
     if not pending_login or time.time() - pending_login["time"] > PENDING_VALIDITY:
         request.session.pop(PENDING, None)
-        messages.info(request, _("Entre de novo com o usuário e a senha."))
+        messages.info(request, _("Log in again with the username and password."))
         return redirect("login")
     user = get_user_model().objects.get(pk=pending_login["usuario"])
     form = CodeForm(request.POST or None)
@@ -74,10 +74,10 @@ def code(request):
         pending_login["attempts"] += 1
         if pending_login["attempts"] >= CODE_ATTEMPTS:
             del request.session[PENDING]
-            messages.error(request, _("Muitos códigos errados. Entre de novo."))
+            messages.error(request, _("Too many wrong codes. Log in again."))
             return redirect("login")
         request.session[PENDING] = pending_login
-        form.add_error("code", _("Código incorreto."))
+        form.add_error("code", _("Wrong code."))
     return render(request, "account/code.html", {"form": form})
 
 
@@ -95,7 +95,7 @@ def two_factor(request):
     # The real row, not the request's lazy user: the audit log needs its model.
     user = get_user_model().objects.get(pk=request.user.pk)
     if user.demo:
-        messages.info(request, _("Contas de demonstração não usam verificação em duas etapas."))
+        messages.info(request, _("Demo accounts do not use two-step verification."))
         return redirect("home")
     action = request.POST.get("action")
     is_required = services.is_required(request)
@@ -116,7 +116,7 @@ def two_factor(request):
                 user,
                 description=f"{user}: verificação em duas etapas desativada",
             )
-            messages.success(request, _("Verificação em duas etapas desativada."))
+            messages.success(request, _("Two-step verification turned off."))
             return redirect("account:two_factor")
         if action == "codigos" and new_ones.is_valid():
             if services.verify(user, new_ones.cleaned_data["code"]):
@@ -125,7 +125,7 @@ def two_factor(request):
                     "account/codes.html",
                     {"codes": services.new_codes(user)},
                 )
-            new_ones.add_error("code", _("Código incorreto."))
+            new_ones.add_error("code", _("Wrong code."))
         remaining_ones = user.recovery_codes.filter(used_at__isnull=True).count()
         return render(
             request,
@@ -149,7 +149,7 @@ def two_factor(request):
                 description=f"{user}: verificação em duas etapas ativada",
             )
             return render(request, "account/codes.html", {"codes": codes, "enabled": True})
-        form.add_error("code", _("Código incorreto. Confira a hora do celular e tente de novo."))
+        form.add_error("code", _("Wrong code. Check the phone's clock and try again."))
     address = services.app_uri(device)
     return render(
         request,

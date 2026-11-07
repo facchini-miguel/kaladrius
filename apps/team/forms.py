@@ -23,7 +23,7 @@ def exclusive_account(user, clinic):
 class NewMemberForm(BootstrapForm, UserCreationForm):
     """A new user account, created already linked to the current clinic with a role."""
 
-    role = forms.ChoiceField(label=_("Perfil"), choices=Role.choices, initial=Role.FRONT_DESK)
+    role = forms.ChoiceField(label=_("Role"), choices=Role.choices, initial=Role.FRONT_DESK)
 
     class Meta(UserCreationForm.Meta):
         model = User
@@ -47,7 +47,7 @@ class MembershipForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Membership
         fields = ["role", "active"]
-        labels = {"active": _("Acesso a esta clínica liberado")}
+        labels = {"active": _("Access to this clinic allowed")}
 
     def __init__(self, *args, editor, **kwargs):
         super().__init__(*args, **kwargs)
@@ -56,7 +56,7 @@ class MembershipForm(BootstrapForm, forms.ModelForm):
             # Nobody removes their own administrator role or access by accident.
             for field in self.fields.values():
                 field.disabled = True
-                field.help_text = _("Você não pode alterar o próprio perfil.")
+                field.help_text = _("You cannot change your own role.")
 
     def clean(self):
         data = super().clean()
@@ -72,7 +72,7 @@ class MembershipForm(BootstrapForm, forms.ModelForm):
             ).exclude(pk=self.instance.pk)
             if not others.exists():
                 raise forms.ValidationError(
-                    _("A clínica precisa de pelo menos um administrador ativo.")
+                    _("The clinic needs at least one active administrator.")
                 )
         return data
 

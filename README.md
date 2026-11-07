@@ -10,7 +10,7 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Current version: 0.66.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/kaladrius/releases)
+**Current version: 0.67.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: in development, running as a public demo. **To try it, start at https://www.facchini.eti.br/en/kaladrius/**: the page has the demo logins for each role (front desk, practitioner, finance, clinic administrator), screenshots and every link. The demo runs on the Google Cloud free tier, IPv6 only; see [Reference production](https://kaladrius-docs.facchini.eti.br/project/production).
 
@@ -41,7 +41,7 @@ Open http://localhost:8000. The API documentation is at http://localhost:8000/ap
 |---|---|
 | Test data (a fake clinic, users, practitioners, 600 patients, 6 weeks of appointments and recalls) | `docker compose exec app python manage.py seed_sample_data` |
 | Compile the translations (after `git pull` or changing texts; the image does it at build time) | `docker compose exec app python manage.py compilemessages` |
-| Extract new texts for translation (`locale/*/LC_MESSAGES/django.po`) | `docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests` |
+| Extract new texts for translation (`locale/*/LC_MESSAGES/django.po`) | `docker compose exec app python manage.py makemessages -l pt_BR -l es --no-location --ignore=staticfiles --ignore=tests --ignore=docs` |
 | Delete the test data (never touches real clinics or users) | `docker compose exec app python manage.py remove_sample_data --confirm` |
 | Import the legacy Odonto System data into a new clinic | `docker compose exec -T app python manage.py import_legacy - --clinic "Name" < dump.sql` |
 | Anonymize a clinic's data to use it for testing (irreversible) | `docker compose exec app python manage.py anonymize_clinic --clinic "Name" --confirm` |

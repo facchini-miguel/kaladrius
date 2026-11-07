@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Novo lançamento a receber" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "New receivable" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% translate "Novo lançamento a receber" %}</h1>
+<h1 class="h3 mb-4">{% translate "New receivable" %}</h1>
 <form method="post" style="max-width: 44rem;" novalidate>
   {% csrf_token %}
   {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
@@ -27,10 +27,10 @@
         <div class="col-md-6">{% with field=form.method %}{% include "includes/field.html" %}{% endwith %}</div>
         <div class="col-md-6">{% with field=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
-      <p class="text-body-secondary small mb-0">{% translate "Para pagamento na hora: a 1ª parcela é registrada como paga e o recibo abre em seguida." %}</p>
+      <p class="text-body-secondary small mb-0">{% translate "For payment on the spot: the 1st installment is recorded as paid and the receipt opens next." %}</p>
     </div>
   </div>
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:receivables' %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'finance:receivables' %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

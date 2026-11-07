@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Acesso negado" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Access denied" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% translate "Acesso negado" %}</h1>
-<p>{% translate "Você não tem permissão para acessar esta página. Se precisar desse acesso, fale com o administrador da clínica." %}</p>
-<p><a href="{% url 'home' %}">{% translate "Voltar ao início" %}</a></p>
+<h1 class="h3 mb-3">{% translate "Access denied" %}</h1>
+<p>{% translate "You do not have permission to access this page. If you need this access, talk to the clinic administrator." %}</p>
+<p><a href="{% url 'home' %}">{% translate "Back to home" %}</a></p>
 {% endblock %}

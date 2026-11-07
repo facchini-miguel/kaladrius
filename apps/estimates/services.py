@@ -17,16 +17,16 @@ def approve(estimate, *, installments, first_due_date, category, user, payment=N
     installment with `pagamento` = {"forma": ..., "conta": ...}). Returns the receivable."""
     estimate = Estimate.objects.select_for_update().get(pk=estimate.pk)
     if estimate.status != Estimate.Status.OPEN:
-        raise ValidationError(_("Só um orçamento em aberto pode ser aprovado."))
+        raise ValidationError(_("Only an open estimate can be approved."))
     total = estimate.total
     if total <= 0:
-        raise ValidationError(_("O orçamento não tem valor a receber."))
+        raise ValidationError(_("The estimate has no amount to receive."))
     entry = finance_services.create_entry(
         clinic=estimate.clinic,
         kind=Entry.Kind.RECEIVABLE,
         patient=estimate.patient,
         practitioner=estimate.practitioner,
-        description=_("Orçamento nº %(numero)s") % {"numero": estimate.pk},
+        description=_("Estimate no. %(numero)s") % {"numero": estimate.pk},
         category=category,
         total_amount=total,
         installments=installments,
@@ -49,7 +49,7 @@ def refuse(estimate, *, user):
     # Locked like in aprovar(), so approving and refusing at once cannot both succeed.
     estimate = Estimate.objects.select_for_update().get(pk=estimate.pk)
     if estimate.status != Estimate.Status.OPEN:
-        raise ValidationError(_("Só um orçamento em aberto pode ser recusado."))
+        raise ValidationError(_("Only an open estimate can be refused."))
     estimate.status = Estimate.Status.REFUSED
     estimate.decided_at = timezone.now()
     estimate.decided_by = user

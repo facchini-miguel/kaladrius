@@ -1,40 +1,40 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{{ membership.user.get_full_name|default:membership.user.username }} · {% translate "Equipe" %} · {{ system_name }}{% endblock %}
+{% block title %}{{ membership.user.get_full_name|default:membership.user.username }} · {% translate "Team" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-1">{{ membership.user.get_full_name|default:membership.user.username }}</h1>
-<p class="text-body-secondary mb-4">{% translate "Usuário:" %} {{ membership.user.username }}</p>
+<p class="text-body-secondary mb-4">{% translate "User:" %} {{ membership.user.username }}</p>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
-  <h2 class="h5">{% translate "Nesta clínica" %}</h2>
+  <h2 class="h5">{% translate "In this clinic" %}</h2>
   {% include "includes/form.html" %}
 
   {% if account %}
-  <h2 class="h5 mt-4">{% translate "Dados da conta" %}</h2>
+  <h2 class="h5 mt-4">{% translate "Account details" %}</h2>
   {% include "includes/form.html" with form=account %}
   {% else %}
   <div class="alert alert-light border small">
-    {% translate "Esta pessoa também tem acesso a outra clínica ou à plataforma. Nome, e-mail e senha só podem ser alterados por ela mesma ou pelo suporte." %}
+    {% translate "This person also has access to another clinic or to the platform. Name, e-mail and password can only be changed by them or by support." %}
   </div>
   {% endif %}
 
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
   {% if exclusive and membership.user != user %}
-  <a class="btn btn-outline-secondary" href="{% url 'team:password' membership.pk %}">{% translate "Definir nova senha" %}</a>
+  <a class="btn btn-outline-secondary" href="{% url 'team:password' membership.pk %}">{% translate "Set new password" %}</a>
   {% endif %}
-  <a class="btn btn-link" href="{% url 'team:list' %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'team:list' %}">{% translate "Cancel" %}</a>
 </form>
 {% if two_factor %}
 <div class="card mt-4" style="max-width: 36rem;"><div class="card-body">
-  <h2 class="h6">{% translate "Verificação em duas etapas" %} <span class="badge text-bg-success">{% translate "Ativa" %}</span></h2>
+  <h2 class="h6">{% translate "Two-step verification" %} <span class="badge text-bg-success">{% translate "Active" context "feminine" %}</span></h2>
   {% if exclusive and membership.user != user %}
-  <p class="small text-body-secondary">{% translate "Se a pessoa perdeu o celular e os códigos de recuperação, remova a verificação: ela entra só com a senha e ativa de novo com um QR code novo." %}</p>
+  <p class="small text-body-secondary">{% translate "If the person lost the phone and the recovery codes, remove the verification: they log in with the password only and turn it on again with a new QR code." %}</p>
   <form method="post" action="{% url 'team:two_factor' membership.pk %}">
     {% csrf_token %}
-    <button type="submit" class="btn btn-sm btn-outline-danger">{% translate "Remover a verificação em duas etapas" %}</button>
+    <button type="submit" class="btn btn-sm btn-outline-danger">{% translate "Remove two-step verification" %}</button>
   </form>
   {% endif %}
 </div></div>

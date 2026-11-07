@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Novo membro da equipe" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "New team member" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% translate "Novo membro da equipe" %}</h1>
+<h1 class="h3 mb-4">{% translate "New team member" %}</h1>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <p class="text-body-secondary small">{% translate "Passe a senha à pessoa e peça que ela a troque no primeiro acesso (menu com o nome dela › Trocar senha)." %}</p>
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'team:list' %}">{% translate "Cancelar" %}</a>
+  <p class="text-body-secondary small">{% translate "Give the password to the person and ask them to change it on first login (menu with their name › Change password)." %}</p>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'team:list' %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

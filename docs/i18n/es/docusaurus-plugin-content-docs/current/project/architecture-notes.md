@@ -47,7 +47,7 @@ Los dos se comunican **solo por la API**.
 Regla: **no usar dependencias GPL/AGPL**, para mantener libre la elección de licencia del proyecto.
 
 ## Idiomas (versión 0.13.0, decisión 049)
-- La interfaz existe en **portugués** (texto de origen, escrito en el código), **inglés** y **español**. Las traducciones están en `locale/en/` y `locale/es/` (`django.po`); los archivos compilados (`.mo`) no van a Git: se generan en el build de la imagen y en el CI.
+- La interfaz existe en **portugués** (el predeterminado), **inglés** y **español**. Los textos se escriben en inglés en el código (el origen, decisión 200); las traducciones están en `locale/pt_BR/` y `locale/es/` (`django.po`); los archivos compilados (`.mo`) no van a Git: se generan en el build de la imagen y en el CI.
 - Cada usuario elige el idioma en el menú de banderas de la barra superior (entre la clínica y el nombre del usuario; 0.13.1); la elección queda en el perfil (`Usuario.idioma`) y en una cookie (para la pantalla de acceso). Sin elección, vale el idioma del navegador.
 - Las fechas usan los formatos del idioma (`SHORT_DATE_FORMAT`); la agenda usa el idioma correspondiente de FullCalendar; las Novedades tienen cada texto en los tres idiomas.
 - Quedan en portugués: los datos (nombres de tipos de atención, descripciones, ciudades), el registro de auditoría y los mensajes de los comandos de terminal.

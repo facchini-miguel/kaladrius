@@ -351,7 +351,7 @@ def test_spanish_of_each_country(country, variant, value, clinic_a, create_user)
             currencies.format_amount(Decimal("1234.56"), countries.COUNTRIES[country].currency)
             == value
         )
-        assert translation.gettext("Rechamadas") == "Recordatorios"
+        assert translation.gettext("Recalls") == "Recordatorios"
 
 
 def test_latin_country_in_form_sets_time_zone_and_currency(clinic_a, create_user, client_for):

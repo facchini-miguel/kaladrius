@@ -29,27 +29,29 @@ class AppointmentTypeForm(BootstrapForm, forms.ModelForm):
         name = self.cleaned_data["name"].strip()
         repeated = AppointmentType.objects.filter(name__iexact=name).exclude(pk=self.instance.pk)
         if repeated.exists():
-            raise forms.ValidationError(_("Já existe um tipo de atendimento com este nome."))
+            raise forms.ValidationError(_("An appointment type with this name already exists."))
         return name
 
 
 class AppointmentForm(BootstrapForm, forms.ModelForm):
     date = forms.DateField(
-        label=_("Data"), widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
+        label=_("Date"), widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
     )
     start_time = forms.TimeField(
-        label=pgettext_lazy("hora", "Início"),
+        label=pgettext_lazy("time", "Start"),
         widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
     )
     end_time = forms.TimeField(
-        label=_("Fim"), widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M")
+        label=_("End"), widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M")
     )
     repetitions = forms.IntegerField(
-        label=_("Repetir por quantas semanas"),
+        label=_("Repeat for how many weeks"),
         min_value=1,
         max_value=52,
         initial=1,
-        help_text=_("1 = somente nesta data. Ex.: 4 cria o mesmo horário por 4 semanas seguidas."),
+        help_text=_(
+            "1 = only on this date. E.g.: 4 creates the same time slot for 4 weeks in a row."
+        ),
     )
 
     class Meta:
@@ -110,7 +112,7 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
             data.get("end_time"),
         )
         if not data.get("patient") and not data.get("description", "").strip():
-            self.add_error("description", _("Informe o paciente ou uma descrição."))
+            self.add_error("description", _("Enter the patient or a description."))
         patient = data.get("patient")
         if (
             self.instance.pk
@@ -121,8 +123,8 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
             self.add_error(
                 "patient",
                 _(
-                    "Este agendamento foi desmarcado. Para pôr outro paciente neste horário, "
-                    "use “Agendar outro paciente neste horário”."
+                    "This appointment was cancelled. To put another patient at this time, use "
+                    "“Book another patient at this time”."
                 ),
             )
         if None in (date, start_time, end_time) or self.errors:
@@ -130,18 +132,16 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
 
         clinic = self.clinic
         if end_time <= start_time:
-            self.add_error("end_time", _("O fim deve ser depois do início."))
+            self.add_error("end_time", _("The end must be after the start."))
             return data
         interval = clinic.schedule_interval
         for field, hour in (("start_time", start_time), ("end_time", end_time)):
             if not self._aligned(hour):
-                self.add_error(
-                    field, _("Use horários de %(n)s em %(n)s minutos.") % {"n": interval}
-                )
+                self.add_error(field, _("Use times in steps of %(n)s minutes.") % {"n": interval})
         if start_time < clinic.schedule_start or end_time > clinic.schedule_end:
             self.add_error(
                 None,
-                _("Fora do horário de atendimento da clínica (%(inicio)s às %(fim)s).")
+                _("Outside the clinic's opening hours (%(inicio)s to %(fim)s).")
                 % {
                     "inicio": f"{clinic.schedule_start:%H:%M}",
                     "fim": f"{clinic.schedule_end:%H:%M}",
@@ -171,8 +171,8 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
                 for a in found[:5]
             )
             if len(found) > 5:
-                results += " " + _("e mais %(n)s") % {"n": len(found) - 5}
+                results += " " + _("and %(n)s more") % {"n": len(found) - 5}
             raise forms.ValidationError(
-                _("Conflito de horário com: %(lista)s. Nada foi gravado.") % {"lista": results}
+                _("Time conflict with: %(lista)s. Nothing was saved.") % {"lista": results}
             )
         return data

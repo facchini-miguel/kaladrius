@@ -109,7 +109,7 @@ class ClinicModel(models.Model):
         "core.Clinic",
         on_delete=models.PROTECT,
         related_name="+",
-        verbose_name=_("clínica"),
+        verbose_name=_("clinic"),
     )
 
     # The first manager declared is Django's default manager, so the isolated one must

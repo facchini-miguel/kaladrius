@@ -84,7 +84,7 @@ def _amount(value):
 def read(content: bytes) -> Statement:
     text = _text(content)
     if "<OFX>" not in text.upper():
-        raise InvalidFile(_("O arquivo não é um extrato OFX."))
+        raise InvalidFile(_("The file is not an OFX statement."))
     transactions = []
     seen = {}
     unreadable_transactions = 0

@@ -17,20 +17,20 @@ DEFAULT = "BRL"
 # ISO 4217 code: (name, symbol, decimals). The symbol is the one people write in the
 # currency's own country; "$" is enough because a clinic works in a single currency.
 CURRENCIES = {
-    "BRL": (_("Real brasileiro"), "R$", 2),
-    "USD": (_("Dólar americano"), "US$", 2),
+    "BRL": (_("Brazilian real"), "R$", 2),
+    "USD": (_("US dollar"), "US$", 2),
     "EUR": (_("Euro"), "€", 2),
-    "GBP": (_("Libra esterlina"), "£", 2),
-    "CAD": (_("Dólar canadense"), "$", 2),
-    "AUD": (_("Dólar australiano"), "$", 2),
-    "ZAR": (_("Rand sul-africano"), "R", 2),
-    "ARS": (_("Peso argentino"), "$", 2),
-    "MXN": (_("Peso mexicano"), "$", 2),
-    "CLP": (_("Peso chileno"), "$", 0),
-    "COP": (_("Peso colombiano"), "$", 2),
-    "UYU": (_("Peso uruguaio"), "$U", 2),
-    "PYG": (_("Guarani paraguaio"), "₲", 0),
-    "PEN": (_("Sol peruano"), "S/", 2),
+    "GBP": (_("Pound sterling"), "£", 2),
+    "CAD": (_("Canadian dollar"), "$", 2),
+    "AUD": (_("Australian dollar"), "$", 2),
+    "ZAR": (_("South African rand"), "R", 2),
+    "ARS": (_("Argentine peso"), "$", 2),
+    "MXN": (_("Mexican peso"), "$", 2),
+    "CLP": (_("Chilean peso"), "$", 0),
+    "COP": (_("Colombian peso"), "$", 2),
+    "UYU": (_("Uruguayan peso"), "$U", 2),
+    "PYG": (_("Paraguayan guaraní"), "₲", 0),
+    "PEN": (_("Peruvian sol"), "S/", 2),
     "BOB": (_("Boliviano"), "Bs", 2),
 }
 

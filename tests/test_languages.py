@@ -82,7 +82,7 @@ def test_changing_language_requires_post_and_login(client):
     assert client.get(reverse("change_language")).status_code in (302, 405)
 
 
-@pytest.mark.parametrize("language", ["en", "es"])
+@pytest.mark.parametrize("language", ["pt_BR", "es"])
 def test_all_texts_are_translated(language):
     po = (LOCALE / language / "LC_MESSAGES" / "django.po").read_text(encoding="utf-8")
     blocks = po.split("\n\n")[1:]
@@ -115,8 +115,8 @@ def test_open_statuses_agree_in_spanish():
 
     with translation.override("es"):
         assert str(Estimate.Status.OPEN.label) == "Abierto"
-        assert pgettext("parcela", "Em aberto") == "Abierta"
-        assert pgettext("valor", "Em aberto") == "Pendiente"
+        assert pgettext("installment", "Open") == "Abierta"
+        assert pgettext("amount", "Outstanding") == "Pendiente"
     with translation.override("en"):
         assert str(Estimate.Status.OPEN.label) == "Open"
 

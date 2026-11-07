@@ -75,11 +75,11 @@ def configure(clinic, codes):
     """
     codes = set(codes)
     if not codes <= set(ModuleCode.values):
-        raise ValidationError(_("Módulo clínico desconhecido."))
+        raise ValidationError(_("Unknown clinical module."))
     if missing(codes):
-        raise ValidationError(_("Orçamentos e Pessoal precisam do Financeiro habilitado."))
+        raise ValidationError(_("Estimates and Staff need Finance turned on."))
     if clinic.pk is None:
-        raise ValidationError(_("Cadastre a clínica antes de configurar os módulos."))
+        raise ValidationError(_("Register the clinic before configuring modules."))
     Clinic.objects.select_for_update().get(pk=clinic.pk)
     # Administrative configuration has an explicit clinic; the ordinary model manager
     # remains isolated for queries from all the other modules.

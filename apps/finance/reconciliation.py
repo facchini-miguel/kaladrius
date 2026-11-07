@@ -33,7 +33,7 @@ def import_statement(account, *, file_name, content, user):
     """Read an OFX file into `conta`. Lines imported before (same bank id) are skipped."""
     statement = ofx.read(content)
     if not statement.transactions:
-        raise ofx.InvalidFile(_("O extrato não tem transações."))
+        raise ofx.InvalidFile(_("The statement has no transactions."))
     statement_import = StatementImport.objects.create(
         clinic=account.clinic,
         account=account,
@@ -186,13 +186,15 @@ def _link(bank_transaction, candidate, user):
             bank_transaction.save()
     except IntegrityError:
         # Someone reconciled the same payment with another line a moment ago.
-        raise ValidationError(_("Esse lançamento já foi conciliado com outra transação.")) from None
+        raise ValidationError(
+            _("That entry was already reconciled with another transaction.")
+        ) from None
 
 
 def _pending(bank_transaction):
     bank_transaction = BankTransaction.objects.select_for_update().get(pk=bank_transaction.pk)
     if bank_transaction.status != Status.PENDING:
-        raise ValidationError(_("Esta transação já foi conciliada ou ignorada."))
+        raise ValidationError(_("This transaction was already reconciled or ignored."))
     return bank_transaction
 
 
@@ -203,7 +205,7 @@ def reconcile(bank_transaction, key, *, user):
         if candidate.key == key:
             _link(bank_transaction, candidate, user)
             return bank_transaction
-    raise ValidationError(_("Esse lançamento não corresponde a esta transação."))
+    raise ValidationError(_("That entry does not match this transaction."))
 
 
 @transaction.atomic

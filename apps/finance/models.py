@@ -14,6 +14,7 @@ from django.db.models import DecimalField, ExpressionWrapper, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.core.isolation import ClinicManager, ClinicModel, without_isolation
 from apps.core.ordering import ALPHABETICAL
@@ -26,24 +27,24 @@ class FinancialAccount(ClinicModel):
     """Where the money goes: the cash drawer, a bank account, the card machine."""
 
     class Kind(models.TextChoices):
-        CASH = "cash", _("Dinheiro (caixa)")
-        BANK = "bank", _("Banco")
-        CARD = "card", _("Maquininha de cartão")
+        CASH = "cash", _("Cash (drawer)")
+        BANK = "bank", _("Bank")
+        CARD = "card", _("Card machine")
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
+    name = models.CharField(_("name"), max_length=60, db_collation=ALPHABETICAL)
+    kind = models.CharField(_("type"), max_length=10, choices=Kind.choices)
     opening_balance = models.DecimalField(
-        _("saldo inicial"),
+        _("initial balance"),
         default=ZERO,
-        help_text=_("Quanto havia na conta antes do primeiro lançamento no sistema."),
+        help_text=_("How much the account had before the first entry in the system."),
         **MONEY,
     )
-    active = models.BooleanField(_("ativa"), default=True)
+    active = models.BooleanField(pgettext_lazy("feminine", "active"), default=True)
 
     class Meta:
         db_table = "finance_financial_account"
-        verbose_name = _("conta")
-        verbose_name_plural = _("contas")
+        verbose_name = _("account")
+        verbose_name_plural = _("accounts")
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(fields=["clinic", "name"], name="financial_account_unique")
@@ -54,8 +55,8 @@ class FinancialAccount(ClinicModel):
 
 
 class FinancialKind(models.TextChoices):
-    INCOME = "income", _("Receita")
-    EXPENSE = "expense", _("Despesa")
+    INCOME = "income", _("Income")
+    EXPENSE = "expense", _("Expense")
 
 
 class AccountGroup(ClinicModel):
@@ -64,28 +65,28 @@ class AccountGroup(ClinicModel):
 
     Kind = FinancialKind
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
+    name = models.CharField(_("name"), max_length=60, db_collation=ALPHABETICAL)
+    kind = models.CharField(_("type"), max_length=10, choices=Kind.choices)
     parent = models.ForeignKey(
         "self",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="children",
-        verbose_name=_("grupo acima"),
+        verbose_name=_("parent group"),
     )
     code = models.PositiveSmallIntegerField(
-        _("código"),
+        _("code"),
         null=True,
         blank=True,
-        help_text=_("Posição dentro do grupo acima (1, 2, 3…); forma números como 2.1."),
+        help_text=_("Position inside the parent group (1, 2, 3…); builds numbers such as 2.1."),
     )
-    active = models.BooleanField(_("ativo"), default=True)
+    active = models.BooleanField(_("active"), default=True)
 
     class Meta:
         db_table = "finance_account_group"
-        verbose_name = _("grupo contábil")
-        verbose_name_plural = _("grupos contábeis")
+        verbose_name = _("account group")
+        verbose_name_plural = _("account groups")
         ordering = ["kind", "code", "name"]
         constraints = [
             models.UniqueConstraint(
@@ -115,22 +116,22 @@ class Category(ClinicModel):
 
     Kind = FinancialKind
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
+    name = models.CharField(_("name"), max_length=60, db_collation=ALPHABETICAL)
+    kind = models.CharField(_("type"), max_length=10, choices=Kind.choices)
     group = models.ForeignKey(
         AccountGroup,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="categories",
-        verbose_name=_("grupo"),
+        verbose_name=_("group"),
     )
-    active = models.BooleanField(_("ativa"), default=True)
+    active = models.BooleanField(pgettext_lazy("feminine", "active"), default=True)
 
     class Meta:
         db_table = "finance_category"
-        verbose_name = _("categoria")
-        verbose_name_plural = _("categorias")
+        verbose_name = _("category")
+        verbose_name_plural = _("categories")
         ordering = ["kind", "name"]
         constraints = [
             models.UniqueConstraint(fields=["clinic", "kind", "name"], name="category_unique")
@@ -146,13 +147,13 @@ class CostCenter(ClinicModel):
     Optional on every entry, one per entry (no split across centers yet).
     """
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
-    active = models.BooleanField(_("ativo"), default=True)
+    name = models.CharField(_("name"), max_length=60, db_collation=ALPHABETICAL)
+    active = models.BooleanField(_("active"), default=True)
 
     class Meta:
         db_table = "finance_cost_center"
-        verbose_name = _("centro de custo")
-        verbose_name_plural = _("centros de custo")
+        verbose_name = _("cost center")
+        verbose_name_plural = _("cost centers")
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(fields=["clinic", "name"], name="cost_center_unique")
@@ -220,31 +221,31 @@ class Supplier(ClinicModel):
     """Who the clinic buys from or pays (decision 093), picked on a payable."""
 
     class Kind(models.TextChoices):
-        INDIVIDUAL = "individual", _("Pessoa física")
-        COMPANY = "company", _("Pessoa jurídica")
+        INDIVIDUAL = "individual", _("Individual")
+        COMPANY = "company", _("Company")
 
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, default=Kind.COMPANY)
+    kind = models.CharField(_("type"), max_length=10, choices=Kind.choices, default=Kind.COMPANY)
     name = models.CharField(
-        _("nome"),
+        _("name"),
         max_length=200,
-        help_text=_("Para pessoa jurídica, o nome fantasia."),
+        help_text=_("For companies, the trade name."),
         db_collation=ALPHABETICAL,
     )
-    legal_name = models.CharField(_("razão social"), max_length=200, blank=True)
+    legal_name = models.CharField(_("company name"), max_length=200, blank=True)
     # The country's tax document (decision 121); the name stayed from Brazil.
-    tax_id = models.CharField(_("documento"), max_length=20, blank=True)
-    phone = models.CharField(_("telefone"), max_length=11, blank=True)
+    tax_id = models.CharField(_("document"), max_length=20, blank=True)
+    phone = models.CharField(_("phone"), max_length=11, blank=True)
     whatsapp = models.CharField(_("WhatsApp"), max_length=11, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)
-    notes = models.TextField(_("observações"), blank=True)
-    active = models.BooleanField(_("ativo"), default=True)
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
+    notes = models.TextField(_("notes"), blank=True)
+    active = models.BooleanField(_("active"), default=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("changed at"), auto_now=True)
 
     class Meta:
         db_table = "finance_supplier"
-        verbose_name = _("fornecedor")
-        verbose_name_plural = _("fornecedores")
+        verbose_name = _("supplier")
+        verbose_name_plural = _("suppliers")
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
@@ -267,16 +268,16 @@ class Entry(ClinicModel):
     """An amount owed to the clinic (receivable) or by it (payable), in installments."""
 
     class Kind(models.TextChoices):
-        RECEIVABLE = "receivable", _("A receber")
-        PAYABLE = "payable", _("A pagar")
+        RECEIVABLE = "receivable", _("Receivables")
+        PAYABLE = "payable", _("Payables")
 
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
-    description = models.CharField(_("descrição"), max_length=200)
+    kind = models.CharField(_("type"), max_length=10, choices=Kind.choices)
+    description = models.CharField(_("description"), max_length=200)
     category = models.ForeignKey(
         Category,
         on_delete=models.PROTECT,
         related_name="+",
-        verbose_name=_("categoria"),
+        verbose_name=_("category"),
     )
     cost_center = models.ForeignKey(
         CostCenter,
@@ -284,7 +285,7 @@ class Entry(ClinicModel):
         null=True,
         blank=True,
         related_name="entries",
-        verbose_name=_("centro de custo"),
+        verbose_name=_("cost center"),
     )
     patient = models.ForeignKey(
         "patients.Patient",
@@ -292,18 +293,18 @@ class Entry(ClinicModel):
         null=True,
         blank=True,
         related_name="entries",
-        verbose_name=_("paciente"),
+        verbose_name=_("patient"),
     )
     # Who pays (receivable without a registered patient) or the supplier (payable). With a
     # registered supplier it holds the supplier's name, so lists and reports need no join.
-    payer = models.CharField(_("pagador"), max_length=200, blank=True)
+    payer = models.CharField(_("payer"), max_length=200, blank=True)
     supplier = models.ForeignKey(
         Supplier,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="entries",
-        verbose_name=_("fornecedor"),
+        verbose_name=_("supplier"),
     )
     practitioner = models.ForeignKey(
         "practitioners.Practitioner",
@@ -311,38 +312,38 @@ class Entry(ClinicModel):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("profissional"),
-        help_text=_("Quem fez o atendimento (opcional)."),
+        verbose_name=_("practitioner"),
+        help_text=_("Who saw the patient (optional)."),
     )
-    total_amount = models.DecimalField(_("valor total"), **MONEY)
-    date = models.DateField(_("data"), default=timezone.localdate)
-    notes = models.TextField(_("observações"), blank=True)
-    cancelled = models.BooleanField(_("cancelado"), default=False)
-    cancelled_at = models.DateTimeField(_("cancelado em"), null=True, blank=True)
+    total_amount = models.DecimalField(_("total amount"), **MONEY)
+    date = models.DateField(_("date"), default=timezone.localdate)
+    notes = models.TextField(_("notes"), blank=True)
+    cancelled = models.BooleanField(_("cancelled"), default=False)
+    cancelled_at = models.DateTimeField(_("cancelled at"), null=True, blank=True)
     cancelled_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("cancelado por"),
+        verbose_name=_("cancelled by"),
     )
-    cancellation_reason = models.CharField(_("motivo do cancelamento"), max_length=200, blank=True)
+    cancellation_reason = models.CharField(_("cancellation reason"), max_length=200, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("criado por"),
+        verbose_name=_("created by"),
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("changed at"), auto_now=True)
 
     class Meta:
         db_table = "finance_entry"
-        verbose_name = _("lançamento")
-        verbose_name_plural = _("lançamentos")
+        verbose_name = _("entry")
+        verbose_name_plural = _("entries")
         ordering = ["-date", "-pk"]
         constraints = [
             models.CheckConstraint(condition=Q(total_amount__gt=0), name="entry_amount_positive"),
@@ -382,11 +383,11 @@ class Installment(ClinicModel):
         Entry,
         on_delete=models.CASCADE,
         related_name="installments",
-        verbose_name=_("lançamento"),
+        verbose_name=_("entry"),
     )
-    number = models.PositiveSmallIntegerField(_("número"))
-    due_date = models.DateField(_("vencimento"))
-    amount = models.DecimalField(_("valor"), **MONEY)
+    number = models.PositiveSmallIntegerField(_("number"))
+    due_date = models.DateField(_("due date"))
+    amount = models.DecimalField(_("amount"), **MONEY)
 
     # Same isolation as every clinic model, plus the balance helpers.
     objects = ClinicManager.from_queryset(InstallmentQuerySet)()
@@ -394,8 +395,8 @@ class Installment(ClinicModel):
 
     class Meta:
         db_table = "finance_installment"
-        verbose_name = _("parcela")
-        verbose_name_plural = _("parcelas")
+        verbose_name = _("installment")
+        verbose_name_plural = _("installments")
         ordering = ["due_date", "number"]
         indexes = [models.Index(fields=["clinic", "due_date"], name="installment_clinic_due_date")]
         constraints = [
@@ -424,19 +425,19 @@ class Payment(ClinicModel):
         """Every method of every country; each country offers some (payment_methods.py, decision
         123)."""
 
-        CASH = "cash", _("Dinheiro")
+        CASH = "cash", _("Cash")
         PIX = "pix", _("Pix")
-        DEBIT = "debit", _("Cartão de débito")
-        CREDIT = "credit", _("Cartão de crédito")
-        TRANSFER = "transfer", _("Transferência")
-        BOLETO = "boleto", _("Boleto")
+        DEBIT = "debit", _("Debit card")
+        CREDIT = "credit", _("Credit card")
+        TRANSFER = "transfer", _("Bank transfer")
+        BOLETO = "boleto", _("Boleto (bank slip)")
         # No longer offered in Brazil (the owner: cheques are not used anymore); kept so
         # payments recorded as cheque there still show their method.
-        CHEQUE = "cheque", _("Cheque")
-        WALLET = "wallet", _("Carteira digital")
-        DIRECT_DEBIT = "direct_debit", _("Débito automático")
-        HSA = "hsa", _("Cartão HSA/FSA")
-        FINANCING = "financing", _("Financiamento ao paciente")
+        CHEQUE = "cheque", _("Check")
+        WALLET = "wallet", _("Digital wallet")
+        DIRECT_DEBIT = "direct_debit", _("Direct debit")
+        HSA = "hsa", _("HSA/FSA card")
+        FINANCING = "financing", _("Patient financing")
         BPAY = "bpay", "BPAY"
 
         @classmethod
@@ -450,44 +451,42 @@ class Payment(ClinicModel):
         Installment,
         on_delete=models.PROTECT,
         related_name="payments",
-        verbose_name=_("parcela"),
+        verbose_name=_("installment"),
     )
-    date = models.DateField(_("data"), default=timezone.localdate)
-    amount = models.DecimalField(_("valor recebido"), **MONEY)
+    date = models.DateField(_("date"), default=timezone.localdate)
+    amount = models.DecimalField(_("amount received"), **MONEY)
     interest = models.DecimalField(
-        _("juros e multa"),
+        _("interest and late fee"),
         default=ZERO,
-        help_text=_("Já incluídos no valor recebido."),
+        help_text=_("Already included in the amount received."),
         **MONEY,
     )
-    discount = models.DecimalField(_("desconto"), default=ZERO, **MONEY)
-    method = models.CharField(_("forma de pagamento"), max_length=15, choices=Method.choices)
+    discount = models.DecimalField(_("discount"), default=ZERO, **MONEY)
+    method = models.CharField(_("payment method"), max_length=15, choices=Method.choices)
     account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
         related_name="+",
-        verbose_name=_("conta"),
+        verbose_name=_("account"),
     )
     # Card details only: never the card number.
-    card_brand = models.CharField(_("bandeira do cartão"), max_length=30, blank=True)
+    card_brand = models.CharField(_("card brand"), max_length=30, blank=True)
     card_installments = models.PositiveSmallIntegerField(
-        _("parcelas no cartão"), null=True, blank=True
+        _("card installments"), null=True, blank=True
     )
-    card_transaction_code = models.CharField(
-        _("código da transação (NSU)"), max_length=40, blank=True
-    )
-    note = models.CharField(_("observação"), max_length=200, blank=True)
-    reversed = models.BooleanField(_("estornado"), default=False)
-    reversed_at = models.DateTimeField(_("estornado em"), null=True, blank=True)
+    card_transaction_code = models.CharField(_("transaction code (NSU)"), max_length=40, blank=True)
+    note = models.CharField(_("note"), max_length=200, blank=True)
+    reversed = models.BooleanField(_("reversed"), default=False)
+    reversed_at = models.DateTimeField(_("reversed at"), null=True, blank=True)
     reversed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("estornado por"),
+        verbose_name=_("reversed by"),
     )
-    reversal_reason = models.CharField(_("motivo do estorno"), max_length=200, blank=True)
+    reversal_reason = models.CharField(_("reversal reason"), max_length=200, blank=True)
     # Practitioner commission (0.19.0): the commission that paid this receipt out, and the
     # one that deducted it again after it was reversed.
     commission = models.ForeignKey(
@@ -496,7 +495,7 @@ class Payment(ClinicModel):
         null=True,
         blank=True,
         related_name="payments",
-        verbose_name=_("comissão"),
+        verbose_name=_("commission"),
     )
     commission_reversal = models.ForeignKey(
         "Commission",
@@ -504,7 +503,7 @@ class Payment(ClinicModel):
         null=True,
         blank=True,
         related_name="reversed_payments",
-        verbose_name=_("comissão que descontou o estorno"),
+        verbose_name=_("commission that deducted the reversal"),
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -512,14 +511,14 @@ class Payment(ClinicModel):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("recebido por"),
+        verbose_name=_("received by"),
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
         db_table = "finance_payment"
-        verbose_name = _("pagamento")
-        verbose_name_plural = _("pagamentos")
+        verbose_name = _("payment")
+        verbose_name_plural = _("payments")
         ordering = ["-date", "-pk"]
         constraints = [
             models.CheckConstraint(condition=Q(amount__gt=0), name="payment_amount_positive"),
@@ -557,39 +556,39 @@ class CashRegister(ClinicModel):
         FinancialAccount,
         on_delete=models.PROTECT,
         related_name="cash_registers",
-        verbose_name=_("conta"),
+        verbose_name=_("account"),
     )
-    opened_at = models.DateTimeField(_("aberto em"), default=timezone.now)
+    opened_at = models.DateTimeField(_("opened at"), default=timezone.now)
     opened_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name="+",
-        verbose_name=_("aberto por"),
+        verbose_name=_("opened by"),
     )
-    opening_amount = models.DecimalField(_("valor contado na abertura"), **MONEY)
-    closed_at = models.DateTimeField(_("fechado em"), null=True, blank=True)
+    opening_amount = models.DecimalField(_("amount counted at opening"), **MONEY)
+    closed_at = models.DateTimeField(_("closed at"), null=True, blank=True)
     closed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("fechado por"),
+        verbose_name=_("closed by"),
     )
-    expected_amount = models.DecimalField(_("valor esperado"), null=True, blank=True, **MONEY)
+    expected_amount = models.DecimalField(_("expected amount"), null=True, blank=True, **MONEY)
     counted_amount = models.DecimalField(
-        _("valor contado no fechamento"),
+        _("amount counted at closing"),
         null=True,
         blank=True,
         **MONEY,
     )
-    note = models.CharField(_("observação"), max_length=200, blank=True)
+    note = models.CharField(_("note"), max_length=200, blank=True)
 
     class Meta:
         db_table = "finance_cash_register"
-        verbose_name = _("caixa")
-        verbose_name_plural = _("caixas")
+        verbose_name = _("cash drawer")
+        verbose_name_plural = _("cash drawers")
         ordering = ["-opened_at"]
         constraints = [
             models.UniqueConstraint(
@@ -620,40 +619,42 @@ class CashMovement(ClinicModel):
     """Withdrawal from or top-up of an open cash drawer, optionally to/from another account."""
 
     class Kind(models.TextChoices):
-        WITHDRAWAL = "withdrawal", _("Retirada (sangria)")
-        TOP_UP = "top_up", _("Reforço")
+        WITHDRAWAL = "withdrawal", _("Withdrawal")
+        TOP_UP = "top_up", _("Top-up")
 
     cash_register = models.ForeignKey(
         CashRegister,
         on_delete=models.PROTECT,
         related_name="movements",
-        verbose_name=_("caixa"),
+        verbose_name=_("cash drawer"),
     )
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
-    amount = models.DecimalField(_("valor"), **MONEY)
+    kind = models.CharField(_("type"), max_length=10, choices=Kind.choices)
+    amount = models.DecimalField(_("amount"), **MONEY)
     other_account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("outra conta"),
-        help_text=_("Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema)."),
+        verbose_name=_("other account"),
+        help_text=_(
+            "Where the withdrawal goes or the top-up comes from (empty: outside the system)."
+        ),
     )
-    reason = models.CharField(_("motivo"), max_length=200)
+    reason = models.CharField(_("reason"), max_length=200)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name="+",
-        verbose_name=_("criado por"),
+        verbose_name=_("created by"),
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
         db_table = "finance_cash_movement"
-        verbose_name = _("movimento de caixa")
-        verbose_name_plural = _("movimentos de caixa")
+        verbose_name = _("drawer movement")
+        verbose_name_plural = _("drawer movements")
         ordering = ["created_at"]
         constraints = [
             models.CheckConstraint(condition=Q(amount__gt=0), name="cash_movement_amount_positive"),
@@ -675,36 +676,36 @@ class Commission(ClinicModel):
         "practitioners.Practitioner",
         on_delete=models.PROTECT,
         related_name="commissions",
-        verbose_name=_("profissional"),
+        verbose_name=_("practitioner"),
     )
-    until = models.DateField(_("recebimentos até"))
-    percentage = models.DecimalField(_("percentual"), max_digits=5, decimal_places=2)
-    received_amount = models.DecimalField(_("valor recebido"), **MONEY)
+    until = models.DateField(_("receipts up to"))
+    percentage = models.DecimalField(_("percentage"), max_digits=5, decimal_places=2)
+    received_amount = models.DecimalField(_("amount received"), **MONEY)
     reversal_deduction = models.DecimalField(
-        _("comissão de estornos descontada"), default=ZERO, **MONEY
+        _("commission of reversals deducted"), default=ZERO, **MONEY
     )
-    amount = models.DecimalField(_("valor da comissão"), **MONEY)
+    amount = models.DecimalField(_("commission amount"), **MONEY)
     entry = models.OneToOneField(
         Entry,
         on_delete=models.PROTECT,
         related_name="commission",
-        verbose_name=_("lançamento a pagar"),
+        verbose_name=_("payable"),
     )
-    cancelled = models.BooleanField(_("cancelada"), default=False)
+    cancelled = models.BooleanField(pgettext_lazy("feminine", "cancelled"), default=False)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("criado por"),
+        verbose_name=_("created by"),
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
         db_table = "finance_commission"
-        verbose_name = _("comissão")
-        verbose_name_plural = _("comissões")
+        verbose_name = _("commission")
+        verbose_name_plural = _("commissions")
         ordering = ["-created_at"]
         constraints = [
             models.CheckConstraint(condition=Q(amount__gt=0), name="commission_amount_positive"),
@@ -723,19 +724,19 @@ class Planning(ClinicModel):
     """The year's goal for a group of the chart of accounts (decision 098, legacy Medical
     planejamento_estrategico): how much to receive or spend, compared with what was paid."""
 
-    year = models.PositiveSmallIntegerField(_("ano"))
+    year = models.PositiveSmallIntegerField(_("year"))
     group = models.ForeignKey(
         AccountGroup,
         on_delete=models.PROTECT,
         related_name="+",
-        verbose_name=_("grupo"),
+        verbose_name=_("group"),
     )
-    amount = models.DecimalField(_("meta"), **MONEY)
+    amount = models.DecimalField(_("goal"), **MONEY)
 
     class Meta:
         db_table = "finance_planning"
-        verbose_name = _("meta do planejamento")
-        verbose_name_plural = _("metas do planejamento")
+        verbose_name = _("planning goal")
+        verbose_name_plural = _("planning goals")
         ordering = ["year", "group"]
         constraints = [
             models.UniqueConstraint(
@@ -756,26 +757,26 @@ class BookClosing(ClinicModel):
     reopening has an earlier date (or none: everything open) and a reason.
     """
 
-    until = models.DateField(_("fechado até"), null=True, blank=True)
-    reason = models.CharField(_("motivo"), max_length=200, blank=True)
+    until = models.DateField(_("closed up to"), null=True, blank=True)
+    reason = models.CharField(_("reason"), max_length=200, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("criado por"),
+        verbose_name=_("created by"),
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
         db_table = "finance_book_closing"
-        verbose_name = _("fechamento do financeiro")
-        verbose_name_plural = _("fechamentos do financeiro")
+        verbose_name = _("finance closing")
+        verbose_name_plural = _("finance closings")
         ordering = ["-created_at", "-pk"]
 
     def __str__(self):
-        return f"{self.until:%d/%m/%Y}" if self.until else str(_("Aberto"))
+        return f"{self.until:%d/%m/%Y}" if self.until else str(_("Open"))
 
 
 class StatementImport(ClinicModel):
@@ -785,21 +786,23 @@ class StatementImport(ClinicModel):
         FinancialAccount,
         on_delete=models.PROTECT,
         related_name="statement_imports",
-        verbose_name=_("conta"),
+        verbose_name=_("account"),
     )
-    file = models.CharField(_("arquivo"), max_length=200)
-    bank_code = models.CharField(_("código do banco"), max_length=20, blank=True)
-    bank_account_number = models.CharField(_("conta no banco"), max_length=40, blank=True)
-    start = models.DateField(_("início"), null=True, blank=True)
-    end = models.DateField(_("fim"), null=True, blank=True)
-    balance = models.DecimalField(_("saldo no banco"), null=True, blank=True, **MONEY)
-    balance_date = models.DateField(_("saldo em"), null=True, blank=True)
-    new_transactions = models.PositiveIntegerField(_("transações novas"), default=0)
-    duplicate_transactions = models.PositiveIntegerField(_("transações já importadas"), default=0)
+    file = models.CharField(_("file"), max_length=200)
+    bank_code = models.CharField(_("bank code"), max_length=20, blank=True)
+    bank_account_number = models.CharField(_("bank account"), max_length=40, blank=True)
+    start = models.DateField(_("start"), null=True, blank=True)
+    end = models.DateField(_("end"), null=True, blank=True)
+    balance = models.DecimalField(_("bank balance"), null=True, blank=True, **MONEY)
+    balance_date = models.DateField(_("balance on"), null=True, blank=True)
+    new_transactions = models.PositiveIntegerField(_("new transactions"), default=0)
+    duplicate_transactions = models.PositiveIntegerField(
+        _("transactions already imported"), default=0
+    )
     unreadable_transactions = models.PositiveIntegerField(
-        _("transações ilegíveis"),
+        _("unreadable transactions"),
         default=0,
-        help_text=_("Linhas do arquivo sem data ou valor que dê para ler: não foram importadas."),
+        help_text=_("Lines of the file without a readable date or amount: they were not imported."),
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -807,14 +810,14 @@ class StatementImport(ClinicModel):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("importado por"),
+        verbose_name=_("imported by"),
     )
-    created_at = models.DateTimeField(_("importado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("imported at"), auto_now_add=True)
 
     class Meta:
         db_table = "finance_statement_import"
-        verbose_name = _("importação de extrato")
-        verbose_name_plural = _("importações de extrato")
+        verbose_name = _("statement import")
+        verbose_name_plural = _("statement imports")
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -825,33 +828,33 @@ class BankTransaction(ClinicModel):
     """A bank statement line, reconciled with a payment or a drawer movement, or ignored."""
 
     class Status(models.TextChoices):
-        PENDING = "pending", _("Pendente")
-        RECONCILED = "reconciled", _("Conciliada")
-        IGNORED = "ignored", _("Ignorada")
+        PENDING = "pending", _("Pending")
+        RECONCILED = "reconciled", _("Reconciled")
+        IGNORED = "ignored", _("Ignored")
 
     account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
         related_name="transactions",
-        verbose_name=_("conta"),
+        verbose_name=_("account"),
     )
     statement_import = models.ForeignKey(
         StatementImport,
         on_delete=models.PROTECT,
         related_name="transactions",
-        verbose_name=_("importação"),
+        verbose_name=_("import"),
     )
-    fitid = models.CharField(_("identificador no banco"), max_length=120)
-    date = models.DateField(_("data"))
+    fitid = models.CharField(_("bank identifier"), max_length=120)
+    date = models.DateField(_("date"))
     amount = models.DecimalField(
-        _("valor"),
-        help_text=_("Positivo: entrada; negativo: saída."),
+        _("amount"),
+        help_text=_("Positive: money in; negative: money out."),
         **MONEY,
     )
-    description = models.CharField(_("descrição"), max_length=200, blank=True)
-    kind = models.CharField(_("tipo no banco"), max_length=20, blank=True)
+    description = models.CharField(_("description"), max_length=200, blank=True)
+    kind = models.CharField(_("bank type"), max_length=20, blank=True)
     status = models.CharField(
-        _("situação"),
+        _("status"),
         max_length=10,
         choices=Status.choices,
         default=Status.PENDING,
@@ -862,7 +865,7 @@ class BankTransaction(ClinicModel):
         null=True,
         blank=True,
         related_name="transaction",
-        verbose_name=_("pagamento"),
+        verbose_name=_("payment"),
     )
     cash_movement = models.OneToOneField(
         CashMovement,
@@ -870,23 +873,23 @@ class BankTransaction(ClinicModel):
         null=True,
         blank=True,
         related_name="transaction",
-        verbose_name=_("movimento do caixa"),
+        verbose_name=pgettext_lazy("of the drawer", "drawer movement"),
     )
-    reason = models.CharField(_("motivo"), max_length=200, blank=True)
+    reason = models.CharField(_("reason"), max_length=200, blank=True)
     reconciled_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("conciliado por"),
+        verbose_name=_("reconciled by"),
     )
-    reconciled_at = models.DateTimeField(_("conciliado em"), null=True, blank=True)
+    reconciled_at = models.DateTimeField(_("reconciled at"), null=True, blank=True)
 
     class Meta:
         db_table = "finance_bank_transaction"
-        verbose_name = _("transação bancária")
-        verbose_name_plural = _("transações bancárias")
+        verbose_name = _("bank transaction")
+        verbose_name_plural = _("bank transactions")
         ordering = ["date", "pk"]
         constraints = [
             models.UniqueConstraint(

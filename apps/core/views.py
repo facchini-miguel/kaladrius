@@ -19,10 +19,10 @@ from .permissions import Action, Module, requires_permission
 def _greeting():
     hour = timezone.localtime().hour
     if hour < 12:
-        return _("Bom dia")
+        return _("Good morning")
     if hour < 18:
-        return _("Boa tarde")
-    return _("Boa noite")
+        return _("Good afternoon")
+    return _("Good evening")
 
 
 @login_required
@@ -52,9 +52,7 @@ def register_clinic(request):
     form = NewClinicForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(
-            request, _("Clínica cadastrada. Agora cadastre a equipe em Cadastros > Equipe.")
-        )
+        messages.success(request, _("Clinic registered. Now add the team in Records > Team."))
         return redirect("home")
     return render(request, "core/register_clinic.html", {"form": form})
 
@@ -68,12 +66,12 @@ class ChangePasswordView(PasswordChangeView):
 
     def dispatch(self, request, *args, **kwargs):
         if getattr(request.user, "demo", False):
-            messages.info(request, _("Contas de demonstração não trocam a senha."))
+            messages.info(request, _("Demo accounts cannot change their password."))
             return redirect("home")
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        messages.success(self.request, _("Senha alterada."))
+        messages.success(self.request, _("Password changed."))
         return super().form_valid(form)
 
 
@@ -82,11 +80,11 @@ def clinic_settings(request):
     form = ClinicForm(request.POST or None, instance=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Configurações da clínica salvas."))
+        messages.success(request, _("Clinic settings saved."))
         if "currency" in form.changed_data:
             messages.info(
                 request,
-                _("Os valores agora aparecem em %(moeda)s. Nenhum valor já lançado foi convertido.")
+                _("Amounts are now shown in %(moeda)s. No amount already entered was converted.")
                 % {"moeda": form.instance.get_currency_display()},
             )
         return redirect("clinic_settings")

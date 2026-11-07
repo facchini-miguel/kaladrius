@@ -97,10 +97,10 @@ def test_new_version_notice_until_whats_new_is_opened(client, create_user):
 
 def test_whats_new_filtered_by_module(client, create_user):
     client.force_login(create_user("maria"))
-    response = client.get(reverse("whats_new"), {"module": "Agenda"})
+    response = client.get(reverse("whats_new"), {"module": "Schedule"})
     modules = {item.module for _, items in response.context["versions"] for item in items}
-    assert modules == {"Agenda"}
-    assert ("Pacientes", "Pacientes") in response.context["modules"]
+    assert modules == {"Schedule"}
+    assert ("Patients", "Pacientes") in response.context["modules"]
 
 
 def test_real_ip_behind_the_proxy(rf):

@@ -19,29 +19,29 @@ PERIODS = {
 # the processor follows the data (at least 10%), or 0.5% would be a flat line.
 CHARTS = [
     (
-        _("Processador"),
+        _("Processor"),
         [
-            ("cpu", "line-1", _("em uso")),
-            ("cpu_steal", "line-2", _("tomado por outras máquinas")),
+            ("cpu", "line-1", _("in use")),
+            ("cpu_steal", "line-2", _("taken by other machines")),
         ],
         None,
         "%",
     ),
     (
-        _("Memória"),
+        _("Memory"),
         [
-            ("memory_pct", "line-1", _("memória em uso")),
-            ("swap_pct", "line-2", _("swap em uso")),
+            ("memory_pct", "line-1", _("memory in use")),
+            ("swap_pct", "line-2", _("swap in use")),
         ],
         100,
         "%",
     ),
-    (_("Disco"), [("disk_pct", "line-1", _("em uso"))], 100, "%"),
+    (_("Disk"), [("disk_pct", "line-1", _("in use"))], 100, "%"),
     (
-        _("Rede"),
+        _("Network"),
         [
-            ("network_in", "line-1", _("recebido por segundo")),
-            ("network_out", "line-2", _("enviado por segundo")),
+            ("network_in", "line-1", _("received per second")),
+            ("network_out", "line-2", _("sent per second")),
         ],
         None,
         "bytes",

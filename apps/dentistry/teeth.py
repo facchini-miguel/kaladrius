@@ -22,17 +22,14 @@ VALID_TEETH = {d for row in PERMANENT_TEETH + PRIMARY_TEETH for d in row}
 # clinic chooses the numbering, by default its country's (Universal in the United States).
 FDI, UNIVERSAL, PALMER = "fdi", "universal", "palmer"
 NUMBERINGS = [
-    (FDI, _("FDI (11 a 48; dentes de leite 51 a 85)")),
-    (UNIVERSAL, _("Universal, dos Estados Unidos (1 a 32; dentes de leite A a T)")),
-    (PALMER, _("Palmer (UR6, LL3; dentes de leite URE a LRE)")),
+    (FDI, _("FDI (11 to 48; baby teeth 51 to 85)")),
+    (UNIVERSAL, _("Universal, United States (1 to 32; baby teeth A to T)")),
+    (PALMER, _("Palmer (UR6, LL3; baby teeth URE to LRE)")),
 ]
 LEGENDS = {
-    FDI: _("Numeração FDI."),
-    UNIVERSAL: _("Numeração universal (Estados Unidos)."),
-    PALMER: _(
-        "Notação de Palmer: UR superior direito, UL superior esquerdo, LL inferior esquerdo, "
-        "LR inferior direito."
-    ),
+    FDI: _("FDI numbering."),
+    UNIVERSAL: _("Universal numbering (United States)."),
+    PALMER: _("Palmer notation: UR upper right, UL upper left, LL lower left, LR lower right."),
 }
 UNIVERSAL_LETTERS = "ABCDEFGHIJKLMNOPQRST"
 _PALMER_QUADRANTS = {1: "UR", 2: "UL", 3: "LL", 4: "LR"}

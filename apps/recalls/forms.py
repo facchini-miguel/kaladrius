@@ -21,4 +21,4 @@ class RecallForm(BootstrapForm, forms.ModelForm):
         if self.instance.clinic_id is None:
             self.instance.clinic = clinic
         self.fields["patient"].queryset = Patient.objects.all()
-        self.fields["patient"].error_messages["required"] = _("Escolha o paciente.")
+        self.fields["patient"].error_messages["required"] = _("Choose the patient.")

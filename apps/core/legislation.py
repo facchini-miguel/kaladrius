@@ -164,22 +164,21 @@ def retention_period(country=None):
     retention = for_country(country).retention
     if retention.years and retention.until_age:
         return _(
-            "O prontuário deve ser guardado por pelo menos %(anos)s anos depois do último "
-            "registro e, de menores de idade, até o paciente fazer %(idade)s anos, se for mais "
-            "tarde (%(fonte)s)."
+            "Health records must be kept for at least %(anos)s years after the last entry "
+            "and, for minors, until the patient turns %(idade)s, if later (%(fonte)s)."
         ) % {"anos": retention.years, "idade": retention.until_age, "fonte": retention.source}
     if retention.years:
         return _(
-            "O prontuário deve ser guardado por pelo menos %(anos)s anos depois do último "
-            "registro (%(fonte)s)."
+            "Health records must be kept for at least %(anos)s years after the last entry "
+            "(%(fonte)s)."
         ) % {"anos": retention.years, "fonte": retention.source}
     if retention.varies == STATE:
-        return _("O prazo de guarda do prontuário é definido pela lei de cada estado.")
+        return _("How long health records must be kept is set by each state's law.")
     if retention.varies == PROVINCE:
-        return _("O prazo de guarda do prontuário é definido pela lei de cada província.")
+        return _("How long health records must be kept is set by each province's law.")
     if retention.source:
         return _(
-            "O prazo de guarda do prontuário segue %(fonte)s: confira o prazo atual com a "
-            "autoridade de saúde."
+            "How long health records must be kept follows %(fonte)s: check the current period "
+            "with the health authority."
         ) % {"fonte": retention.source}
-    return _("Confira com a autoridade de saúde do país o prazo de guarda do prontuário.")
+    return _("Check with the country's health authority how long health records must be kept.")

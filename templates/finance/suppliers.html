@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Fornecedores" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Suppliers" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h3 mb-0">{% translate "Fornecedores" %}</h1>
-  {% if can.finance.create %}<a class="btn btn-primary" href="{% url 'finance:supplier_new' %}">{% translate "Novo fornecedor" %}</a>{% endif %}
+  <h1 class="h3 mb-0">{% translate "Suppliers" %}</h1>
+  {% if can.finance.create %}<a class="btn btn-primary" href="{% url 'finance:supplier_new' %}">{% translate "New supplier" %}</a>{% endif %}
 </div>
 
-{% document_label "person" "company" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Nome, razão social ou {{ documentos }}{% endblocktranslate %}
+{% document_label "person" "company" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Name, legal name or {{ documentos }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-8">
     <input type="search" name="q" value="{{ search }}" class="form-control" autofocus
-           placeholder="{{ search_hint }}" aria-label="{% translate 'Buscar fornecedor' %}">
+           placeholder="{{ search_hint }}" aria-label="{% translate "Search supplier" %}">
   </div>
   <div class="col-md-2">
-    <button type="submit" class="btn btn-primary w-100">{% translate "Buscar" %}</button>
+    <button type="submit" class="btn btn-primary w-100">{% translate "Search" %}</button>
   </div>
 </form>
 
@@ -24,11 +24,11 @@
   <table class="table table-hover align-middle bg-white">
     <thead>
       <tr>
-        <th>{% translate "Nome" %}</th>
+        <th>{% translate "Name" %}</th>
         <th>{% document_label "person" "company" %}</th>
-        <th>{% translate "Telefone" %}</th>
+        <th>{% translate "Phone" %}</th>
         <th>{% translate "WhatsApp" %}</th>
-        <th class="text-end">{% translate "Ações" %}</th>
+        <th class="text-end">{% translate "Actions" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -36,19 +36,19 @@
       <tr>
         <td>
           <a href="{% url 'finance:supplier' supplier.pk %}">{{ supplier.name }}</a>
-          {% if not supplier.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
+          {% if not supplier.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inactive" %}</span>{% endif %}
         </td>
         <td class="text-nowrap">{{ supplier.tax_id|document:supplier.document_role|default:"—" }}</td>
         <td class="text-nowrap">{{ supplier.phone|phone|default:"—" }}</td>
         <td class="text-nowrap">{% if supplier.whatsapp %}<a href="{{ supplier.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ supplier.whatsapp|phone }}</a>{% else %}—{% endif %}</td>
-        <td class="text-end text-nowrap">{% if can.finance.change %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td class="text-end text-nowrap">{% if can.finance.change %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Edit" %}</a>{% endif %}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum fornecedor encontrado." %}</td></tr>
+      <tr><td colspan="5" class="text-body-secondary">{% translate "No suppliers found." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 {% include "includes/pagination.html" %}
-<p class="text-body-secondary small">{% translate "Para deixar de usar sem perder o histórico, edite e desmarque “ativo”." %}</p>
+<p class="text-body-secondary small">{% translate "To stop using it without losing the history, edit it and uncheck “active”." %}</p>
 {% endblock %}

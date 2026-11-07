@@ -12,71 +12,71 @@ class Patient(ClinicModel):
     """A patient: an individual (CPF) or a company (CNPJ)."""
 
     class Kind(models.TextChoices):
-        INDIVIDUAL = "individual", _("Pessoa física")
-        COMPANY = "company", _("Pessoa jurídica")
+        INDIVIDUAL = "individual", _("Individual")
+        COMPANY = "company", _("Company")
 
     class Sex(models.TextChoices):
-        FEMALE = "F", _("Feminino")
-        MALE = "M", _("Masculino")
-        OTHER = "O", _("Outro")
+        FEMALE = "F", _("Female")
+        MALE = "M", _("Male")
+        OTHER = "O", _("Other")
 
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, default=Kind.INDIVIDUAL)
+    kind = models.CharField(_("type"), max_length=10, choices=Kind.choices, default=Kind.INDIVIDUAL)
     name = models.CharField(
-        _("nome"),
+        _("name"),
         max_length=200,
-        help_text=_("Para pessoa jurídica, o nome fantasia."),
+        help_text=_("For companies, the trade name."),
         db_collation=ALPHABETICAL,
     )
-    legal_name = models.CharField(_("razão social"), max_length=200, blank=True)
+    legal_name = models.CharField(_("company name"), max_length=200, blank=True)
     # The country's document of an individual or a company (decision 121); the name stayed from
     # Brazil.
     tax_id = models.CharField(
-        _("documento"),
+        _("document"),
         max_length=20,
         blank=True,
-        help_text=_("Pode ser digitado com ou sem pontuação."),
+        help_text=_("May be typed with or without punctuation."),
     )
-    rg = models.CharField(_("RG"), max_length=20, blank=True)
-    state_registration = models.CharField(_("inscrição estadual"), max_length=20, blank=True)
-    sex = models.CharField(_("sexo"), max_length=1, choices=Sex.choices, blank=True)
-    birth_date = models.DateField(_("data de nascimento"), null=True, blank=True)
+    rg = models.CharField(_("ID card (RG)"), max_length=20, blank=True)
+    state_registration = models.CharField(_("state registration"), max_length=20, blank=True)
+    sex = models.CharField(_("sex"), max_length=1, choices=Sex.choices, blank=True)
+    birth_date = models.DateField(_("birth date"), null=True, blank=True)
     marital_status = models.ForeignKey(
         "reference_data.MaritalStatus",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("estado civil"),
+        verbose_name=_("marital status"),
     )
-    occupation = models.CharField(_("profissão"), max_length=100, blank=True)
+    occupation = models.CharField(_("occupation"), max_length=100, blank=True)
     guardian = models.CharField(
-        _("responsável"),
+        _("guardian"),
         max_length=200,
         blank=True,
-        help_text=_("Para menores de idade, por exemplo."),
+        help_text=_("For minors, for example."),
     )
 
-    mobile_phone = models.CharField(_("celular"), max_length=11, blank=True)
+    mobile_phone = models.CharField(_("mobile"), max_length=11, blank=True)
     # Fax and MSN from the legacy system are not kept as fields: nobody uses them anymore.
     whatsapp = models.CharField(
         _("WhatsApp"),
         max_length=11,
         blank=True,
-        help_text=_("Com DDD. A ficha abre a conversa direto no WhatsApp."),
+        help_text=_("With the area code. The patient record opens the chat straight in WhatsApp."),
     )
-    home_phone = models.CharField(_("telefone residencial"), max_length=11, blank=True)
-    work_phone = models.CharField(_("telefone comercial"), max_length=11, blank=True)
+    home_phone = models.CharField(_("home phone"), max_length=11, blank=True)
+    work_phone = models.CharField(_("work phone"), max_length=11, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)
 
     # Brazil: 8 digits; other countries (decision 117): up to a 9-digit ZIP+4.
-    postal_code = models.CharField(_("CEP"), max_length=9, blank=True)
+    postal_code = models.CharField(_("Postal code (CEP)"), max_length=9, blank=True)
     state = models.ForeignKey(
         "reference_data.State",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("UF"),
+        verbose_name=_("State"),
     )
     city = models.ForeignKey(
         "reference_data.City",
@@ -84,43 +84,43 @@ class Patient(ClinicModel):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("cidade"),
+        verbose_name=_("city"),
     )
     # Outside Brazil the national state and city tables (IBGE) do not apply: typed text.
-    state_name = models.CharField(_("estado ou província"), max_length=60, blank=True)
-    city_name = models.CharField(_("cidade"), max_length=100, blank=True)
-    neighborhood = models.CharField(_("bairro"), max_length=100, blank=True)
+    state_name = models.CharField(_("state or province"), max_length=60, blank=True)
+    city_name = models.CharField(_("city"), max_length=100, blank=True)
+    neighborhood = models.CharField(_("district"), max_length=100, blank=True)
     street = models.CharField(
-        _("endereço"),
+        _("address"),
         max_length=200,
         blank=True,
-        help_text=_("Rua, avenida…"),
+        help_text=_("Street, avenue…"),
     )
-    number = models.CharField(_("número"), max_length=10, blank=True)
-    complement = models.CharField(_("complemento"), max_length=100, blank=True)
+    number = models.CharField(_("number"), max_length=10, blank=True)
+    complement = models.CharField(_("complement"), max_length=100, blank=True)
 
-    notes = models.TextField(_("observações"), blank=True)
-    active = models.BooleanField(_("ativo"), default=True)
+    notes = models.TextField(_("notes"), blank=True)
+    active = models.BooleanField(_("active"), default=True)
     # Archiving replaces deleting: the patient leaves every screen of the team but keeps
     # their history (schedule, recalls, audit). Only clinic administrators see archived
     # patients, and can restore them (decision 046).
-    archived = models.BooleanField(_("arquivado"), default=False)
-    archived_at = models.DateTimeField(_("arquivado em"), null=True, blank=True)
+    archived = models.BooleanField(_("archived"), default=False)
+    archived_at = models.DateTimeField(_("archived at"), null=True, blank=True)
     archived_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("arquivado por"),
+        verbose_name=_("archived by"),
     )
-    created_at = models.DateTimeField(_("cadastrado em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("registered at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("changed at"), auto_now=True)
 
     class Meta:
         db_table = "patients_patient"
-        verbose_name = _("paciente")
-        verbose_name_plural = _("pacientes")
+        verbose_name = _("patient")
+        verbose_name_plural = _("patients")
         ordering = ["name"]
         indexes = [
             models.Index(fields=["clinic", "name"], name="patient_clinic_name"),
@@ -177,42 +177,42 @@ class RelatedPerson(ClinicModel):
     """
 
     class Relationship(models.TextChoices):
-        MOTHER = "mother", _("Mãe")
-        FATHER = "father", _("Pai")
-        GUARDIAN = "guardian", _("Responsável legal")
-        SPOUSE = "spouse", _("Cônjuge")
-        CHILD = "child", _("Filho(a)")
-        SIBLING = "sibling", _("Irmão(ã)")
-        GRANDPARENT = "grandparent", _("Avô/avó")
-        GRANDCHILD = "grandchild", _("Neto(a)")
-        RELATIVE = "relative", _("Outro parente")
-        EMERGENCY = "emergency", _("Contato de emergência")
-        CONTACT = "contact", _("Contato")
+        MOTHER = "mother", _("Mother")
+        FATHER = "father", _("Father")
+        GUARDIAN = "guardian", _("Legal guardian")
+        SPOUSE = "spouse", _("Spouse")
+        CHILD = "child", _("Child")
+        SIBLING = "sibling", _("Sibling")
+        GRANDPARENT = "grandparent", _("Grandparent")
+        GRANDCHILD = "grandchild", _("Grandchild")
+        RELATIVE = "relative", _("Other relative")
+        EMERGENCY = "emergency", _("Emergency contact")
+        CONTACT = "contact", _("Contact")
 
     patient = models.ForeignKey(
         Patient,
         on_delete=models.CASCADE,
         related_name="related_people",
-        verbose_name=_("paciente"),
+        verbose_name=_("patient"),
     )
-    relationship = models.CharField(_("vínculo"), max_length=20, choices=Relationship.choices)
+    relationship = models.CharField(_("relationship"), max_length=20, choices=Relationship.choices)
     other_patient = models.ForeignKey(
         Patient,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name="related_to",
-        verbose_name=_("paciente da clínica"),
+        verbose_name=_("clinic patient"),
     )
-    name = models.CharField(_("nome"), max_length=200, blank=True)
-    phone = models.CharField(_("telefone"), max_length=11, blank=True)
-    note = models.CharField(_("observação"), max_length=200, blank=True)
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    name = models.CharField(_("name"), max_length=200, blank=True)
+    phone = models.CharField(_("phone"), max_length=11, blank=True)
+    note = models.CharField(_("note"), max_length=200, blank=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
         db_table = "patients_related_person"
-        verbose_name = _("pessoa relacionada")
-        verbose_name_plural = _("pessoas relacionadas")
+        verbose_name = _("related person")
+        verbose_name_plural = _("related people")
         ordering = ["pk"]
         constraints = [
             models.CheckConstraint(

@@ -24,14 +24,14 @@ docker compose exec app python manage.py makemigrations --check
 
 ## Convenções
 
-- **Nomes em inglês** no código novo (`Patient`, `Appointment`), **comentários em inglês**; os textos das telas em português, dentro de `_()`. Campos e funções mais antigos ainda têm nomes em português (em renomeação, decisão 157).
-- **Pastas e módulos dos apps com nome em inglês** (`apps/patients/`, `apps/core/countries.py`). Cada app mantém o seu **label** em português (`label = "pacientes"` no `apps.py`), o nome pelo qual as tabelas do banco, as migrações e as permissões o conhecem, e os arquivos de migração mantêm os seus nomes: a produção os tem registrados (decisão 145).
+- **Todo nome em inglês**: código, comentários, códigos gravados no banco, URLs, campos da API (decisões 144 a 200). Um app novo nasce em inglês: a pasta, o `label` (igual à pasta), modelos, campos e migrações (decisão 193).
+- **Pastas e módulos dos apps com nome em inglês** (`apps/patients/`, `apps/core/countries.py`); o `label` de cada app é o nome da pasta (decisão 195). Os nomes dos arquivos de migração antigos ficam como estavam.
 - **Comandos de gerenciamento com nome em inglês**, opções incluídas (`python manage.py seed_sample_data --patients 50`) (decisão 148).
 - **Templates com nome em inglês**, numa pasta com o nome do seu app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); os nomes do próprio Django ficam (`base.html`, `403.html`, `registration/login.html`) (decisão 146).
 - **Arquivos de teste com nome em inglês**, pelo que testam (`tests/test_patients.py`, `tests/test_schedule.py`), mesmo quando o módulo testado tem nome em português (decisão 144). As funções de teste também, dizendo o que conferem (`test_duplicate_cpf_refused_in_same_clinic_but_allowed_in_another`); os textos que o teste procura na tela continuam em português (decisão 181). As fixtures, funções auxiliares e variáveis dos testes também são em inglês (`clinic_a`, `create_user`, `client_for`, `scenario`; decisão 188), e os dados fictícios ficam em português (`"Maria Paciente"`).
-- **Todo texto da tela** é escrito em português no código e traduzido em `locale/en` e `locale/es`:
+- **Todo texto da tela** é escrito em inglês no código, dentro de `_()` ou `{% translate %}`, e traduzido em `locale/pt_BR` e `locale/es` (decisão 200; o idioma padrão continua sendo o português do Brasil):
   ```bash
-  docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests
+  docker compose exec app python manage.py makemessages -l pt_BR -l es --no-location --ignore=staticfiles --ignore=tests --ignore=docs
   ```
 - **Documentação nos três idiomas:** tudo fica neste site (`docs/`): uma mudança numa página de `docs/docs/` também muda a mesma página em `docs/i18n/pt-BR/` e `docs/i18n/es/`, no mesmo commit.
 - **Sem JavaScript embutido na página** (a Content Security Policy bloqueia): os scripts ficam em `static/js/`.

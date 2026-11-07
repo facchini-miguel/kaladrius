@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Atestado" %} · {{ certificate.visit.patient.name }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Certificate" %} · {{ certificate.visit.patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
-  <button type="button" class="btn btn-primary" data-print>{% translate "Imprimir ou salvar em PDF" %}</button>
-  <a class="btn btn-link" href="{% url 'medical_records:visit' certificate.visit_id %}">{% translate "Voltar" %}</a>
+  <button type="button" class="btn btn-primary" data-print>{% translate "Print or save as PDF" %}</button>
+  <a class="btn btn-link" href="{% url 'medical_records:visit' certificate.visit_id %}">{% translate "Back" %}</a>
 </div>
 <div class="receipt bg-white border rounded p-4" style="max-width: 48rem;">
-  {% translate "ATESTADO" as document_title %}
+  {% translate "MEDICAL CERTIFICATE" as document_title %}
   {% include "medical_records/_header.html" with document_date=certificate.created_at %}
   {% get_current_language as language %}
   {# Month names are capitalized in Django's Portuguese dates, but not in running text. #}

@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Aprovar orçamento" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Approve estimate" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-1">{% translate "Aprovar orçamento" %}</h1>
-<p class="text-body-secondary mb-4">{% blocktranslate with numero=estimate.pk nome=estimate.patient.name total=estimate.total|currency %}Orçamento nº {{ numero }} · {{ nome }} · {{ total }}{% endblocktranslate %}</p>
+<h1 class="h3 mb-1">{% translate "Approve estimate" %}</h1>
+<p class="text-body-secondary mb-4">{% blocktranslate with numero=estimate.pk nome=estimate.patient.name total=estimate.total|currency %}Estimate no. {{ numero }} · {{ nome }} · {{ total }}{% endblocktranslate %}</p>
 <form method="post" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
   {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
@@ -21,8 +21,8 @@
       <div class="col-md-6">{% with field=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
     </div>
   </div></div>
-  <p class="text-body-secondary small">{% translate "O orçamento vira um lançamento a receber, nas parcelas escolhidas, e não pode mais ser alterado." %}</p>
-  <button type="submit" class="btn btn-success">{% translate "Aprovar" %}</button>
-  <a class="btn btn-link" href="{% url 'estimates:detail' estimate.pk %}">{% translate "Cancelar" %}</a>
+  <p class="text-body-secondary small">{% translate "The estimate becomes a receivable, in the chosen installments, and can no longer be changed." %}</p>
+  <button type="submit" class="btn btn-success">{% translate "Approve" %}</button>
+  <a class="btn btn-link" href="{% url 'estimates:detail' estimate.pk %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

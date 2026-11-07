@@ -19,32 +19,32 @@ from .models import ModuleCode, Role
 
 
 class Module(models.TextChoices):
-    PATIENTS = "patients", _("Pacientes")
-    SCHEDULE = "schedule", _("Agenda")
-    RECALLS = "recalls", _("Rechamadas")
-    BIRTHDAYS = "birthdays", _("Aniversariantes")
-    PRACTITIONERS = "practitioners", _("Profissionais")
-    CATALOGS = "catalogs", _("Tabelas base")
-    USERS = "users", _("Usuários da clínica")
-    CLINIC = "clinic", _("Configurações da clínica")
-    AUDIT = "audit", _("Auditoria")
+    PATIENTS = "patients", _("Patients")
+    SCHEDULE = "schedule", _("Schedule")
+    RECALLS = "recalls", _("Recalls")
+    BIRTHDAYS = "birthdays", _("Birthdays")
+    PRACTITIONERS = "practitioners", _("Practitioners")
+    CATALOGS = "catalogs", _("Base tables")
+    USERS = "users", _("Clinic users")
+    CLINIC = "clinic", _("Clinic settings")
+    AUDIT = "audit", _("Audit log")
     # Receivables, receiving payments, receipts and debtors (front desk included).
-    RECEIVING = "receiving", _("Recebimentos")
+    RECEIVING = "receiving", _("Receipts")
     # Accounts, categories and (0.16) payables and cash flow: administrators only.
-    FINANCE = "finance", _("Financeiro")
+    FINANCE = "finance", _("Finance")
     # Treatment estimates (0.18.0): written by practitioners and the front desk.
-    ESTIMATES = "estimates", _("Orçamentos")
+    ESTIMATES = "estimates", _("Estimates")
     # Health plans and the patients' cards (decision 094).
-    HEALTH_PLANS = "health_plans", _("Convênios")
+    HEALTH_PLANS = "health_plans", _("Health plans")
     # Staff, salaries and the month's pay (decision 099): administrators and Finance only.
-    STAFF = "staff", _("Pessoal")
+    STAFF = "staff", _("Staff")
 
 
 class Action(models.TextChoices):
-    VIEW = "view", _("Ver")
-    CREATE = "create", _("Criar")
-    CHANGE = "change", _("Alterar")
-    DELETE = "delete", _("Excluir")
+    VIEW = "view", _("View")
+    CREATE = "create", _("Create")
+    CHANGE = "change", _("Change")
+    DELETE = "delete", _("Delete")
 
 
 _ALL = frozenset(Action)

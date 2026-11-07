@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Cadastre sua clínica" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Register your clinic" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-2">{% translate "Cadastre sua clínica" %}</h1>
+<h1 class="h3 mb-2">{% translate "Register your clinic" %}</h1>
 <p class="text-body-secondary mb-4" style="max-width: 36rem;">
-  {% translate "Este sistema atende uma clínica. Informe os dados dela: eles aparecem na política de privacidade, nos recibos e nos orçamentos. O horário da agenda e o restante ficam em Configurações da clínica." %}
+  {% translate "This system serves one clinic. Enter its details: they appear on the privacy policy, receipts and estimates. The schedule hours and the rest are in Clinic settings." %}
 </p>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <button type="submit" class="btn btn-primary">{% translate "Cadastrar" %}</button>
+  <button type="submit" class="btn btn-primary">{% translate "Register" %}</button>
 </form>
 {% endblock %}

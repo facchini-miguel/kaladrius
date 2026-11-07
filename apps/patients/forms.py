@@ -36,15 +36,15 @@ def _text_field(label, max_length, **attrs):
 
 
 class PatientForm(BootstrapForm, forms.ModelForm):
-    state = StateField(queryset=State.objects.all(), required=False, label=_("UF"))
-    city = CityField(queryset=City.objects.none(), required=False, label=_("Cidade"))
+    state = StateField(queryset=State.objects.all(), required=False, label=_("State"))
+    city = CityField(queryset=City.objects.none(), required=False, label=_("City"))
     # The country's document (decision 121), typed with punctuation, stored compact.
     tax_id = document_field()
-    postal_code = _text_field(_("CEP"), 10)
-    mobile_phone = _text_field(_("Celular"), 16, inputmode="tel")
+    postal_code = _text_field(_("Postal code (CEP)"), 10)
+    mobile_phone = _text_field(_("Mobile"), 16, inputmode="tel")
     whatsapp = _text_field(_("WhatsApp"), 16, inputmode="tel")
-    home_phone = _text_field(_("Telefone residencial"), 16, inputmode="tel")
-    work_phone = _text_field(_("Telefone comercial"), 16, inputmode="tel")
+    home_phone = _text_field(_("Home phone"), 16, inputmode="tel")
+    work_phone = _text_field(_("Work phone"), 16, inputmode="tel")
 
     class Meta:
         model = Patient
@@ -159,7 +159,7 @@ class PatientForm(BootstrapForm, forms.ModelForm):
     def clean_birth_date(self):
         date = self.cleaned_data.get("birth_date")
         if date and date > datetime.date.today():
-            raise forms.ValidationError(_("A data de nascimento não pode estar no futuro."))
+            raise forms.ValidationError(_("The birth date cannot be in the future."))
         return date
 
     def clean(self):
@@ -186,13 +186,13 @@ class PatientForm(BootstrapForm, forms.ModelForm):
                 self.add_error(
                     "tax_id",
                     _(
-                        "Este documento é de um paciente arquivado. Peça ao administrador "
-                        "da clínica para restaurá-lo."
+                        "This document belongs to an archived patient. Ask the clinic "
+                        "administrator to restore them."
                     ),
                 )
             elif other is not None:
                 self.add_error(
-                    "tax_id", _("Já existe um paciente com este documento nesta clínica.")
+                    "tax_id", _("A patient with this document already exists in this clinic.")
                 )
 
         # Fields that only make sense for one person type are cleared for the other.
@@ -206,20 +206,20 @@ class PatientForm(BootstrapForm, forms.ModelForm):
 
         city, state = data.get("city"), data.get("state")
         if city is not None and city.state_id != getattr(state, "pk", None):
-            self.add_error("city", _("A cidade não pertence à UF escolhida."))
+            self.add_error("city", _("The city is not in the chosen state."))
         return data
 
 
 class RelatedPersonForm(BootstrapForm, forms.ModelForm):
     """A relative or contact (decision 101): another patient of the clinic, or a name."""
 
-    phone = _text_field(_("Telefone"), 16, inputmode="tel")
+    phone = _text_field(_("Phone"), 16, inputmode="tel")
 
     class Meta:
         model = RelatedPerson
         fields = ["relationship", "other_patient", "name", "phone", "note"]
         widgets = {"other_patient": forms.HiddenInput}
-        help_texts = {"name": _("Só para quem não é paciente da clínica.")}
+        help_texts = {"name": _("Only for someone who is not a patient of the clinic.")}
 
     def __init__(self, *args, patient, **kwargs):
         super().__init__(*args, **kwargs)
@@ -235,9 +235,9 @@ class RelatedPersonForm(BootstrapForm, forms.ModelForm):
         data = super().clean()
         other, name = data.get("other_patient"), data.get("name", "").strip()
         if other and name:
-            self.add_error("name", _("Escolha um paciente ou digite um nome, não os dois."))
+            self.add_error("name", _("Choose a patient or type a name, not both."))
         elif not other and not name:
-            self.add_error("name", _("Escolha um paciente da clínica ou digite o nome."))
+            self.add_error("name", _("Choose a patient of the clinic or type the name."))
         data["name"] = name
         if (
             other
@@ -249,5 +249,5 @@ class RelatedPersonForm(BootstrapForm, forms.ModelForm):
             .exclude(pk=self.instance.pk)
             .exists()
         ):
-            self.add_error("other_patient", _("Este vínculo já está cadastrado."))
+            self.add_error("other_patient", _("This relationship is already registered."))
         return data

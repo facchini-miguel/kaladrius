@@ -37,6 +37,6 @@ class PractitionerForm(BootstrapForm, forms.ModelForm):
             others = Practitioner.objects.filter(user=user).exclude(pk=self.instance.pk)
             if others.exists():
                 raise forms.ValidationError(
-                    _("Este usuário já está ligado a outro profissional desta clínica.")
+                    _("This user is already linked to another practitioner in this clinic.")
                 )
         return user

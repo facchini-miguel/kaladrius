@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Caixa do dia" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Daily cash" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-  <h1 class="h3 mb-0">{% translate "Caixa do dia" %}</h1>
+  <h1 class="h3 mb-0">{% translate "Daily cash" %}</h1>
   {% if accounts|length > 1 %}
   <form method="get">
-    <select name="account" class="form-select" aria-label="{% translate 'Conta' %}" data-submit-on-change>
+    <select name="account" class="form-select" aria-label="{% translate "Account" %}" data-submit-on-change>
       {% for item in accounts %}<option value="{{ item.pk }}"{% if item.pk == account.pk %} selected{% endif %}>{{ item.name }}</option>{% endfor %}
     </select>
   </form>
@@ -16,17 +16,17 @@
 </div>
 
 {% if not account %}
-<div class="alert alert-info">{% translate "Nenhuma conta de dinheiro ativa. O administrador cadastra uma em Cadastros > Contas, com o tipo “Dinheiro (caixa)”." %}</div>
+<div class="alert alert-info">{% translate "No active cash account. The administrator adds one in Records > Accounts, with the type “Cash (drawer)”." %}</div>
 {% else %}
 <div class="card mb-4" style="max-width: 32rem;">
   <div class="card-body">
-    <h2 class="h5">{% blocktranslate with conta=account.name %}O caixa “{{ conta }}” está fechado{% endblocktranslate %}</h2>
+    <h2 class="h5">{% blocktranslate with conta=account.name %}The “{{ conta }}” drawer is closed{% endblocktranslate %}</h2>
     {% if can.receiving.create %}
     <form method="post" novalidate>
       {% csrf_token %}
       {% include "includes/form.html" %}
-      {% if system_balance is not None %}<p class="text-body-secondary small">{% blocktranslate with saldo=system_balance|currency %}Pelo sistema, a conta tem {{ saldo }}.{% endblocktranslate %}</p>{% endif %}
-      <button type="submit" class="btn btn-primary">{% translate "Abrir caixa" %}</button>
+      {% if system_balance is not None %}<p class="text-body-secondary small">{% blocktranslate with saldo=system_balance|currency %}According to the system, the account has {{ saldo }}.{% endblocktranslate %}</p>{% endif %}
+      <button type="submit" class="btn btn-primary">{% translate "Open drawer" %}</button>
     </form>
     {% endif %}
   </div>
@@ -34,16 +34,16 @@
 {% endif %}
 
 {% if history %}
-<h2 class="h5">{% translate "Caixas anteriores" %}</h2>
+<h2 class="h5">{% translate "Previous drawers" %}</h2>
 <div class="table-responsive">
   <table class="table table-sm table-hover align-middle bg-white">
     <thead>
       <tr>
-        <th>{% translate "Aberto em" %}</th>
-        <th>{% translate "Fechado em" %}</th>
-        <th class="text-end">{% translate "Esperado" %}</th>
-        <th class="text-end">{% translate "Contado" %}</th>
-        <th class="text-end">{% translate "Diferença" %}</th>
+        <th>{% translate "Opened at" %}</th>
+        <th>{% translate "Closed at" %}</th>
+        <th class="text-end">{% translate "Expected" %}</th>
+        <th class="text-end">{% translate "Counted" %}</th>
+        <th class="text-end">{% translate "Difference" %}</th>
       </tr>
     </thead>
     <tbody>

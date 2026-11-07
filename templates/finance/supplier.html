@@ -7,24 +7,24 @@
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">
     {{ supplier.name }}
-    {% if not supplier.active %}<span class="badge text-bg-secondary align-middle">{% translate "Inativo" %}</span>{% endif %}
+    {% if not supplier.active %}<span class="badge text-bg-secondary align-middle">{% translate "Inactive" %}</span>{% endif %}
   </h1>
   <div class="d-flex gap-2">
-    {% if can.finance.create and supplier.active %}<a class="btn btn-outline-primary" href="{% url 'finance:expense_new' %}?supplier={{ supplier.pk }}">{% translate "Nova despesa" %}</a>{% endif %}
-    {% if can.finance.change %}<a class="btn btn-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}
+    {% if can.finance.create and supplier.active %}<a class="btn btn-outline-primary" href="{% url 'finance:expense_new' %}?supplier={{ supplier.pk }}">{% translate "New expense" %}</a>{% endif %}
+    {% if can.finance.change %}<a class="btn btn-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Edit" %}</a>{% endif %}
   </div>
 </div>
 
 <div class="row g-3 mb-3">
   <div class="col-lg-6">
     <div class="card h-100">
-      <div class="card-header">{% translate "Dados" %}</div>
+      <div class="card-header">{% translate "Details" context "data" %}</div>
       <div class="card-body">
         <dl class="row mb-0">
-          <dt class="col-sm-5">{% translate "Tipo" %}</dt><dd class="col-sm-7">{{ supplier.get_kind_display }}</dd>
-          {% if supplier.legal_name %}<dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ supplier.legal_name }}</dd>{% endif %}
+          <dt class="col-sm-5">{% translate "Type" %}</dt><dd class="col-sm-7">{{ supplier.get_kind_display }}</dd>
+          {% if supplier.legal_name %}<dt class="col-sm-5">{% translate "Company name" %}</dt><dd class="col-sm-7">{{ supplier.legal_name }}</dd>{% endif %}
           {% with abbreviation=supplier.tax_id|document_abbreviation:supplier.document_role %}{% if abbreviation %}<dt class="col-sm-5">{{ abbreviation }}</dt><dd class="col-sm-7">{{ supplier.tax_id|document:supplier.document_role|default:"—" }}</dd>{% endif %}{% endwith %}
-          <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ supplier.phone|phone|default:"—" }}</dd>
+          <dt class="col-sm-5">{% translate "Phone" %}</dt><dd class="col-sm-7">{{ supplier.phone|phone|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if supplier.whatsapp %}<a href="{{ supplier.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ supplier.whatsapp|phone }}</a>{% else %}—{% endif %}</dd>
           <dt class="col-sm-5">{% translate "E-mail" %}</dt><dd class="col-sm-7">{{ supplier.email|default:"—" }}</dd>
         </dl>
@@ -34,26 +34,26 @@
   </div>
   <div class="col-lg-6">
     <div class="card h-100">
-      <div class="card-header">{% translate "A pagar" %}</div>
+      <div class="card-header">{% translate "Payables" %}</div>
       <div class="card-body">
         <p class="h4 mb-0">{{ outstanding|currency }}</p>
-        <p class="text-body-secondary small mb-0">{% translate "em aberto, somando as parcelas ainda não pagas" %}</p>
+        <p class="text-body-secondary small mb-0">{% translate "outstanding, adding up the installments not paid yet" %}</p>
       </div>
     </div>
   </div>
 </div>
 
 <div class="card">
-  <div class="card-header">{% translate "Contas a pagar" %}</div>
+  <div class="card-header">{% translate "Payables" context "accounts" %}</div>
   <div class="table-responsive">
     <table class="table table-hover align-middle mb-0">
       <thead>
         <tr>
-          <th>{% translate "Vencimento" %}</th>
-          <th>{% translate "Descrição" %}</th>
-          <th class="text-end">{% translate "Valor" %}</th>
-          <th class="text-end">{% translate "Falta" %}</th>
-          <th>{% translate "Situação" %}</th>
+          <th>{% translate "Due date" %}</th>
+          <th>{% translate "Description" %}</th>
+          <th class="text-end">{% translate "Amount" %}</th>
+          <th class="text-end">{% translate "Due" %}</th>
+          <th>{% translate "Status" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -66,7 +66,7 @@
           <td>{% include "finance/_status.html" with status=installment.status %}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhuma conta deste fornecedor ainda." %}</td></tr>
+        <tr><td colspan="5" class="text-body-secondary">{% translate "No bills from this supplier yet." %}</td></tr>
         {% endfor %}
       </tbody>
     </table>

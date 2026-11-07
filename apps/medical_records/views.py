@@ -58,9 +58,7 @@ def _finalize(request, visit):
     visit.finalized_by = request.user
     visit.save(update_fields=["finalized_at", "finalized_by", "updated_at"])
     log_event(Action.CHANGE, visit, changes={"finalized": [None, "yes"]})
-    messages.success(
-        request, _("Atendimento finalizado. A partir de agora, correções são feitas por adendo.")
-    )
+    messages.success(request, _("Visit finalized. From now on, corrections are made by addendum."))
 
 
 @requires_practitioner
@@ -90,7 +88,7 @@ def new_visit(request, practitioner, patient):
         if request.POST.get("action") == "finalize":
             _finalize(request, visit)
         else:
-            messages.success(request, _("Atendimento salvo."))
+            messages.success(request, _("Visit saved."))
         return redirect("medical_records:visit", pk=visit.pk)
     return render(
         request,
@@ -119,7 +117,7 @@ def visit(request, practitioner, pk):
             if request.POST.get("action") == "finalize":
                 _finalize(request, visit)
             else:
-                messages.success(request, _("Atendimento salvo."))
+                messages.success(request, _("Visit saved."))
             return redirect("medical_records:visit", pk=visit.pk)
     else:
         log_event(Action.VIEWED, visit)
@@ -210,12 +208,12 @@ def new_certificate(request, practitioner, pk):
                 **({"note": [None, CONFIDENTIAL]} if certificate.note else {}),
             },
         )
-        messages.success(request, _("Atestado emitido."))
+        messages.success(request, _("Certificate issued."))
         return redirect("medical_records:certificate", pk=certificate.pk)
     return render(
         request,
         "medical_records/document_form.html",
-        {"form": form, "visit": visit, "title": _("Emitir atestado")},
+        {"form": form, "visit": visit, "title": _("Issue certificate")},
     )
 
 
@@ -230,12 +228,12 @@ def new_prescription(request, practitioner, pk):
         prescription.created_by = request.user
         prescription.save()
         log_event(Action.CREATE, prescription, changes={"medications": [None, CONFIDENTIAL]})
-        messages.success(request, _("Receita emitida."))
+        messages.success(request, _("Prescription issued."))
         return redirect("medical_records:prescription", pk=prescription.pk)
     return render(
         request,
         "medical_records/document_form.html",
-        {"form": form, "visit": visit, "title": _("Emitir receita")},
+        {"form": form, "visit": visit, "title": _("Issue prescription")},
     )
 
 
@@ -274,9 +272,9 @@ def addendum(request, practitioner, pk):
         addendum.created_by = request.user
         addendum.save()
         log_event(Action.CREATE, addendum, changes={"text": [None, CONFIDENTIAL]})
-        messages.success(request, _("Adendo incluído."))
+        messages.success(request, _("Addendum added."))
     else:
-        messages.error(request, _("Escreva o adendo."))
+        messages.error(request, _("Write the addendum."))
     return redirect("medical_records:visit", pk=visit.pk)
 
 
@@ -298,12 +296,12 @@ def new_exam_request(request, practitioner, pk):
                 **({"indication": [None, CONFIDENTIAL]} if exam_order.indication else {}),
             },
         )
-        messages.success(request, _("Pedido de exames emitido."))
+        messages.success(request, _("Exam request issued."))
         return redirect("medical_records:exam_request", pk=exam_order.pk)
     return render(
         request,
         "medical_records/document_form.html",
-        {"form": form, "visit": visit, "title": _("Pedir exames")},
+        {"form": form, "visit": visit, "title": _("Request exams")},
     )
 
 
@@ -325,7 +323,7 @@ def upload_attachment(request, practitioner, pk):
     """Any practitioner adds files to a visit, even a finalized one (results arrive later)."""
     visit = get_object_or_404(Visit.objects, pk=pk)
     if request.user.demo:
-        messages.error(request, _("Contas de demonstração não enviam anexos."))
+        messages.error(request, _("Demo accounts cannot upload attachments."))
         return redirect("medical_records:visit", pk=visit.pk)
     form = AttachmentForm(request.POST, request.FILES)
     if form.is_valid():
@@ -343,10 +341,10 @@ def upload_attachment(request, practitioner, pk):
         log_event(
             Action.CREATE,
             attachment,
-            description=f"{visit} – {_('anexo')}",
+            description=f"{visit} – {_('attachment')}",
             changes={"file": [None, CONFIDENTIAL]},
         )
-        messages.success(request, _("Anexo incluído."))
+        messages.success(request, _("Attachment added."))
     else:
         messages.error(request, " ".join(e for errors in form.errors.values() for e in errors))
     return redirect("medical_records:visit", pk=visit.pk)
@@ -355,7 +353,7 @@ def upload_attachment(request, practitioner, pk):
 @requires_practitioner
 def attachment(request, practitioner, pk):
     attachment = get_object_or_404(Attachment.objects.select_related("visit"), pk=pk)
-    log_event(Action.VIEWED, attachment, description=f"{attachment.visit} – {_('anexo')}")
+    log_event(Action.VIEWED, attachment, description=f"{attachment.visit} – {_('attachment')}")
     response = HttpResponse(bytes(attachment.content), content_type=attachment.kind)
     # Opened in the browser (only PDF, JPG and PNG are ever stored), never cached.
     name = "".join(c for c in attachment.name if c.isalnum() or c in "._- ") or "anexo"
@@ -379,9 +377,9 @@ def remove_attachment(request, practitioner, pk):
     log_event(
         Action.DELETE,
         attachment,
-        description=f"{visit} – {_('anexo')}",
+        description=f"{visit} – {_('attachment')}",
         changes={"file": [CONFIDENTIAL, None]},
     )
     attachment.delete()
-    messages.success(request, _("Anexo removido."))
+    messages.success(request, _("Attachment removed."))
     return redirect("medical_records:visit", pk=visit.pk)

@@ -49,12 +49,12 @@ def valid_cnpj(cnpj):
 
 def validate_cpf(value):
     if not valid_cpf(value):
-        raise ValidationError(_("CPF inválido."))
+        raise ValidationError(_("Invalid CPF."))
 
 
 def validate_cnpj(value):
     if not valid_cnpj(value):
-        raise ValidationError(_("CNPJ inválido."))
+        raise ValidationError(_("Invalid CNPJ."))
 
 
 # Brazilian area codes (DDD) in use, from Anatel's numbering plan.
@@ -110,9 +110,9 @@ def normalize_phone(value, country=None):
     if not number:
         return ""
     if len(number) not in (10, 11):
-        raise ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
+        raise ValidationError(_("Enter the area code and number (10 or 11 digits)."))
     if int(number[:2]) not in DDDS:
-        raise ValidationError(_("O DDD %(ddd)s não existe.") % {"ddd": number[:2]})
+        raise ValidationError(_("Area code %(ddd)s does not exist.") % {"ddd": number[:2]})
     if len(number) == 11 and number[2] != "9":
-        raise ValidationError(_("Com 11 dígitos, o número começa com 9 depois do DDD."))
+        raise ValidationError(_("With 11 digits, the number starts with 9 after the area code."))
     return ninth_digit(number)

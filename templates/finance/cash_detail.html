@@ -1,50 +1,50 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Caixa do dia" %} · {{ cash_register.account.name }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Daily cash" %} · {{ cash_register.account.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
-    <h1 class="h3 mb-0">{% translate "Caixa do dia" %} · {{ cash_register.account.name }}</h1>
+    <h1 class="h3 mb-0">{% translate "Daily cash" %} · {{ cash_register.account.name }}</h1>
     <span class="text-body-secondary">
-      {% blocktranslate with momento=cash_register.opened_at|date:"SHORT_DATETIME_FORMAT" nome=cash_register.opened_by.get_full_name|default:cash_register.opened_by.username %}Aberto em {{ momento }} por {{ nome }}{% endblocktranslate %}
-      {% if not cash_register.is_open %} · {% blocktranslate with momento=cash_register.closed_at|date:"SHORT_DATETIME_FORMAT" nome=cash_register.closed_by.get_full_name|default:cash_register.closed_by.username %}fechado em {{ momento }} por {{ nome }}{% endblocktranslate %}{% endif %}
+      {% blocktranslate with momento=cash_register.opened_at|date:"SHORT_DATETIME_FORMAT" nome=cash_register.opened_by.get_full_name|default:cash_register.opened_by.username %}Opened on {{ momento }} by {{ nome }}{% endblocktranslate %}
+      {% if not cash_register.is_open %} · {% blocktranslate with momento=cash_register.closed_at|date:"SHORT_DATETIME_FORMAT" nome=cash_register.closed_by.get_full_name|default:cash_register.closed_by.username %}closed on {{ momento }} by {{ nome }}{% endblocktranslate %}{% endif %}
     </span>
-    {% if cash_register.is_open %}<span class="badge text-bg-success ms-1">{% translate "Aberto" %}</span>{% else %}<span class="badge text-bg-secondary ms-1">{% translate "Fechado" %}</span>{% endif %}
+    {% if cash_register.is_open %}<span class="badge text-bg-success ms-1">{% translate "Open" %}</span>{% else %}<span class="badge text-bg-secondary ms-1">{% translate "Closed" %}</span>{% endif %}
   </div>
   <div class="d-flex flex-wrap gap-2">
     {% if cash_register.is_open and can.receiving.create %}
-    <a class="btn btn-outline-danger" href="{% url 'finance:cash_movement' cash_register.pk 'withdrawal' %}">{% translate "Retirada (sangria)" %}</a>
-    <a class="btn btn-outline-success" href="{% url 'finance:cash_movement' cash_register.pk 'top-up' %}">{% translate "Reforço" %}</a>
-    <a class="btn btn-primary" href="{% url 'finance:cash_close' cash_register.pk %}">{% translate "Fechar caixa" %}</a>
+    <a class="btn btn-outline-danger" href="{% url 'finance:cash_movement' cash_register.pk 'withdrawal' %}">{% translate "Withdrawal" %}</a>
+    <a class="btn btn-outline-success" href="{% url 'finance:cash_movement' cash_register.pk 'top-up' %}">{% translate "Top-up" %}</a>
+    <a class="btn btn-primary" href="{% url 'finance:cash_close' cash_register.pk %}">{% translate "Close drawer" %}</a>
     {% endif %}
-    <a class="btn btn-link" href="{% url 'finance:cash' %}?account={{ cash_register.account_id }}">{% translate "Caixas anteriores" %}</a>
+    <a class="btn btn-link" href="{% url 'finance:cash' %}?account={{ cash_register.account_id }}">{% translate "Previous drawers" %}</a>
   </div>
 </div>
 
 <div class="table-responsive mb-4" style="max-width: 36rem;">
   <table class="table table-sm bg-white mb-0">
     <tbody>
-      <tr><td>{% translate "Valor contado na abertura" %}</td><td class="text-end">{{ cash_register.opening_amount|currency }}</td></tr>
-      <tr><td>{% translate "+ Recebimentos nesta conta" %}</td><td class="text-end text-success">{{ summary.incoming|currency }}</td></tr>
-      <tr><td>{% translate "− Despesas pagas por esta conta" %}</td><td class="text-end text-danger">{{ summary.outgoing|currency }}</td></tr>
-      <tr><td>{% translate "+ Reforços" %}</td><td class="text-end text-success">{{ summary.top_ups|currency }}</td></tr>
-      <tr><td>{% translate "− Retiradas" %}</td><td class="text-end text-danger">{{ summary.withdrawals|currency }}</td></tr>
-      <tr class="fw-semibold"><td>{% translate "Deve haver na gaveta" %}</td><td class="text-end">{% if cash_register.is_open %}{{ summary.expected|currency }}{% else %}{{ cash_register.expected_amount|currency }}{% endif %}</td></tr>
+      <tr><td>{% translate "Amount counted at opening" %}</td><td class="text-end">{{ cash_register.opening_amount|currency }}</td></tr>
+      <tr><td>{% translate "+ Received into this account" %}</td><td class="text-end text-success">{{ summary.incoming|currency }}</td></tr>
+      <tr><td>{% translate "− Expenses paid from this account" %}</td><td class="text-end text-danger">{{ summary.outgoing|currency }}</td></tr>
+      <tr><td>{% translate "+ Top-ups" %}</td><td class="text-end text-success">{{ summary.top_ups|currency }}</td></tr>
+      <tr><td>{% translate "− Withdrawals" %}</td><td class="text-end text-danger">{{ summary.withdrawals|currency }}</td></tr>
+      <tr class="fw-semibold"><td>{% translate "Should be in the drawer" %}</td><td class="text-end">{% if cash_register.is_open %}{{ summary.expected|currency }}{% else %}{{ cash_register.expected_amount|currency }}{% endif %}</td></tr>
       {% if not cash_register.is_open %}
-      <tr><td>{% translate "Contado no fechamento" %}</td><td class="text-end">{{ cash_register.counted_amount|currency }}</td></tr>
-      <tr class="fw-semibold{% if cash_register.difference %} text-danger{% endif %}"><td>{% translate "Diferença" %}</td><td class="text-end">{{ cash_register.difference|currency }}</td></tr>
+      <tr><td>{% translate "Counted at closing" %}</td><td class="text-end">{{ cash_register.counted_amount|currency }}</td></tr>
+      <tr class="fw-semibold{% if cash_register.difference %} text-danger{% endif %}"><td>{% translate "Difference" %}</td><td class="text-end">{{ cash_register.difference|currency }}</td></tr>
       {% endif %}
     </tbody>
   </table>
 </div>
-{% if cash_register.note %}<p><strong>{% translate "Observação" %}:</strong> {{ cash_register.note }}</p>{% endif %}
+{% if cash_register.note %}<p><strong>{% translate "Note" %}:</strong> {{ cash_register.note }}</p>{% endif %}
 
-<h2 class="h5">{% translate "Movimentação" %}</h2>
+<h2 class="h5">{% translate "Movements" %}</h2>
 <div class="table-responsive">
   <table class="table table-sm align-middle bg-white">
-    <thead><tr><th>{% translate "Quando" %}</th><th>{% translate "Descrição" %}</th><th>{% translate "Forma de pagamento" %}</th><th class="text-end">{% translate "Valor" %}</th></tr></thead>
+    <thead><tr><th>{% translate "When" %}</th><th>{% translate "Description" %}</th><th>{% translate "Payment method" %}</th><th class="text-end">{% translate "Amount" %}</th></tr></thead>
     <tbody>
       {% for payment in summary.payments %}
       <tr>
@@ -63,10 +63,10 @@
       </tr>
       {% endfor %}
       {% if not summary.payments and not summary.movements %}
-      <tr><td colspan="4" class="text-body-secondary">{% translate "Nenhuma movimentação desde a abertura." %}</td></tr>
+      <tr><td colspan="4" class="text-body-secondary">{% translate "No movements since opening." %}</td></tr>
       {% endif %}
     </tbody>
   </table>
 </div>
-<p class="text-body-secondary small">{% translate "Entram aqui os pagamentos registrados nesta conta enquanto o caixa está aberto, pela hora do registro." %}</p>
+<p class="text-body-secondary small">{% translate "Payments registered into this account while the drawer is open come in here, by the time they were registered." %}</p>
 {% endblock %}

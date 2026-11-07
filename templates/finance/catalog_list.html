@@ -6,31 +6,31 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{{ model.verbose_name_plural|capfirst }}</h1>
-  {% if can.finance.create %}<a class="btn btn-primary" href="{% url 'finance:catalog_new' catalog %}">{% translate "Novo" %}</a>{% endif %}
+  {% if can.finance.create %}<a class="btn btn-primary" href="{% url 'finance:catalog_new' catalog %}">{% translate "New" %}</a>{% endif %}
 </div>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
-    <thead><tr><th>{% translate "Nome" %}</th>{% if catalog != "cost-centers" %}<th>{% translate "Tipo" %}</th>{% endif %}{% if catalog == "categories" %}<th>{% translate "Grupo" %}</th>{% endif %}<th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Name" %}</th>{% if catalog != "cost-centers" %}<th>{% translate "Type" %}</th>{% endif %}{% if catalog == "categories" %}<th>{% translate "Group" %}</th>{% endif %}<th>{% translate "Status" %}</th><th class="text-end">{% translate "Actions" %}</th></tr></thead>
     <tbody>
       {% for item in items %}
       <tr>
         <td>{{ item.name }}</td>
         {% if catalog == "cost-centers" %}
-        <td>{% if item.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
+        <td>{% if item.active %}<span class="badge text-bg-success">{% translate "Active" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inactive" %}</span>{% endif %}</td>
         {% else %}
         <td>{{ item.get_kind_display }}</td>
         {% if catalog == "categories" %}<td>{{ item.group|default:"—" }}</td>{% endif %}
-        <td>{% if item.active %}<span class="badge text-bg-success">{% translate "Ativa" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td>
+        <td>{% if item.active %}<span class="badge text-bg-success">{% translate "Active" context "feminine" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inactive" context "feminine" %}</span>{% endif %}</td>
         {% endif %}
-        <td class="text-end">{% if can.finance.change %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:catalog_edit' catalog item.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td class="text-end">{% if can.finance.change %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:catalog_edit' catalog item.pk %}">{% translate "Edit" %}</a>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 {% if catalog == "cost-centers" %}
-<p class="text-body-secondary small">{% translate "O centro de custo diz para quem é cada receita ou despesa (um consultório, uma especialidade, o administrativo). Ele aparece nos lançamentos e nos relatórios assim que houver um cadastrado. Para deixar de usar sem perder o histórico, edite e desmarque “ativo”." %}</p>
+<p class="text-body-secondary small">{% translate "The cost center tells who each income or expense is for (a room, a specialty, the office). It shows up on entries and reports once there is one registered. To stop using one without losing the history, edit it and uncheck “active”." %}</p>
 {% else %}
-<p class="text-body-secondary small">{% translate "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”." %}</p>
+<p class="text-body-secondary small">{% translate "To stop using it without losing the history, edit it and uncheck “active”." context "feminine" %}</p>
 {% endif %}
 {% endblock %}

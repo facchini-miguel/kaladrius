@@ -104,13 +104,13 @@ def pay(practitioner, *, until, due_date, category, user):
     practitioner = Practitioner.objects.select_for_update().get(pk=practitioner.pk)
     calculation = pending(practitioner, until)
     if calculation["amount"] <= 0:
-        raise ValidationError(_("Não há comissão a pagar até esta data."))
+        raise ValidationError(_("There is no commission to pay up to this date."))
     entry = services.create_entry(
         clinic=practitioner.clinic,
         kind=Entry.Kind.PAYABLE,
         payer=practitioner.name,
         practitioner=practitioner,
-        description=_("Comissão de %(nome)s até %(data)s")
+        description=_("Commission of %(nome)s up to %(data)s")
         % {"nome": practitioner.name, "data": date_format(until, "SHORT_DATE_FORMAT")},
         category=category,
         total_amount=calculation["amount"],
@@ -157,8 +157,8 @@ def release(commission):
     if deducted is not None:
         raise ValidationError(
             _(
-                "Esta comissão não pode ser cancelada: o estorno de um recebimento dela já foi "
-                "descontado na comissão até %(data)s. Cancele aquela antes."
+                "This commission cannot be cancelled: the reversal of one of its receipts was "
+                "already deducted in the commission up to %(data)s. Cancel that one first."
             )
             % {"data": date_format(deducted.until, "SHORT_DATE_FORMAT")}
         )

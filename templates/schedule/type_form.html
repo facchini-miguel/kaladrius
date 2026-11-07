@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% if kind.pk %}{% translate "Editar tipo de atendimento" %}{% else %}{% translate "Novo tipo de atendimento" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if kind.pk %}{% translate "Edit appointment type" %}{% else %}{% translate "New appointment type" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if kind.pk %}{% blocktranslate with nome=kind.display_name %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo tipo de atendimento" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if kind.pk %}{% blocktranslate with nome=kind.display_name %}Edit {{ nome }}{% endblocktranslate %}{% else %}{% translate "New appointment type" %}{% endif %}</h1>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'schedule:types' %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'schedule:types' %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

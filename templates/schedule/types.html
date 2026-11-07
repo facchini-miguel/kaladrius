@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Tipos de atendimento" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Appointment types" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h3 mb-0">{% translate "Tipos de atendimento" %}</h1>
+  <h1 class="h3 mb-0">{% translate "Appointment types" %}</h1>
   {% if can.catalogs.create %}
-  <a class="btn btn-primary" href="{% url 'schedule:type_new' %}">{% translate "Novo tipo" %}</a>
+  <a class="btn btn-primary" href="{% url 'schedule:type_new' %}">{% translate "New type" %}</a>
   {% endif %}
 </div>
-<p class="text-body-secondary">{% translate "A cor de cada tipo pinta os horários na agenda." %}</p>
+<p class="text-body-secondary">{% translate "Each type's color paints its slots in the schedule." %}</p>
 
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead>
-      <tr><th>{% translate "Cor" %}</th><th>{% translate "Nome" %}</th><th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr>
+      <tr><th>{% translate "Color" %}</th><th>{% translate "Name" %}</th><th>{% translate "Status" %}</th><th class="text-end">{% translate "Actions" %}</th></tr>
     </thead>
     <tbody>
       {% for kind in types %}
@@ -23,20 +23,20 @@
         <td><span class="color-swatch" style="background-color: {{ kind.color }}" title="{{ kind.color }}"></span></td>
         <td>{{ kind.display_name }}</td>
         <td>
-          {% if kind.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
-          {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}
+          {% if kind.active %}<span class="badge text-bg-success">{% translate "Active" %}</span>
+          {% else %}<span class="badge text-bg-secondary">{% translate "Inactive" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
           {% if can.catalogs.change %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'schedule:type_edit' kind.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'schedule:type_edit' kind.pk %}">{% translate "Edit" %}</a>
           {% endif %}
           {% if can.catalogs.delete %}
-          <a class="btn btn-sm btn-outline-danger" href="{% url 'schedule:type_delete' kind.pk %}">{% translate "Excluir" %}</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'schedule:type_delete' kind.pk %}">{% translate "Delete" %}</a>
           {% endif %}
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="4" class="text-body-secondary">{% translate "Nenhum tipo de atendimento cadastrado." %}</td></tr>
+      <tr><td colspan="4" class="text-body-secondary">{% translate "No appointment types yet." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Verificação em duas etapas" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Two-step verification" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center mt-5">
   <div class="col-sm-9 col-md-6 col-lg-4">
     <div class="card shadow-sm"><div class="card-body p-4">
-      <h1 class="h4 mb-3">{% translate "Verificação em duas etapas" %}</h1>
-      <p class="text-body-secondary">{% translate "Digite o código de 6 números que aparece no aplicativo autenticador do seu celular. Sem o celular, use um dos códigos de recuperação." %}</p>
+      <h1 class="h4 mb-3">{% translate "Two-step verification" %}</h1>
+      <p class="text-body-secondary">{% translate "Type the 6-digit code shown by the authenticator app on your phone. Without the phone, use one of the recovery codes." %}</p>
       <form method="post" novalidate>
         {% csrf_token %}
         {% include "includes/form.html" %}
-        <button type="submit" class="btn btn-primary w-100">{% translate "Entrar" %}</button>
+        <button type="submit" class="btn btn-primary w-100">{% translate "Log in" %}</button>
       </form>
-      <p class="text-center small mt-3 mb-0"><a href="{% url 'login' %}">{% translate "Voltar" %}</a></p>
+      <p class="text-center small mt-3 mb-0"><a href="{% url 'login' %}">{% translate "Back" %}</a></p>
     </div></div>
   </div>
 </div>

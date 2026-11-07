@@ -304,7 +304,7 @@ def abbreviation(value, roles_=None, country=None):
 
 
 def invalid(label):
-    return gettext("%(documento)s: número inválido.") % {"documento": label}
+    return gettext("%(documento)s: invalid number.") % {"documento": label}
 
 
 def clean_value(value, documents, label):

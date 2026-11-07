@@ -3,7 +3,7 @@ from django.contrib.postgres.constraints import ExclusionConstraint
 from django.contrib.postgres.fields import DateTimeRangeField, RangeBoundary, RangeOperators
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import gettext, pgettext, pgettext_lazy
+from django.utils.translation import gettext, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolation import ClinicModel, without_isolation
@@ -25,37 +25,39 @@ DEFAULT_TYPES = [
     ("Ocupado", "#a7bef1"),
 ]
 
-# The default names are saved in Portuguese and shown in the user's language (see
-# TipoAtendimento.nome_exibido). This list only marks them for makemessages; it is never read.
-_DEFAULT_NAMES_FOR_TRANSLATION = [
-    pgettext_lazy("tipo de atendimento", "Liberado"),
-    pgettext_lazy("tipo de atendimento", "Consulta"),
-    pgettext_lazy("tipo de atendimento", "Retorno"),
-    pgettext_lazy("tipo de atendimento", "Exame"),
-    pgettext_lazy("tipo de atendimento", "Procedimento"),
-    pgettext_lazy("tipo de atendimento", "Atendimento de 15 em 15"),
-    pgettext_lazy("tipo de atendimento", "Ocupado"),
-    pgettext_lazy("tipo de atendimento", "Cirurgia"),
-    pgettext_lazy("tipo de atendimento", "Dentística"),
-    pgettext_lazy("tipo de atendimento", "Periodontia"),
-    pgettext_lazy("tipo de atendimento", "Consulta inicial"),
-    pgettext_lazy("tipo de atendimento", "Prótese"),
-    pgettext_lazy("tipo de atendimento", "Endodontia"),
-    pgettext_lazy("tipo de atendimento", "Ortodontia"),
-]
+# The default names are saved in Portuguese, as the clinic may rename them, and shown in the
+# user's language (AppointmentType.display_name): their translations, by the saved name.
+DEFAULT_NAMES = {
+    "Liberado": pgettext_lazy("appointment type", "Available"),
+    "Consulta": pgettext_lazy("appointment type", "Consultation"),
+    "Retorno": pgettext_lazy("appointment type", "Follow-up"),
+    "Exame": pgettext_lazy("appointment type", "Exam"),
+    "Procedimento": pgettext_lazy("appointment type", "Procedure"),
+    "Atendimento de 15 em 15": pgettext_lazy("appointment type", "15-minute appointments"),
+    "Ocupado": pgettext_lazy("appointment type", "Busy"),
+    "Cirurgia": pgettext_lazy("appointment type", "Surgery"),
+    "Dentística": pgettext_lazy("appointment type", "Restorative dentistry"),
+    "Periodontia": pgettext_lazy("appointment type", "Periodontics"),
+    "Consulta inicial": pgettext_lazy("appointment type", "First visit"),
+    "Prótese": pgettext_lazy("appointment type", "Prosthodontics"),
+    "Endodontia": pgettext_lazy("appointment type", "Endodontics"),
+    "Ortodontia": pgettext_lazy("appointment type", "Orthodontics"),
+}
 
 
 class AppointmentType(ClinicModel):
     """Kind of appointment (surgery, first visit...). Its color paints the schedule."""
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
-    color = models.CharField(_("cor"), max_length=7, default="#0d6efd", validators=[validate_color])
-    active = models.BooleanField(_("ativo"), default=True)
+    name = models.CharField(_("name"), max_length=60, db_collation=ALPHABETICAL)
+    color = models.CharField(
+        _("color"), max_length=7, default="#0d6efd", validators=[validate_color]
+    )
+    active = models.BooleanField(_("active"), default=True)
 
     class Meta:
         db_table = "schedule_appointment_type"
-        verbose_name = _("tipo de atendimento")
-        verbose_name_plural = _("tipos de atendimento")
+        verbose_name = _("appointment type")
+        verbose_name_plural = _("appointment types")
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(fields=["clinic", "name"], name="appointment_type_unique"),
@@ -68,7 +70,7 @@ class AppointmentType(ClinicModel):
     def display_name(self):
         """The name in the user's language when it is one of the default types; a name the
         clinic typed itself (or renamed) has no translation and is shown as saved."""
-        return pgettext("tipo de atendimento", self.name)
+        return str(DEFAULT_NAMES.get(self.name, self.name))
 
 
 class TsTzRange(models.Func):
@@ -82,58 +84,58 @@ class Appointment(ClinicModel):
     class Status(models.TextChoices):
         """Whether the patient came (0.24.0). Only appointments with a patient are marked."""
 
-        BOOKED = "booked", _("Agendado")
-        ATTENDED = "attended", _("Compareceu")
-        MISSED = "missed", _("Faltou")
+        BOOKED = "booked", _("Booked")
+        ATTENDED = "attended", _("Came")
+        MISSED = "missed", _("Missed")
         # Kept for the history and the no-show figures, but frees the time slot.
-        CANCELLED = "cancelled", _("Desmarcou")
+        CANCELLED = "cancelled", pgettext_lazy("appointment", "Cancelled")
 
     practitioner = models.ForeignKey(
         "practitioners.Practitioner",
         on_delete=models.PROTECT,
         related_name="appointments",
-        verbose_name=_("profissional"),
+        verbose_name=_("practitioner"),
     )
     kind = models.ForeignKey(
         AppointmentType,
         on_delete=models.PROTECT,
         related_name="appointments",
-        verbose_name=_("tipo de atendimento"),
+        verbose_name=_("appointment type"),
     )
-    start = models.DateTimeField(_("início"))
-    end = models.DateTimeField(_("fim"))
+    start = models.DateTimeField(_("start"))
+    end = models.DateTimeField(_("end"))
     patient = models.ForeignKey(
         "patients.Patient",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="appointments",
-        verbose_name=_("paciente"),
+        verbose_name=_("patient"),
     )
-    description = models.TextField(_("descrição"), blank=True)
+    description = models.TextField(_("description"), blank=True)
     status = models.CharField(
-        _("situação"),
+        _("status"),
         max_length=10,
         choices=Status.choices,
         default=Status.BOOKED,
     )
     # Appointments created together by "repeat N weeks" share the same series id.
-    series = models.UUIDField(_("série"), null=True, blank=True, editable=False)
+    series = models.UUIDField(_("series"), null=True, blank=True, editable=False)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("criado por"),
+        verbose_name=_("created by"),
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("changed at"), auto_now=True)
 
     class Meta:
         db_table = "schedule_appointment"
-        verbose_name = _("agendamento")
-        verbose_name_plural = _("agendamentos")
+        verbose_name = _("appointment")
+        verbose_name_plural = _("appointments")
         ordering = ["start"]
         indexes = [
             models.Index(
@@ -157,7 +159,9 @@ class Appointment(ClinicModel):
                 condition=~models.Q(
                     status__in=spellings("schedule.Appointment.status", "cancelled")
                 ),
-                violation_error_message=_("O profissional já tem um agendamento neste horário."),
+                violation_error_message=_(
+                    "The practitioner already has an appointment at this time."
+                ),
             ),
         ]
 
@@ -168,7 +172,7 @@ class Appointment(ClinicModel):
     def title(self):
         if self.patient_id:
             return self.patient.name
-        return (self.description.strip().splitlines() or [gettext("Horário reservado")])[0]
+        return (self.description.strip().splitlines() or [gettext("Reserved slot")])[0]
 
     @property
     def is_cancelled(self):

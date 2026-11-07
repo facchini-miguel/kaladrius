@@ -5,12 +5,12 @@
 
 {% block content %}
 <h1 class="h3 mb-1">{{ title }}</h1>
-<p class="text-body-secondary mb-4">{% translate "Caixa do dia" %} · {{ cash_register.account.name }}</p>
-{% if expected is not None %}<div class="alert alert-light border" style="max-width: 32rem;">{% translate "Deve haver na gaveta" %}: <strong>{{ expected|currency }}</strong></div>{% endif %}
+<p class="text-body-secondary mb-4">{% translate "Daily cash" %} · {{ cash_register.account.name }}</p>
+{% if expected is not None %}<div class="alert alert-light border" style="max-width: 32rem;">{% translate "Should be in the drawer" %}: <strong>{{ expected|currency }}</strong></div>{% endif %}
 <form method="post" style="max-width: 32rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:cash_detail' cash_register.pk %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'finance:cash_detail' cash_register.pk %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}
