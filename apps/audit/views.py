@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.utils.http import urlencode
 
 from apps.core.permissions import Action, Module, requires_permission
+from apps.core.values import VALUES, code_value
 
 from .models import AuditEntry
 from .record import model_label
@@ -58,12 +59,50 @@ def _labels():
     return labels
 
 
+@cache
+def _choices():
+    """For each kind of record, by every name an entry may have stored, its choice fields as
+    (field key in VALUES, {code: label}): an entry shows "Compareceu", not the code it stored."""
+    from .old_names import OLD_FIELD_NAMES
+    from .signals import AUDITED
+
+    choices = {}
+    for model in AUDITED:
+        fields = choices.setdefault(model_label(model), {})
+        old_names = OLD_FIELD_NAMES.get(model._meta.label, {})
+        for field in model._meta.concrete_fields:
+            if not field.choices:
+                continue
+            shown = (f"{model._meta.label}.{field.name}", dict(field.choices))
+            names = {field.column, field.attname, field.name}
+            names |= {old for old, name in old_names.items() if name == field.name}
+            for name in names:
+                fields[name] = shown
+    return choices
+
+
+def _shown(choice, value):
+    """A stored code as its label, in either spelling of decision 197."""
+    if choice is None or not isinstance(value, str):
+        return value
+    key, labels = choice
+    if key in VALUES:
+        value = code_value(key, value)
+    return labels.get(value, value)
+
+
 def changed_fields(record):
     """The entry's changes as (label, before, after), in the user's language. A field the
     model no longer has (or "senha") shows its stored name."""
     labels = _labels().get(record.model_name, {})
+    choices = _choices().get(record.model_name, {})
     return [
-        (labels.get(field, field), values[0], values[1]) for field, values in record.changes.items()
+        (
+            labels.get(field, field),
+            _shown(choices.get(field), values[0]),
+            _shown(choices.get(field), values[1]),
+        )
+        for field, values in record.changes.items()
     ]
 
 
