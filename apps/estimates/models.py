@@ -68,9 +68,9 @@ class Procedure(ClinicModel):
 
 class Estimate(ClinicModel):
     class Status(models.TextChoices):
-        OPEN = "aberto", pgettext_lazy("orçamento", "Em aberto")
-        APPROVED = "aprovado", _("Aprovado")
-        REFUSED = "recusado", _("Recusado")
+        OPEN = "open", pgettext_lazy("orçamento", "Em aberto")
+        APPROVED = "approved", _("Aprovado")
+        REFUSED = "refused", _("Recusado")
 
     patient = models.ForeignKey(
         "patients.Patient",

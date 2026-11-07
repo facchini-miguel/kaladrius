@@ -26,9 +26,9 @@ class FinancialAccount(ClinicModel):
     """Where the money goes: the cash drawer, a bank account, the card machine."""
 
     class Kind(models.TextChoices):
-        CASH = "dinheiro", _("Dinheiro (caixa)")
-        BANK = "banco", _("Banco")
-        CARD = "cartao", _("Maquininha de cartão")
+        CASH = "cash", _("Dinheiro (caixa)")
+        BANK = "bank", _("Banco")
+        CARD = "card", _("Maquininha de cartão")
 
     name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
     kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
@@ -54,8 +54,8 @@ class FinancialAccount(ClinicModel):
 
 
 class FinancialKind(models.TextChoices):
-    INCOME = "receita", _("Receita")
-    EXPENSE = "despesa", _("Despesa")
+    INCOME = "income", _("Receita")
+    EXPENSE = "expense", _("Despesa")
 
 
 class AccountGroup(ClinicModel):
@@ -220,8 +220,8 @@ class Supplier(ClinicModel):
     """Who the clinic buys from or pays (decision 093), picked on a payable."""
 
     class Kind(models.TextChoices):
-        INDIVIDUAL = "PF", _("Pessoa física")
-        COMPANY = "PJ", _("Pessoa jurídica")
+        INDIVIDUAL = "individual", _("Pessoa física")
+        COMPANY = "company", _("Pessoa jurídica")
 
     kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, default=Kind.COMPANY)
     name = models.CharField(
@@ -267,8 +267,8 @@ class Entry(ClinicModel):
     """An amount owed to the clinic (receivable) or by it (payable), in installments."""
 
     class Kind(models.TextChoices):
-        RECEIVABLE = "receber", _("A receber")
-        PAYABLE = "pagar", _("A pagar")
+        RECEIVABLE = "receivable", _("A receber")
+        PAYABLE = "payable", _("A pagar")
 
     kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
     description = models.CharField(_("descrição"), max_length=200)
@@ -424,19 +424,19 @@ class Payment(ClinicModel):
         """Every method of every country; each country offers some (payment_methods.py, decision
         123)."""
 
-        CASH = "dinheiro", _("Dinheiro")
+        CASH = "cash", _("Dinheiro")
         PIX = "pix", _("Pix")
-        DEBIT = "debito", _("Cartão de débito")
-        CREDIT = "credito", _("Cartão de crédito")
-        TRANSFER = "transferencia", _("Transferência")
+        DEBIT = "debit", _("Cartão de débito")
+        CREDIT = "credit", _("Cartão de crédito")
+        TRANSFER = "transfer", _("Transferência")
         BOLETO = "boleto", _("Boleto")
         # No longer offered in Brazil (the owner: cheques are not used anymore); kept so
         # payments recorded as cheque there still show their method.
         CHEQUE = "cheque", _("Cheque")
-        WALLET = "carteira", _("Carteira digital")
-        DIRECT_DEBIT = "debito_auto", _("Débito automático")
+        WALLET = "wallet", _("Carteira digital")
+        DIRECT_DEBIT = "direct_debit", _("Débito automático")
         HSA = "hsa", _("Cartão HSA/FSA")
-        FINANCING = "financiamento", _("Financiamento ao paciente")
+        FINANCING = "financing", _("Financiamento ao paciente")
         BPAY = "bpay", "BPAY"
 
         @classmethod
@@ -620,8 +620,8 @@ class CashMovement(ClinicModel):
     """Withdrawal from or top-up of an open cash drawer, optionally to/from another account."""
 
     class Kind(models.TextChoices):
-        WITHDRAWAL = "retirada", _("Retirada (sangria)")
-        TOP_UP = "reforco", _("Reforço")
+        WITHDRAWAL = "withdrawal", _("Retirada (sangria)")
+        TOP_UP = "top_up", _("Reforço")
 
     cash_register = models.ForeignKey(
         CashRegister,
@@ -825,9 +825,9 @@ class BankTransaction(ClinicModel):
     """A bank statement line, reconciled with a payment or a drawer movement, or ignored."""
 
     class Status(models.TextChoices):
-        PENDING = "pendente", _("Pendente")
-        RECONCILED = "conciliada", _("Conciliada")
-        IGNORED = "ignorada", _("Ignorada")
+        PENDING = "pending", _("Pendente")
+        RECONCILED = "reconciled", _("Conciliada")
+        IGNORED = "ignored", _("Ignorada")
 
     account = models.ForeignKey(
         FinancialAccount,

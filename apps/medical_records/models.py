@@ -128,8 +128,8 @@ class Certificate(ClinicModel):
     deleted after issued; it can be printed again."""
 
     class Kind(models.TextChoices):
-        ATTENDANCE = "comparecimento", _("Comparecimento")
-        SICK_LEAVE = "afastamento", _("Afastamento")
+        ATTENDANCE = "attendance", _("Comparecimento")
+        SICK_LEAVE = "sick_leave", _("Afastamento")
 
     visit = models.ForeignKey(
         Visit,
