@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.71.1
+  date: 2026-11-09
+  title:
+    pt-br: O sistema fora das buscas
+    en: The system kept out of search results
+    es: El sistema fuera de las búsquedas
+  items:
+    - kind: improvement
+      module: System
+      audience: [staff]
+      text:
+        pt-br: >
+          Os mecanismos de busca, como o Google, são avisados para não listar nenhuma página do
+          sistema, então o endereço da clínica não aparece numa pesquisa. A documentação do
+          Kaladrius continua aberta às buscas e agora indica o mapa das suas páginas.
+        en: >
+          Search engines such as Google are told not to list any page of the system, so the
+          clinic's address does not turn up in a search. The Kaladrius documentation stays open to
+          search engines and now points them to the map of its pages.
+        es: >
+          Se avisa a los buscadores, como Google, que no muestren ninguna página del sistema, así
+          que la dirección de la clínica no aparece en una búsqueda. La documentación de Kaladrius
+          sigue abierta a los buscadores y ahora les indica el mapa de sus páginas.
+
 - version: 0.71.0
   date: 2026-11-09
   title:

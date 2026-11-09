@@ -28,7 +28,8 @@
 # only docs.localhost, with Caddy's local certificate, and never reaches the internet.
 {$DOCS_HOSTNAME:docs.localhost} {
 	encode zstd gzip
-	# Public and indexed since the code was opened (decision 077).
+	# Public and indexed since the code was opened (decision 077); the system itself is not
+	# (decision 207, apps/core/middleware.py).
 	reverse_proxy 127.0.0.1:8080
 	header -Server
 }

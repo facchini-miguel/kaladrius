@@ -148,3 +148,15 @@ def test_api_docs_only_for_superuser(client, create_user):
     # The endpoints themselves stay open to the app.
     client.logout()
     assert client.get(reverse("api-v1:version")).status_code == 200
+
+
+@pytest.mark.parametrize("path", ["/account/login/", "/", "/privacy/", "/api/v1/version", "/nada/"])
+def test_search_engines_never_list_the_system(client, path):
+    """Decision 207: a clinic's installation never turns up in a search, whatever the page."""
+    assert client.get(path)["X-Robots-Tag"] == "noindex, nofollow"
+
+
+def test_documentation_points_search_engines_to_its_sitemap():
+    robots = (Path(__file__).parent.parent / "docs/static/robots.txt").read_text()
+    assert "Sitemap: https://kaladrius-docs.facchini.eti.br/sitemap.xml" in robots
+    assert "Disallow: /\n" not in robots
