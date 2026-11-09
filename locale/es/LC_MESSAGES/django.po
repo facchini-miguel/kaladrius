@@ -2031,6 +2031,9 @@ msgstr "Adjunto agregado."
 msgid "Attachment removed."
 msgstr "Adjunto eliminado."
 
+msgid "System health"
+msgstr "Salud del sistema"
+
 msgid "Processor"
 msgstr "Procesador"
 
@@ -2783,6 +2786,13 @@ msgstr "Sistema"
 msgid "Appointment types"
 msgstr "Tipos de atención"
 
+msgctxt "admin site header"
+msgid "administration"
+msgstr "administración"
+
+msgid "Administration"
+msgstr "Administración"
+
 msgid "Access denied"
 msgstr "Acceso denegado"
 
@@ -3127,12 +3137,6 @@ msgstr "Proveedores"
 
 msgid "User manual"
 msgstr "Manual del usuario"
-
-msgid "System health"
-msgstr "Salud del sistema"
-
-msgid "Administration"
-msgstr "Administración"
 
 msgid "Django admin"
 msgstr "Panel de Django"
