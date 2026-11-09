@@ -97,3 +97,21 @@ class UserLanguageMiddleware:
             translation.activate(language)
             request.LANGUAGE_CODE = language
         return self.get_response(request)
+
+
+class NoIndexMiddleware:
+    """Asks search engines not to list any page of the system (decision 207).
+
+    An installation is a clinic's private system: its address must never turn up in a
+    search. The public pages about the project are the website and the documentation,
+    which are indexed. A header rather than a robots.txt block, so engines that already
+    know an address (from a link) read it and drop it.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response.headers.setdefault("X-Robots-Tag", "noindex, nofollow")
+        return response
