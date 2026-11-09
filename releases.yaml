@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.71.2
+  date: 2026-11-09
+  title:
+    pt-br: Política de privacidade com o novo servidor
+    en: Privacy policy with the new server
+    es: Política de privacidad con el nuevo servidor
+  items:
+    - kind: improvement
+      module: Help
+      audience: [staff, patient]
+      text:
+        pt-br: >
+          A política de privacidade (versão 6) diz onde o sistema fica agora: num servidor da
+          Hostinger, nos Estados Unidos, que passa a ser o suboperador no lugar do Google Cloud. O
+          resto da política não mudou.
+        en: >
+          The privacy policy (version 6) says where the system is now: on a Hostinger server in the
+          United States, which becomes the sub-processor in Google Cloud's place. The rest of the
+          policy did not change.
+        es: >
+          La política de privacidad (versión 6) dice dónde está ahora el sistema: en un servidor de
+          Hostinger, en Estados Unidos, que pasa a ser el subencargado en lugar de Google Cloud. El
+          resto de la política no cambió.
+
 - version: 0.71.1
   date: 2026-11-09
   title:

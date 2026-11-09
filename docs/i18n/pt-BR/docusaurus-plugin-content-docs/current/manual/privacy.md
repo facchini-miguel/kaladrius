@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Política de privacidade
 
-Versão 5 · 31/10/2026
+Versão 6 · 09/11/2026
 
 Esta política explica como os dados pessoais de pacientes, responsáveis, equipe e fornecedores são tratados no **Kaladrius**, o sistema de gestão que a clínica usa: quais dados, para quê, com que base legal, quem tem acesso, onde ficam, por quanto tempo e como exercer seus direitos. Ela segue a Lei Geral de Proteção de Dados Pessoais (LGPD, Lei 13.709/2018) e a lei sobre prontuários eletrônicos (Lei 13.787/2018).
 
@@ -60,11 +60,11 @@ Os dados **não** são usados para publicidade, **não** são vendidos, **não**
 ## 5. Quem tem acesso
 - Só a equipe da clínica, com usuário e senha pessoais, cada um conforme o seu perfil: o profissional vê apenas a própria agenda; a recepção não vê as contas a pagar; o financeiro, as comissões e os extratos ficam só com o administrador. Todos estão sujeitos ao **sigilo profissional**.
 - Cada clínica vê apenas os próprios dados, mesmo usando o mesmo sistema.
-- **Google Cloud**, que fornece o servidor e guarda as cópias de segurança, como suboperador. Nenhuma outra empresa recebe os dados pelo sistema: as telas não carregam nada de terceiros.
+- **Hostinger**, que fornece o servidor onde ficam o sistema e as cópias de segurança, como suboperador. Nenhuma outra empresa recebe os dados pelo sistema: as telas não carregam nada de terceiros.
 - Autoridades públicas, quando a lei ou uma ordem judicial exigir.
 
 ## 6. Onde os dados ficam
-O servidor e as cópias de segurança ficam no **Google Cloud, nos Estados Unidos** (região us-east1). Isso é uma transferência internacional de dados, feita nos termos do art. 33 da LGPD e da Resolução CD/ANPD nº 19/2024, com as garantias contratuais de proteção de dados do provedor. A comunicação com o sistema é sempre criptografada (HTTPS), e o provedor criptografa os dados armazenados.
+O servidor e as cópias de segurança ficam na **Hostinger, nos Estados Unidos** (Boston). Isso é uma transferência internacional de dados, feita nos termos do art. 33 da LGPD e da Resolução CD/ANPD nº 19/2024, com as garantias contratuais de proteção de dados do provedor. A comunicação com o sistema é sempre criptografada (HTTPS).
 
 ## 7. Por quanto tempo
 - **Cadastro, consultas, orçamentos e financeiro:** enquanto houver relação com a clínica e, depois, por **no mínimo 20 anos a partir do último registro**, o prazo de guarda do prontuário do paciente (Lei 13.787/2018, art. 6º), que vale para todas as profissões de saúde, inclusive a odontologia, e também cobre as obrigações fiscais e a defesa da clínica. Passado esse prazo, os dados podem ser eliminados com sigilo ou devolvidos ao paciente.

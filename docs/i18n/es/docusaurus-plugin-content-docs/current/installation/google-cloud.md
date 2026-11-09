@@ -39,7 +39,7 @@ Mantenimiento: SSH solo por el túnel IAP de Google
 
 ## Pasos
 
-La página [Producción de referencia](../project/production.md) registra cada recurso de la instalación de referencia. En resumen:
+La propia demostración de Kaladrius corrió así hasta el 09/11/2026, cuando pasó a una VPS (decisión 208); los pasos de abajo son los que usó. En resumen:
 
 1. **Proyecto y presupuesto.** Cree un proyecto en Google Cloud y una alerta de presupuesto (por ejemplo, R$ 5) para notar cualquier cobro inesperado.
 2. **Red.** Una VPC con subred en la región del free tier e **IPv6 externa**; reserve la IPv6 como fija (gratis). Firewall: TCP 80/443 y UDP 443 desde `::/0`, ICMPv6, y SSH (22) solo desde el rango de IAP `35.235.240.0/20`.

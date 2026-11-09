@@ -69,19 +69,17 @@ In production only the app receives the whole `.env`; the database gets just the
 
 ## Infrastructure
 
-Rule: **Google Cloud free tier resources only** (decision 020).
+The reference production runs on the owner's VPS since 2026-11-09 (decision 208). Until then the rule was **Google Cloud free tier resources only** (decision 020), which made the server IPv6-only (decision 035).
 
 | Environment | Where | Cost |
 |---|---|---|
 | Local | Docker on the developer's machine | — |
-| Cloud (testing and production) | **e2-micro** VM in `us-east1-b`, 30 GB standard disk, **public IPv6 only** (IPv4 is billed). Details in [deploy.md](production.md) | Free |
-| Backup | Cloud Storage, US regional bucket, up to 5 GB | Free |
+| Production (reference) | VPS at Hostinger (Boston, US), Ubuntu 24.04, IPv4 and IPv6, managed with Dokploy. Details in [Reference production](production.md) | Paid VPS |
+| Backup | Local folder on the VPS (30 days); a copy elsewhere is still to be chosen | — |
 
-**Google Cloud project:** `medical-system-facchini`, with the Compute Engine API enabled and a **R$ 5 budget alert** (notifications at R$ 0.50, R$ 2.50 and R$ 5) to catch any charge.
+**CI/CD:** GitHub Actions runs lint and tests and publishes the image to **GitHub Packages** (`ghcr.io`). The server checks every 5 minutes and asks Dokploy to deploy a new image; CI never reaches the server.
 
-**Free tier limits to respect:** 1 e2-micro VM, 30 GB standard disk, 5 GB in Cloud Storage, 1 GB/month egress. Disk snapshots are paid, so they are not used. A VM's public IPv4 is billed, so the VM only has a public IPv6 (decision 035).
-
-**CI/CD:** GitHub Actions runs lint and tests and publishes the image to Google **Artifact Registry** (keyless auth). The VM checks every 5 minutes and updates itself (GitHub has no IPv6, so the VM could not reach GHCR, nor could CI reach the VM over SSH).
+Anyone can still install Kaladrius on the Google Cloud free tier: see [Google Cloud free tier](../installation/google-cloud.md).
 
 ## Security (requirements)
 - Django's built-in protections enabled (CSRF, XSS escaping, parameterized ORM, security headers). `manage.py check --deploy` with no warnings.

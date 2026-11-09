@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Política de privacidad
 
-Versión 5 · 31/10/2026
+Versión 6 · 09/11/2026
 
 Esta política explica cómo se tratan los datos personales de pacientes, responsables, equipo y proveedores en **Kaladrius**, el sistema de gestión que usa la clínica: qué datos, para qué, con qué base legal, quién tiene acceso, dónde se guardan, por cuánto tiempo y cómo ejercer sus derechos. Sigue la Ley General de Protección de Datos Personales de Brasil (LGPD, Ley 13.709/2018) y la ley sobre historias clínicas electrónicas (Ley 13.787/2018).
 
@@ -60,11 +60,11 @@ Los datos **no** se usan para publicidad, **no** se venden, **no** pasan por dec
 ## 5. Quién tiene acceso
 - Solo el equipo de la clínica, con usuario y contraseña personales, cada uno según su perfil: el profesional ve solo su propia agenda; la recepción no ve las cuentas por pagar; el financiero, las comisiones y los extractos quedan solo para el administrador. Todos están sujetos al **secreto profesional**.
 - Cada clínica ve solo sus propios datos, aunque use el mismo sistema.
-- **Google Cloud**, que provee el servidor y guarda las copias de seguridad, como subencargado. Ninguna otra empresa recibe los datos a través del sistema: las pantallas no cargan nada de terceros.
+- **Hostinger**, que provee el servidor donde están el sistema y las copias de seguridad, como subencargado. Ninguna otra empresa recibe los datos a través del sistema: las pantallas no cargan nada de terceros.
 - Autoridades públicas, cuando la ley o una orden judicial lo exija.
 
 ## 6. Dónde se guardan los datos
-El servidor y las copias de seguridad están en **Google Cloud, en los Estados Unidos** (región us-east1). Es una transferencia internacional de datos, hecha en los términos del art. 33 de la LGPD y de la Resolución CD/ANPD n.º 19/2024, con las garantías contractuales de protección de datos del proveedor. La comunicación con el sistema siempre está cifrada (HTTPS), y el proveedor cifra los datos almacenados.
+El servidor y las copias de seguridad están en **Hostinger, en los Estados Unidos** (Boston). Es una transferencia internacional de datos, hecha en los términos del art. 33 de la LGPD y de la Resolución CD/ANPD n.º 19/2024, con las garantías contractuales de protección de datos del proveedor. La comunicación con el sistema siempre está cifrada (HTTPS).
 
 ## 7. Por cuánto tiempo
 - **Ficha, turnos, presupuestos y financiero:** mientras haya relación con la clínica y luego por **al menos 20 años desde el último registro**, el plazo de conservación de la historia clínica (Ley 13.787/2018, art. 6), que vale para todas las profesiones de la salud, incluida la odontología, y también cubre las obligaciones fiscales y la defensa de la clínica. Pasado ese plazo, los datos pueden eliminarse con resguardo del secreto o devolverse al paciente.
