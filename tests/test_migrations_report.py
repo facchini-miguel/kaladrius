@@ -228,7 +228,7 @@ def test_round_trip_only_on_disposable_database(monkeypatch):
     """--test-rollback undoes migrations: never on a database with real data."""
     monkeypatch.delenv("DISPOSABLE_DATABASE", raising=False)
     production = SimpleNamespace(settings_dict={"NAME": "kaladrius"})
-    with pytest.raises(CommandError, match="banco descartável"):
+    with pytest.raises(CommandError, match="throwaway database"):
         report.disposable_database(production)
     report.disposable_database(SimpleNamespace(settings_dict={"NAME": "test_kaladrius"}))
     monkeypatch.setenv("DISPOSABLE_DATABASE", "1")
@@ -243,7 +243,7 @@ def test_command_refuses_rollback_test_outside_disposable_database(monkeypatch):
     monkeypatch.setattr(report, "analyze", lambda keys: calls.append(keys) or [])
     from django.core.management import call_command
 
-    with pytest.raises(CommandError, match="banco descartável"):
+    with pytest.raises(CommandError, match="throwaway database"):
         call_command("migrations_report", "health_plans.0003_x", test_rollback=True)
     assert calls == []  # refused before anything ran
 

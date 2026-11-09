@@ -130,10 +130,10 @@ def test_report(imported):
     assert (report.practitioners, report.patients) == (2, 4)
     assert (report.appointments, report.recalls, report.kinds_created) == (4, 2, 1)
     warnings = report.warnings
-    assert warnings["Agendamento sem profissional, tipo ou data válidos (não importado)"] == 1
+    assert warnings["Appointment without a valid practitioner, type or date (not imported)"] == 1
     assert warnings["Agendamento sobreposto a outro do mesmo profissional (não importado)"] == 1
-    assert warnings["Agendamento com término antes do início (corrigido para 30 min)"] == 1
-    assert warnings["Rechamada de paciente inexistente ou sem data (não importada)"] == 1
+    assert warnings["Appointment ending before it starts (set to 30 min)"] == 1
+    assert warnings["Recall of a missing patient or without a date (not imported)"] == 1
 
 
 def test_schedule_hours_cover_the_appointments(imported):
@@ -265,7 +265,7 @@ def test_command(db, tmp_path, capsys):
     file.write_text(DUMP, encoding="utf-8")
     call_command("import_legacy", str(file), clinic="Pelo Comando")
     output = capsys.readouterr().out
-    assert "Pacientes: 4" in output and "Avisos:" in output
+    assert "Patients: 4" in output and "Warnings:" in output
     with pytest.raises(CommandError):
         call_command("import_legacy", str(file), clinic="Pelo Comando")
     with pytest.raises(CommandError):
@@ -337,7 +337,7 @@ def test_anonymization_replaces_personal_data_and_keeps_structure(imported):
 
 
 def test_anonymize_missing_clinic(db):
-    with pytest.raises(CommandError, match="não encontrada"):
+    with pytest.raises(CommandError, match="not found"):
         call_command("anonymize_clinic", clinic="Não existe", confirm=True)
 
 

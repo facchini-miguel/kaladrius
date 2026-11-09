@@ -35,24 +35,24 @@ class Command(BaseCommand):
             else:
                 text = Path(file).read_text(encoding=encoding)
         except (OSError, UnicodeDecodeError) as error:
-            raise CommandError(f"Não foi possível ler o arquivo: {error}") from error
+            raise CommandError(f"Could not read the file: {error}") from error
 
         try:
             report = import_dump(text, clinic)
         except (InvalidDump, ImportRefused) as error:
             raise CommandError(str(error)) from error
 
-        self.stdout.write(self.style.SUCCESS(f"Importado na clínica “{report.clinic.name}”:"))
-        self.stdout.write(f"  Profissionais: {report.practitioners}")
-        self.stdout.write(f"  Tipos de atendimento novos: {report.kinds_created}")
-        self.stdout.write(f"  Pacientes: {report.patients}")
-        self.stdout.write(f"  Agendamentos: {report.appointments}")
-        self.stdout.write(f"  Rechamadas: {report.recalls}")
+        self.stdout.write(self.style.SUCCESS(f"Imported into the clinic “{report.clinic.name}”:"))
+        self.stdout.write(f"  Practitioners: {report.practitioners}")
+        self.stdout.write(f"  New appointment types: {report.kinds_created}")
+        self.stdout.write(f"  Patients: {report.patients}")
+        self.stdout.write(f"  Appointments: {report.appointments}")
+        self.stdout.write(f"  Recalls: {report.recalls}")
         if report.warnings:
-            self.stdout.write("Avisos:")
+            self.stdout.write("Warnings:")
             for warning, total in sorted(report.warnings.items()):
                 self.stdout.write(f"  {total} × {warning}")
         self.stdout.write(
-            "Nenhum usuário foi importado: crie a equipe em Cadastros › Equipe "
-            "(e vincule o administrador da clínica pelo admin do Django)."
+            "No user was imported: create the team in Records › Team "
+            "(and link the clinic's administrator in the Django admin)."
         )

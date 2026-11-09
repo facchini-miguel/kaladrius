@@ -40,22 +40,22 @@ class Command(BaseCommand):
     def handle(self, *args, clinic, account, days, **options):
         target = Clinic.objects.filter(name=clinic).first()
         if target is None:
-            raise CommandError(f"Clínica “{clinic}” não encontrada.")
+            raise CommandError(f"Clinic “{clinic}” not found.")
         rng = random.Random()  # noqa: S311 (fake data, not security)
         today = timezone.localdate()
         start = today - datetime.timedelta(days=days)
         with use_clinic(target):
             target_account = FinancialAccount.objects.filter(name=account).first()
             if target_account is None:
-                raise CommandError(f"Conta “{account}” não encontrada.")
+                raise CommandError(f"Account “{account}” not found.")
             rows = []
-            fora = Decimal("0")  # recorded in the system, not in the bank yet
+            not_in_bank = Decimal("0")  # recorded in the system, not in the bank yet
             for p in Payment.objects.filter(
                 account=target_account, reversed=False, date__range=(start, today)
             ).select_related("installment__entry"):
                 is_incoming = p.installment.entry.kind == Entry.Kind.RECEIVABLE
                 if rng.random() < 0.15:
-                    fora += p.amount if is_incoming else -p.amount
+                    not_in_bank += p.amount if is_incoming else -p.amount
                     continue
                 date = min(p.date + datetime.timedelta(days=rng.choice([0, 0, 1, 2])), today)
                 description = "PIX RECEBIDO" if is_incoming else "PAGAMENTO"
@@ -68,7 +68,7 @@ class Command(BaseCommand):
             rows.sort()
             balance = dict(services.account_balances(until=today)).get(target_account)
         # The bank balance: what the system has plus the extras minus what is not there yet.
-        balance = (balance or Decimal("0")) + sum(v for _, v in EXTRAS) - fora
+        balance = (balance or Decimal("0")) + sum(v for _, v in EXTRAS) - not_in_bank
         self.stdout.write(self._ofx(rows, start, today, balance))
 
     def _ofx(self, rows, start, end, balance):

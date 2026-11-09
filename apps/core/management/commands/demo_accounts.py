@@ -60,11 +60,13 @@ class Command(BaseCommand):
         extras = [extra for extra in extras if extra[2]]
         if seed and seed in (*passwords, *(extra[2] for extra in extras)):
             # The seed users (admin.sorriso included) share that password.
-            raise CommandError("Não use a senha de DJANGO_SEED_PASSWORD nas contas públicas.")
+            raise CommandError(
+                "Do not use the DJANGO_SEED_PASSWORD password for the public accounts."
+            )
         try:
             clinic = Clinic.objects.get(name=options["clinic"])
         except Clinic.DoesNotExist as error:
-            raise CommandError(f"Clínica não encontrada: {options['clinic']}") from error
+            raise CommandError(f"Clinic not found: {options['clinic']}") from error
 
         reception = self._account(FRONT_DESK, "Recepção", passwords[0], clinic, Role.FRONT_DESK)
         practitioner = self._account(
@@ -78,20 +80,20 @@ class Command(BaseCommand):
             if record is None:
                 if not options["create_practitioner"]:
                     raise CommandError(
-                        f"Profissional não encontrado: {options['practitioner']} "
+                        f"Practitioner not found: {options['practitioner']} "
                         "(use --create-practitioner para criar)"
                     )
                 record = Practitioner.objects.create(name=options["practitioner"])
             if record.user_id not in (None, practitioner.pk):
                 raise CommandError(
-                    f"{record.name} já tem outro usuário de acesso; escolha outro profissional."
+                    f"{record.name} already has another login; choose another practitioner."
                 )
             record.user = practitioner
             record.save(update_fields=["user"])
         self.stdout.write(
             self.style.SUCCESS(
-                f"Contas prontas: {reception.username} (recepção), {practitioner.username} "
-                f"(profissional, agenda de {record.name})"
+                f"Accounts ready: {reception.username} (front desk), {practitioner.username} "
+                f"(practitioner, schedule of {record.name})"
                 + "".join(f", {account.username}" for account in others)
                 + "."
             )

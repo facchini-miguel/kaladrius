@@ -7,10 +7,6 @@ from django.utils import timezone
 from apps.core.models import Backup
 from apps.monitoring import health
 
-# The report keeps its Portuguese words (it was written with the old internal names).
-LEVEL_NAMES = {"critical": "critico", "warning": "atencao"}
-LABELS = {"cpu": "cpu", "memory": "memoria", "swap": "swap", "disk": "disco"}
-
 
 class Command(BaseCommand):
     help = (
@@ -22,37 +18,35 @@ class Command(BaseCommand):
         results = health.samples(since=timezone.now() - datetime.timedelta(hours=24))
         summary = health.summary(results)
         if summary is None:
-            self.stdout.write("Sem amostras nas últimas 24 horas: a coleta está funcionando?")
+            self.stdout.write("No samples in the last 24 hours: is the collection running?")
         else:
             latest = results[-1]
             self.stdout.write(
-                f"Amostras: {summary['samples']} (a última às {latest['time']:%H:%M} UTC)"
+                f"Samples: {summary['samples']} (the last at {latest['time']:%H:%M} UTC)"
             )
             self.stdout.write(
-                f"Processador: média {summary['cpu_avg']:.1f}%, pico {summary['cpu_max']:.1f}%"
+                f"Processor: average {summary['cpu_avg']:.1f}%, peak {summary['cpu_max']:.1f}%"
             )
             self.stdout.write(
-                f"Memória: pico {summary['memory_max']:.0f}% em uso; "
-                f"swap: pico {summary['swap_max']:.0f}%"
+                f"Memory: peak {summary['memory_max']:.0f}% in use; "
+                f"swap: peak {summary['swap_max']:.0f}%"
             )
-            self.stdout.write(f"Disco: {summary['disk']:.0f}% em uso")
+            self.stdout.write(f"Disk: {summary['disk']:.0f}% in use")
             self.stdout.write(
-                f"Rede: {filesizeformat(summary['received'])} recebidos, "
-                f"{filesizeformat(summary['sent'])} enviados"
+                f"Network: {filesizeformat(summary['received'])} received, "
+                f"{filesizeformat(summary['sent'])} sent"
             )
             alerts = [
-                f"{LABELS[key]}: {LEVEL_NAMES[level]}"
-                for key, level in health.levels(latest).items()
-                if level != "ok"
+                f"{key}: {level}" for key, level in health.levels(latest).items() if level != "ok"
             ]
             if health.stopped(latest):
-                alerts.append("coleta parada")
-            self.stdout.write("Alertas: " + (", ".join(alerts) if alerts else "nenhum"))
+                alerts.append("collection stopped")
+            self.stdout.write("Alerts: " + (", ".join(alerts) if alerts else "none"))
         backup = Backup.objects.first()
         if backup is None:
-            self.stdout.write("Último backup: nenhum registrado")
+            self.stdout.write("Last backup: none recorded")
         else:
             hours = (timezone.now() - backup.timestamp).total_seconds() / 3600
             self.stdout.write(
-                f"Último backup: {backup.file} ({filesizeformat(backup.size)}), há {hours:.0f} h"
+                f"Last backup: {backup.file} ({filesizeformat(backup.size)}), {hours:.0f} h ago"
             )

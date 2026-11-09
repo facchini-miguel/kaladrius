@@ -71,13 +71,11 @@ class Command(BaseCommand):
     def handle(self, *args, force=False, patients=600, no_schedule=False, **options):
         if not settings.DEBUG and not force:
             raise CommandError(
-                "Dados de teste só podem ser criados com DJANGO_DEBUG=1 (use --force para ignorar)."
+                "Sample data is only created with DJANGO_DEBUG=1 (use --force to skip this check)."
             )
         password = os.environ.get("DJANGO_SEED_PASSWORD")
         if not password:
-            raise CommandError(
-                "Defina DJANGO_SEED_PASSWORD no .env antes de criar os dados de teste."
-            )
+            raise CommandError("Set DJANGO_SEED_PASSWORD in .env before creating the sample data.")
 
         created_count = []
         with transaction.atomic(), without_isolation():
@@ -107,16 +105,16 @@ class Command(BaseCommand):
                 self._employees(clinic)
                 self._related_people(clinic)
 
-        self.stdout.write(self.style.SUCCESS("Dados de teste prontos."))
-        self.stdout.write(f"Pacientes fictícios criados: {patient_total}")
-        self.stdout.write(f"Agendamentos fictícios criados: {appointment_total}")
-        self.stdout.write(f"Rechamadas fictícias criadas: {recall_total}")
+        self.stdout.write(self.style.SUCCESS("Sample data ready."))
+        self.stdout.write(f"Fake patients created: {patient_total}")
+        self.stdout.write(f"Fake appointments created: {appointment_total}")
+        self.stdout.write(f"Fake recalls created: {recall_total}")
         if created_count:
             self.stdout.write(
-                f"Usuários criados (senha em DJANGO_SEED_PASSWORD): {', '.join(created_count)}"
+                f"Users created (password in DJANGO_SEED_PASSWORD): {', '.join(created_count)}"
             )
         else:
-            self.stdout.write("Nenhum usuário novo: os dados de teste já existiam.")
+            self.stdout.write("No new user: the sample data already existed.")
 
     def _user(self, username, name, last_name, password, created_count):
         user, created = get_user_model().objects.get_or_create(

@@ -69,7 +69,7 @@ def test_refuses_sample_data_password_and_practitioner_with_another_user(
         )
     with use_clinic(clinic_a):
         Practitioner.objects.create(name="Dra. Ana", user=create_user("dra.ana"))
-    with pytest.raises(CommandError, match="outro usuário"):
+    with pytest.raises(CommandError, match="another login"):
         call_command("demo_accounts", clinic="Clínica A", practitioner="Dra. Ana", **PASSWORDS)
 
 

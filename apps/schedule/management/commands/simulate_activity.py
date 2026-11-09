@@ -58,13 +58,13 @@ class Command(BaseCommand):
     def handle(self, *args, clinic, recalls, no_schedule, entries, estimates, confirm, **options):
         if not confirm:
             raise CommandError(
-                "Nada foi criado: rode de novo com --confirm (só em clínicas de teste)."
+                "Nothing was created: run it again with --confirm (only on test clinics)."
             )
         rng = random.Random()  # noqa: S311 (fake data, not security)
         with transaction.atomic(), without_isolation():
             target = Clinic.objects.filter(name=clinic).first()
             if target is None:
-                raise CommandError(f"Clínica “{clinic}” não encontrada.")
+                raise CommandError(f"Clinic “{clinic}” not found.")
             appointments = 0 if no_schedule else simulate_appointments(target, rng)
             created_recalls = simulate_recalls(target, rng, quantity=recalls)
             created_count = simulate_estimates(target, rng, quantity=estimates) if estimates else 0
@@ -72,10 +72,10 @@ class Command(BaseCommand):
                 simulate_finance(target, rng, quantity=entries) if entries else (0, 0)
             )
             commissions = simulate_commissions(target, rng)
-        self.stdout.write(self.style.SUCCESS(f"Movimento simulado na clínica “{clinic}”:"))
-        self.stdout.write(f"  Agendamentos fictícios: {appointments}")
-        self.stdout.write(f"  Rechamadas fictícias: {created_recalls}")
-        self.stdout.write(f"  Lançamentos a receber fictícios: {receivable_total}")
-        self.stdout.write(f"  Despesas fictícias: {payable_total}")
-        self.stdout.write(f"  Orçamentos fictícios: {created_count}")
-        self.stdout.write(f"  Comissões lançadas (até o fim do mês passado): {commissions}")
+        self.stdout.write(self.style.SUCCESS(f"Activity simulated in the clinic “{clinic}”:"))
+        self.stdout.write(f"  Fake appointments: {appointments}")
+        self.stdout.write(f"  Fake recalls: {created_recalls}")
+        self.stdout.write(f"  Fake receivable entries: {receivable_total}")
+        self.stdout.write(f"  Fake expenses: {payable_total}")
+        self.stdout.write(f"  Fake estimates: {created_count}")
+        self.stdout.write(f"  Commissions entered (up to the end of last month): {commissions}")

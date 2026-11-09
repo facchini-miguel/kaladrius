@@ -326,5 +326,5 @@ def anonymize_clinic(clinic_name, today=None):
     with without_isolation():
         clinic = Clinic.objects.filter(name=clinic_name).first()
     if clinic is None:
-        raise ClinicNotFound(f"Clínica “{clinic_name}” não encontrada.")
+        raise ClinicNotFound(f"Clinic “{clinic_name}” not found.")
     return _Anonymizer(clinic, today or timezone.localdate()).run()

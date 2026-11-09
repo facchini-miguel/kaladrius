@@ -12,4 +12,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, file, size, **options):
         Backup.objects.create(file=file, size=size)
-        self.stdout.write(f"Backup registrado: {file}")
+        self.stdout.write(f"Backup recorded: {file}")
