@@ -11,10 +11,11 @@ import random
 from dataclasses import dataclass
 
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q
 from django.utils import timezone
 from faker import Faker
 
+from apps.audit import events
 from apps.audit.models import AuditEntry
 from apps.audit.record import log_event, model_label
 from apps.core import fake_data
@@ -294,9 +295,15 @@ class _Anonymizer:
             clinic=self.clinic, model_name__in=model_list
         ).delete()
         # The import summary has no model but belongs to the same history.
-        summary, _ = AuditEntry.objects.filter(
-            clinic=self.clinic, object_repr__startswith="Importação do sistema antigo"
-        ).delete()
+        summary, _ = (
+            AuditEntry.objects.filter(clinic=self.clinic)
+            .filter(
+                Q(event=events.LEGACY_IMPORT)
+                # Written before decision 206.
+                | Q(event="", object_repr__startswith="Importação do sistema antigo")
+            )
+            .delete()
+        )
         self.result.deleted_records = deleted_ones + summary
 
     def run(self):
@@ -314,10 +321,13 @@ class _Anonymizer:
             log_event(
                 AuditEntry.Action.CHANGE,
                 clinic=self.clinic,
-                description=(
-                    f"Dados anonimizados: {r.patients} pacientes, {r.appointments} agendamentos, "
-                    f"{r.recalls} rechamadas, {r.practitioners} profissionais"
-                ),
+                event=events.LEGACY_ANONYMIZED,
+                values={
+                    "patients": r.patients,
+                    "appointments": r.appointments,
+                    "recalls": r.recalls,
+                    "practitioners": r.practitioners,
+                },
             )
         return self.result
 

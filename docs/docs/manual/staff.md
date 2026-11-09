@@ -16,4 +16,4 @@ In **Finance > Month's pay**, choose the month. There is one line per employee w
 - **Overtime**: hours and the hourly rate. The rate comes suggested as salary ÷ 220 hours × 1.5 (the minimum overtime rate for a 44-hour week) and can be changed.
 - **Absences**: days missed; each one deducts salary ÷ 30.
 
-The **total** is salary + overtime − absences. **Save** keeps what was typed. **Save and launch into finance** turns each line into a **payable** in the employee's name, in the chosen category (by default "Salários e encargos") and due date. A launched line no longer changes on this page; to redo it, cancel the payable in finance and the line opens again.
+The **total** is salary + overtime − absences. **Save** keeps what was typed. **Save and launch into finance** turns each line into a **payable** in the employee's name, in the chosen category (by default the salaries and payroll taxes one, "Salários e encargos" in Brazil, even if renamed) and due date. A launched line no longer changes on this page; to redo it, cancel the payable in finance and the line opens again.

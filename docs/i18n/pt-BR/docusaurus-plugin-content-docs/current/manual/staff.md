@@ -16,4 +16,4 @@ Em **Financeiro > Folha do mês**, escolha o mês. Aparece uma linha por funcion
 - **Horas extras**: a quantidade e o valor da hora. O valor vem sugerido como salário ÷ 220 horas × 1,5 (o adicional mínimo para quem trabalha 44 horas por semana) e pode ser mudado.
 - **Faltas**: os dias de falta; cada um desconta salário ÷ 30.
 
-O **total** é salário + horas extras − faltas. **Salvar** guarda o que foi digitado. **Salvar e lançar no financeiro** transforma cada linha numa **conta a pagar** em nome do funcionário, na categoria escolhida (por padrão, "Salários e encargos") e com o vencimento escolhido. A linha lançada não muda mais nesta tela; para refazer, cancele a conta no financeiro e a linha volta a ficar aberta.
+O **total** é salário + horas extras − faltas. **Salvar** guarda o que foi digitado. **Salvar e lançar no financeiro** transforma cada linha numa **conta a pagar** em nome do funcionário, na categoria escolhida (por padrão, a de "Salários e encargos", mesmo que renomeada) e com o vencimento escolhido. A linha lançada não muda mais nesta tela; para refazer, cancele a conta no financeiro e a linha volta a ficar aberta.

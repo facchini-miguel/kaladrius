@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from apps.audit import events
 from apps.audit.models import AuditEntry
 from apps.audit.record import log_event
 from apps.core import modules
@@ -30,7 +31,7 @@ from .permissions import accesses_medical_records, manages_medical_records, user
 
 Action = AuditEntry.Action
 # The audit log names the changed fields but never copies clinical text (decision 081).
-CONFIDENTIAL = "(conteúdo clínico)"
+CONFIDENTIAL = events.CLINICAL_CONTENT
 
 
 def requires_practitioner(view):
@@ -170,7 +171,7 @@ def print_visit(request, practitioner, pk):
     visit = get_object_or_404(Visit.objects.select_related("patient", "practitioner"), pk=pk)
     if not visit.is_finalized:
         raise PermissionDenied
-    log_event(Action.VIEWED, visit, description=f"{visit} (impressão)")
+    log_event(Action.VIEWED, visit, event=events.PRINTED, values={"record": visit})
     return render(
         request,
         "medical_records/print.html",
@@ -341,7 +342,8 @@ def upload_attachment(request, practitioner, pk):
         log_event(
             Action.CREATE,
             attachment,
-            description=f"{visit} – {_('attachment')}",
+            event=events.ATTACHMENT,
+            values={"record": visit},
             changes={"file": [None, CONFIDENTIAL]},
         )
         messages.success(request, _("Attachment added."))
@@ -353,10 +355,12 @@ def upload_attachment(request, practitioner, pk):
 @requires_practitioner
 def attachment(request, practitioner, pk):
     attachment = get_object_or_404(Attachment.objects.select_related("visit"), pk=pk)
-    log_event(Action.VIEWED, attachment, description=f"{attachment.visit} – {_('attachment')}")
+    log_event(
+        Action.VIEWED, attachment, event=events.ATTACHMENT, values={"record": attachment.visit}
+    )
     response = HttpResponse(bytes(attachment.content), content_type=attachment.kind)
     # Opened in the browser (only PDF, JPG and PNG are ever stored), never cached.
-    name = "".join(c for c in attachment.name if c.isalnum() or c in "._- ") or "anexo"
+    name = "".join(c for c in attachment.name if c.isalnum() or c in "._- ") or _("attachment")
     response["Content-Disposition"] = f'inline; filename="{name}"'
     response["Cache-Control"] = "private, no-store"
     return response
@@ -377,7 +381,8 @@ def remove_attachment(request, practitioner, pk):
     log_event(
         Action.DELETE,
         attachment,
-        description=f"{visit} – {_('attachment')}",
+        event=events.ATTACHMENT,
+        values={"record": visit},
         changes={"file": [CONFIDENTIAL, None]},
     )
     attachment.delete()

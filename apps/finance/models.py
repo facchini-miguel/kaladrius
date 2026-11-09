@@ -12,10 +12,11 @@ from django.conf import settings
 from django.db import models
 from django.db.models import DecimalField, ExpressionWrapper, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
+from apps.core import countries
 from apps.core.isolation import ClinicManager, ClinicModel, without_isolation
 from apps.core.ordering import ALPHABETICAL
 
@@ -127,6 +128,10 @@ class Category(ClinicModel):
         verbose_name=_("group"),
     )
     active = models.BooleanField(pgettext_lazy("feminine", "active"), default=True)
+    # Which default category this is (decision 205), so the code finds the payroll and the
+    # commissions categories by it and not by their names, which are in the clinic's
+    # language and which the clinic may change. Empty on the categories the clinic adds.
+    key = models.CharField(max_length=30, blank=True, editable=False)
 
     class Meta:
         db_table = "finance_category"
@@ -134,7 +139,10 @@ class Category(ClinicModel):
         verbose_name_plural = _("categories")
         ordering = ["kind", "name"]
         constraints = [
-            models.UniqueConstraint(fields=["clinic", "kind", "name"], name="category_unique")
+            models.UniqueConstraint(fields=["clinic", "kind", "name"], name="category_unique"),
+            models.UniqueConstraint(
+                fields=["clinic", "key"], condition=~Q(key=""), name="category_key_unique"
+            ),
         ]
 
     def __str__(self):
@@ -163,57 +171,93 @@ class CostCenter(ClinicModel):
         return self.name
 
 
-# Accounts and categories every new clinic starts with (it can add, rename or deactivate).
-DEFAULT_ACCOUNTS = [("Caixa", FinancialAccount.Kind.CASH), ("Banco", FinancialAccount.Kind.BANK)]
-DEFAULT_CATEGORIES = [
-    ("Tratamento", Category.Kind.INCOME),
-    ("Consulta", Category.Kind.INCOME),
-    ("Outras receitas", Category.Kind.INCOME),
-    ("Aluguel", Category.Kind.EXPENSE),
-    ("Material odontológico", Category.Kind.EXPENSE),
-    ("Laboratório de prótese", Category.Kind.EXPENSE),
-    ("Salários e encargos", Category.Kind.EXPENSE),
-    ("Comissões", Category.Kind.EXPENSE),
-    ("Impostos", Category.Kind.EXPENSE),
-    ("Água, luz e internet", Category.Kind.EXPENSE),
-    ("Manutenção", Category.Kind.EXPENSE),
-    ("Outras despesas", Category.Kind.EXPENSE),
+# Accounts and categories every new clinic starts with (it can add, rename or deactivate),
+# written in the language of the clinic's country (decision 205).
+DEFAULT_ACCOUNTS = [
+    (pgettext_lazy("default account", "Cash"), FinancialAccount.Kind.CASH),
+    (pgettext_lazy("default account", "Bank"), FinancialAccount.Kind.BANK),
 ]
-# A basic chart of accounts for new clinics (decision 097): code, group and its categories.
+# Category.key of the defaults the code looks for.
+PAYROLL = "payroll"
+COMMISSIONS = "commissions"
+TREATMENT = "treatment"
+# (key, name, kind)
+DEFAULT_CATEGORIES = [
+    (TREATMENT, pgettext_lazy("default category", "Treatment"), Category.Kind.INCOME),
+    ("consultation", pgettext_lazy("default category", "Consultation"), Category.Kind.INCOME),
+    ("other_income", pgettext_lazy("default category", "Other income"), Category.Kind.INCOME),
+    ("rent", pgettext_lazy("default category", "Rent"), Category.Kind.EXPENSE),
+    (
+        "dental_supplies",
+        pgettext_lazy("default category", "Dental supplies"),
+        Category.Kind.EXPENSE,
+    ),
+    (
+        "prosthesis_lab",
+        pgettext_lazy("default category", "Dental prosthesis laboratory"),
+        Category.Kind.EXPENSE,
+    ),
+    (
+        PAYROLL,
+        pgettext_lazy("default category", "Salaries and payroll taxes"),
+        Category.Kind.EXPENSE,
+    ),
+    (COMMISSIONS, pgettext_lazy("default category", "Commissions"), Category.Kind.EXPENSE),
+    ("taxes", pgettext_lazy("default category", "Taxes"), Category.Kind.EXPENSE),
+    (
+        "utilities",
+        pgettext_lazy("default category", "Water, electricity and internet"),
+        Category.Kind.EXPENSE,
+    ),
+    ("maintenance", pgettext_lazy("default category", "Maintenance"), Category.Kind.EXPENSE),
+    ("other_expenses", pgettext_lazy("default category", "Other expenses"), Category.Kind.EXPENSE),
+]
+# A basic chart of accounts for new clinics (decision 097): code, group and the keys of its
+# categories.
 DEFAULT_CHART = {
     Category.Kind.INCOME: [
-        (1, "Atendimentos", ["Tratamento", "Consulta"]),
-        (2, "Outras receitas", ["Outras receitas"]),
+        (1, pgettext_lazy("default account group", "Appointments"), [TREATMENT, "consultation"]),
+        (2, pgettext_lazy("default account group", "Other income"), ["other_income"]),
     ],
     Category.Kind.EXPENSE: [
-        (1, "Ocupação", ["Aluguel", "Água, luz e internet", "Manutenção"]),
-        (2, "Pessoal", ["Salários e encargos", "Comissões"]),
-        (3, "Materiais e laboratório", ["Material odontológico", "Laboratório de prótese"]),
-        (4, "Impostos", ["Impostos"]),
-        (5, "Outras despesas", ["Outras despesas"]),
+        (
+            1,
+            pgettext_lazy("default account group", "Premises"),
+            ["rent", "utilities", "maintenance"],
+        ),
+        (2, pgettext_lazy("default account group", "Personnel"), [PAYROLL, COMMISSIONS]),
+        (
+            3,
+            pgettext_lazy("default account group", "Supplies and laboratory"),
+            ["dental_supplies", "prosthesis_lab"],
+        ),
+        (4, pgettext_lazy("default account group", "Taxes"), ["taxes"]),
+        (5, pgettext_lazy("default account group", "Other expenses"), ["other_expenses"]),
     ],
 }
 
 
 def create_defaults(clinic):
-    """Default accounts and categories for a clinic that has none."""
-    with without_isolation():
+    """Default accounts and categories for a clinic that has none, in the language of its
+    country: Portuguese in Brazil, Spanish in Latin America, English in the others."""
+    language = countries.by_code(clinic.country).language
+    with without_isolation(), translation.override(language):
         if not FinancialAccount.objects.filter(clinic=clinic).exists():
             FinancialAccount.objects.bulk_create(
-                FinancialAccount(clinic=clinic, name=name, kind=kind)
+                FinancialAccount(clinic=clinic, name=str(name), kind=kind)
                 for name, kind in DEFAULT_ACCOUNTS
             )
         if not Category.objects.filter(clinic=clinic).exists():
             group_of = {}
             for kind, rows in DEFAULT_CHART.items():
-                for code, name, categories in rows:
+                for code, name, keys in rows:
                     group = AccountGroup.objects.create(
-                        clinic=clinic, kind=kind, code=code, name=name
+                        clinic=clinic, kind=kind, code=code, name=str(name)
                     )
-                    group_of.update({(kind, category): group for category in categories})
+                    group_of.update(dict.fromkeys(keys, group))
             Category.objects.bulk_create(
-                Category(clinic=clinic, name=name, kind=kind, group=group_of.get((kind, name)))
-                for name, kind in DEFAULT_CATEGORIES
+                Category(clinic=clinic, key=key, name=str(name), kind=kind, group=group_of[key])
+                for key, name, kind in DEFAULT_CATEGORIES
             )
 
 

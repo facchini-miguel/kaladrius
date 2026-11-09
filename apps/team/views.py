@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
 from apps.account import services as account_services
+from apps.audit import events
 from apps.audit.models import AuditEntry
 from apps.audit.record import log_event
 from apps.core.models import Membership
@@ -121,7 +122,8 @@ def two_factor(request, pk):
         log_event(
             AuditEntry.Action.CHANGE,
             user,
-            description=f"{user}: verificação em duas etapas removida pelo administrador",
+            event=events.TWO_FACTOR_REMOVED,
+            values={"record": user},
         )
         messages.success(
             request,

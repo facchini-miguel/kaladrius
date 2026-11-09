@@ -24,6 +24,9 @@ class Country:
     english: str = "en"  # language code of the English variant (dates and times)
     spanish: str = "es"  # language code of the Spanish variant (dates and numbers)
     numbering: str = "fdi"  # tooth numbering, see apps/dentistry/teeth.py (decision 122)
+    # The language a new clinic's default records are written in, like its financial
+    # categories (decision 205); each user still sees the screens in their own language.
+    language: str = "es"
 
 
 COUNTRIES = {
@@ -42,6 +45,7 @@ COUNTRIES = {
             "America/Noronha",
         ),
         "en",
+        language="pt-br",
     ),
     # Latin America (decision 120): Spanish with each country's numbers (1,234.56 in Mexico
     # and Peru, 1.234,56 in the others) and dates.
@@ -100,8 +104,9 @@ COUNTRIES = {
         ),
         "en",
         numbering="universal",
+        language="en",
     ),
-    "GB": Country(_("United Kingdom"), "44", "GBP", ("Europe/London",), "en-gb"),
+    "GB": Country(_("United Kingdom"), "44", "GBP", ("Europe/London",), "en-gb", language="en"),
     "CA": Country(
         _("Canada"),
         "1",
@@ -116,6 +121,7 @@ COUNTRIES = {
             "America/St_Johns",
         ),
         "en-ca",
+        language="en",
     ),
     "AU": Country(
         _("Australia"),
@@ -131,8 +137,9 @@ COUNTRIES = {
             "Australia/Hobart",
         ),
         "en-au",
+        language="en",
     ),
-    "ZA": Country(_("South Africa"), "27", "ZAR", ("Africa/Johannesburg",), "en-za"),
+    "ZA": Country(_("South Africa"), "27", "ZAR", ("Africa/Johannesburg",), "en-za", language="en"),
 }
 
 CHOICES = [(code, country.name) for code, country in COUNTRIES.items()]

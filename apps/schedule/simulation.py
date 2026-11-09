@@ -187,15 +187,15 @@ def simulate_finance(clinic, rng, quantity=60, user=None):
 
 # Fake payables: (supplier, description, category, amount, monthly repetitions or None).
 SIMULATED_EXPENSES = [
-    ("Imobiliária Central", "Aluguel", "Aluguel", 3000, 6),
-    ("Companhia de energia", "Água, luz e internet", "Água, luz e internet", 450, 6),
-    ("Dental Suprimentos", "Material odontológico", "Material odontológico", 1350, None),
-    ("Laboratório Sorriso", "Prótese", "Laboratório de prótese", 980, None),
-    ("Contabilidade Ágil", "Honorários contábeis", "Outras despesas", 600, 6),
+    ("Imobiliária Central", "Aluguel", "rent", 3000, 6),
+    ("Companhia de energia", "Água, luz e internet", "utilities", 450, 6),
+    ("Dental Suprimentos", "Material odontológico", "dental_supplies", 1350, None),
+    ("Laboratório Sorriso", "Prótese", "prosthesis_lab", 980, None),
+    ("Contabilidade Ágil", "Honorários contábeis", "other_expenses", 600, 6),
 ]
 
 
-VISIT_EXPENSES = {"Material odontológico", "Laboratório de prótese"}
+VISIT_EXPENSES = {"dental_supplies", "prosthesis_lab"}
 
 
 def _simulate_expenses(clinic, rng, accounts, user, cost_centers):
@@ -216,7 +216,8 @@ def _simulate_expenses(clinic, rng, accounts, user, cost_centers):
     )
     methods = [method for method in bill_methods if method in for_country]
     categories = {
-        c.name: c for c in Category.objects.filter(clinic=clinic, kind=Category.Kind.EXPENSE)
+        c.key: c
+        for c in Category.objects.filter(clinic=clinic, kind=Category.Kind.EXPENSE).exclude(key="")
     }
     today = timezone.localdate()
     start = services.add_months(today.replace(day=10), -2)
@@ -282,9 +283,9 @@ def simulate_estimates(clinic, rng, quantity=20, user=None):
         EstimateItem,
         Procedure,
     )
-    from apps.finance.models import Category
+    from apps.finance.models import TREATMENT, Category
 
-    treatment = Category.objects.filter(clinic=clinic, name="Tratamento").first()
+    treatment = Category.objects.filter(clinic=clinic, key=TREATMENT).first()
     if not Procedure.objects.filter(clinic=clinic).exists():
         Procedure.objects.bulk_create(
             Procedure(clinic=clinic, name=name, amount=Decimal(amount), category=treatment)
@@ -341,11 +342,9 @@ def simulate_commissions(clinic, rng, user=None):
     from decimal import Decimal
 
     from apps.finance import commissions
-    from apps.finance.models import Category
+    from apps.finance.models import COMMISSIONS, Category
 
-    category = Category.objects.filter(
-        clinic=clinic, kind=Category.Kind.EXPENSE, name="Comissões"
-    ).first()
+    category = Category.objects.filter(clinic=clinic, key=COMMISSIONS).first()
     if category is None:
         return 0
     end_of_last_month = timezone.localdate().replace(day=1) - datetime.timedelta(days=1)

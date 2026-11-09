@@ -3,8 +3,9 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
+from apps.audit import events
 from apps.audit.models import AuditEntry
-from apps.audit.record import log_event
+from apps.audit.record import log_event, model_label
 from apps.core.isolation import without_isolation
 from apps.core.models import Clinic, ClinicModule
 from apps.estimates.models import Estimate, EstimateItem, Procedure
@@ -132,7 +133,7 @@ class Command(BaseCommand):
             AuditEntry.objects.filter(clinic_id__in=clinic_ids).delete()
             AuditEntry.objects.filter(user_id__in=user_ids).delete()
             AuditEntry.objects.filter(
-                model_name__in=["Usuário", "Clínica"],
+                model_name__in=[model_label(get_user_model()), model_label(Clinic)],
                 object_id__in=[str(i) for i in user_ids + clinic_ids],
             ).delete()
             deleted_usernames = [u.username for u in users]
@@ -140,10 +141,8 @@ class Command(BaseCommand):
             AccessAttempt.objects.filter(username__in=deleted_usernames).delete()
             log_event(
                 AuditEntry.Action.DELETE,
-                description=(
-                    f"Dados de teste removidos: {len(clinics)} clínicas, {patients} pacientes, "
-                    f"{len(users)} usuários"
-                ),
+                event=events.SAMPLE_DATA_REMOVED,
+                values={"clinics": len(clinics), "patients": patients, "users": len(users)},
             )
 
         self.stdout.write(self.style.SUCCESS("Sample data removed."))

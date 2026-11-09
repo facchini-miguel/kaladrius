@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 
@@ -50,6 +51,11 @@ class AuditEntry(models.Model):
     object_id = models.CharField(_("record code"), max_length=40, blank=True)
     object_repr = models.CharField(_("record"), max_length=200, blank=True)
     changes = models.JSONField(_("changes"), default=dict, blank=True)
+    # What the system described itself (decision 206): a code of apps/audit/events.py and
+    # its values, shown in the reader's language. object_repr keeps the text in the source
+    # language.
+    event = models.CharField(_("event"), max_length=30, blank=True)
+    event_values = models.JSONField(_("event values"), default=dict, blank=True)
     ip = models.GenericIPAddressField(_("IP"), null=True, blank=True)
 
     class Meta:
@@ -63,6 +69,6 @@ class AuditEntry(models.Model):
         ]
 
     def __str__(self):
-        who = self.user_name or "sistema"
+        who = self.user_name or gettext("system")
         action = self.get_action_display()
         return f"{self.timestamp:%d/%m/%Y %H:%M} {who}: {action} {self.object_repr}"

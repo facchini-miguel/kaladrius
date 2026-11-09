@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.core import identification
 from apps.core.forms import BootstrapForm, LocalizedDecimalField, document_field
 from apps.core.validators import normalize_phone
-from apps.finance.models import Category
+from apps.finance.models import PAYROLL, Category
 
 from .models import Employee, Payroll
 
@@ -133,4 +133,4 @@ class PostPayrollForm(BootstrapForm, forms.Form):
         super().__init__(*args, **kwargs)
         expenses = Category.objects.filter(kind=Category.Kind.EXPENSE, active=True)
         self.fields["category"].queryset = expenses
-        self.fields["category"].initial = expenses.filter(name="Salários e encargos").first()
+        self.fields["category"].initial = expenses.filter(key=PAYROLL).first()

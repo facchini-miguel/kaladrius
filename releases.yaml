@@ -4,6 +4,50 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.71.0
+  date: 2026-11-09
+  title:
+    pt-br: Categorias padrão e auditoria no idioma certo
+    en: Default categories and audit log in the right language
+    es: Categorías predeterminadas y auditoría en el idioma correcto
+  items:
+    - kind: improvement
+      module: Finance
+      audience: [staff]
+      text:
+        pt-br: >
+          Uma clínica nova recebe as contas, as categorias e o plano de contas padrão no idioma do
+          seu país: em português no Brasil, em espanhol na América Latina e em inglês nos outros.
+          Renomear as categorias de salários ou de comissões não tira mais a sugestão delas ao
+          lançar a folha ou pagar uma comissão.
+        en: >
+          A new clinic gets the default accounts, categories and chart of accounts in the language
+          of its country: Portuguese in Brazil, Spanish in Latin America and English elsewhere.
+          Renaming the salaries or the commissions category no longer stops it being suggested
+          when posting the payroll or paying a commission.
+        es: >
+          Una clínica nueva recibe las cuentas, las categorías y el plan de cuentas predeterminados
+          en el idioma de su país: portugués en Brasil, español en América Latina e inglés en los
+          demás. Cambiar el nombre de las categorías de sueldos o de comisiones ya no impide que se
+          sugieran al registrar la nómina o pagar una comisión.
+    - kind: fix
+      module: Audit log
+      audience: [staff]
+      text:
+        pt-br: >
+          No registro de auditoria, o que o próprio sistema escreve (verificação em duas etapas,
+          tentativa de login recusada, impressão do atendimento, anexos, dados excluídos) e o tipo
+          de registro aparecem no idioma de quem lê, também nas entradas antigas.
+        en: >
+          In the audit log, what the system itself writes (two-step verification, refused login
+          attempt, visit printout, attachments, deleted data) and the kind of record appear in the
+          reader's language, in older entries too.
+        es: >
+          En el registro de auditoría, lo que escribe el propio sistema (verificación en dos pasos,
+          intento de inicio de sesión rechazado, impresión de la atención, adjuntos, datos
+          eliminados) y el tipo de registro aparecen en el idioma de quien lee, también en las
+          entradas antiguas.
+
 - version: 0.70.1
   date: 2026-11-09
   title:

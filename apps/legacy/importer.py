@@ -20,6 +20,7 @@ from django.core.validators import validate_email
 from django.db import transaction
 from django.utils import timezone
 
+from apps.audit import events
 from apps.audit.models import AuditEntry
 from apps.audit.record import log_event
 from apps.core.isolation import without_isolation
@@ -466,10 +467,12 @@ class _Importer:
             log_event(
                 AuditEntry.Action.CREATE,
                 clinic=clinic,
-                description=(
-                    f"Importação do sistema antigo: {r.patients} pacientes, "
-                    f"{r.appointments} agendamentos, {r.recalls} rechamadas"
-                ),
+                event=events.LEGACY_IMPORT,
+                values={
+                    "patients": r.patients,
+                    "appointments": r.appointments,
+                    "recalls": r.recalls,
+                },
             )
         return self.report
 

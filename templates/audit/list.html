@@ -18,7 +18,7 @@
   <div class="col-6 col-md-2">
     <select name="model_name" class="form-select" aria-label="{% translate "Record type" %}">
       <option value="">{% translate "All types" %}</option>
-      {% for item in model_names %}<option value="{{ item }}"{% if filters.model_name == item %} selected{% endif %}>{{ item }}</option>{% endfor %}
+      {% for stored, shown in model_names %}<option value="{{ stored }}"{% if filters.model_name == stored %} selected{% endif %}>{{ shown }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filters.since }}" class="form-control" aria-label="{% translate "From" %}" title="{% translate "From" %}"></div>
@@ -35,7 +35,7 @@
         <td class="text-nowrap">{{ record.timestamp|date:"SHORT_DATETIME_FORMAT" }}</td>
         <td>{% if record.user_name %}{{ record.user_name }}{% else %}{% translate "system" %}{% endif %}</td>
         <td>{{ record.get_action_display }}</td>
-        <td>{% if record.model_name %}<span class="text-body-secondary">{{ record.model_name }} {{ record.object_id }}:</span> {% endif %}{{ record.object_repr }}</td>
+        <td>{% if record.model_name %}<span class="text-body-secondary">{{ record.type_shown }} {{ record.object_id }}:</span> {% endif %}{{ record.description }}</td>
         <td>
           {% if record.changes %}
           <details>

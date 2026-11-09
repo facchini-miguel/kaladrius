@@ -54,6 +54,7 @@ from .forms import (
     TransactionEntryForm,
 )
 from .models import (
+    COMMISSIONS,
     ZERO,
     AccountGroup,
     BankTransaction,
@@ -869,7 +870,7 @@ def pay_commission(request, pk):
     practitioner = get_object_or_404(Practitioner.objects, pk=pk)
     until = _until(request)
     default = (
-        Category.objects.filter(kind=Category.Kind.EXPENSE, name="Comissões", active=True).first()
+        Category.objects.filter(key=COMMISSIONS, active=True).first()
         or Category.objects.filter(kind=Category.Kind.EXPENSE, active=True).first()
     )
     form = PayCommissionForm(request.POST or None, initial={"category": default})

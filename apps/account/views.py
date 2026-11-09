@@ -13,6 +13,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
 
+from apps.audit import events
 from apps.audit.models import AuditEntry
 from apps.audit.record import log_event
 
@@ -114,7 +115,8 @@ def two_factor(request):
             log_event(
                 AuditEntry.Action.CHANGE,
                 user,
-                description=f"{user}: verificação em duas etapas desativada",
+                event=events.TWO_FACTOR_OFF,
+                values={"record": user},
             )
             messages.success(request, _("Two-step verification turned off."))
             return redirect("account:two_factor")
@@ -146,7 +148,8 @@ def two_factor(request):
             log_event(
                 AuditEntry.Action.CHANGE,
                 user,
-                description=f"{user}: verificação em duas etapas ativada",
+                event=events.TWO_FACTOR_ON,
+                values={"record": user},
             )
             return render(request, "account/codes.html", {"codes": codes, "enabled": True})
         form.add_error("code", _("Wrong code. Check the phone's clock and try again."))
