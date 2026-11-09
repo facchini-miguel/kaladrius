@@ -25,13 +25,13 @@ class Command(BaseCommand):
         email = os.environ.get("DJANGO_ADMIN_EMAIL", "")
 
         if not password:
-            raise CommandError("Defina DJANGO_ADMIN_PASSWORD no .env antes de criar o admin.")
+            raise CommandError("Set DJANGO_ADMIN_PASSWORD in .env before creating the admin.")
 
         User = get_user_model()
         if User.objects.filter(username=username).exists():
             if options["fail_if_exists"]:
-                raise CommandError(f"O usuário '{username}' já existe.", returncode=3)
-            self.stdout.write(f"O usuário '{username}' já existe. Nada foi alterado.")
+                raise CommandError(f"User '{username}' already exists.", returncode=3)
+            self.stdout.write(f"User '{username}' already exists. Nothing was changed.")
             return
 
         try:
@@ -40,4 +40,4 @@ class Command(BaseCommand):
             raise CommandError(" ".join(error.messages)) from error
 
         User.objects.create_superuser(username=username, email=email, password=password)
-        self.stdout.write(self.style.SUCCESS(f"Superusuário '{username}' criado."))
+        self.stdout.write(self.style.SUCCESS(f"Superuser '{username}' created."))

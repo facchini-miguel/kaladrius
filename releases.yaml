@@ -4,6 +4,42 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.69.0
+  date: 2026-11-09
+  title:
+    pt-br: Mensagens dos comandos do servidor em inglês
+    en: The server commands' messages in English
+    es: Mensajes de los comandos del servidor en inglés
+  items:
+    - kind: improvement
+      module: General
+      audience: [staff]
+      text:
+        pt-br: >
+          Manutenção interna: as mensagens dos comandos do servidor foram reorganizadas. Nada muda
+          no uso, nas telas nem nos dados.
+        en: >
+          Internal maintenance: the server commands' messages were reorganized. Nothing changes in
+          use, on the screens or in the data.
+        es: >
+          Mantenimiento interno: se reorganizaron los mensajes de los comandos del servidor. Nada
+          cambia en el uso, en las pantallas ni en los datos.
+    - kind: improvement
+      module: System
+      audience: []
+      text:
+        pt-br: >
+          O que os comandos de administração escrevem no terminal (relatório de saúde, reinício da
+          demonstração, dados de teste, importação do sistema antigo...) está em inglês, como nos
+          comandos do próprio Django (decisão 202).
+        en: >
+          What the management commands print in the terminal (health report, demo reset, sample
+          data, legacy import...) is in English, as in Django's own commands (decision 202).
+        es: >
+          Lo que los comandos de administración escriben en la terminal (informe de salud, reinicio
+          de la demostración, datos de prueba, importación del sistema antiguo...) está en inglés,
+          como en los comandos del propio Django (decisión 202).
+
 - version: 0.68.0
   date: 2026-11-07
   title:

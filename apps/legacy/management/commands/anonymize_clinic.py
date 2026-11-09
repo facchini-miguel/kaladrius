@@ -21,16 +21,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, clinic, confirm, **options):
         if not confirm:
-            raise CommandError("Nada foi alterado: rode de novo com --confirm.")
+            raise CommandError("Nothing was changed: run it again with --confirm.")
         try:
             r = anonymize_clinic(clinic)
         except ClinicNotFound as error:
             raise CommandError(str(error)) from error
-        self.stdout.write(self.style.SUCCESS(f"Dados da clínica “{clinic}” anonimizados:"))
-        self.stdout.write(f"  Pacientes: {r.patients}")
-        self.stdout.write(f"  Agendamentos: {r.appointments}")
-        self.stdout.write(f"  Rechamadas: {r.recalls}")
-        self.stdout.write(f"  Profissionais: {r.practitioners}")
-        self.stdout.write(
-            f"  Registros de auditoria com os dados originais apagados: {r.deleted_records}"
-        )
+        self.stdout.write(self.style.SUCCESS(f"Data of the clinic “{clinic}” anonymized:"))
+        self.stdout.write(f"  Patients: {r.patients}")
+        self.stdout.write(f"  Appointments: {r.appointments}")
+        self.stdout.write(f"  Recalls: {r.recalls}")
+        self.stdout.write(f"  Practitioners: {r.practitioners}")
+        self.stdout.write(f"  Audit entries with the original data deleted: {r.deleted_records}")

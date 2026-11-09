@@ -188,8 +188,8 @@ class _Importer:
         clinic = Clinic.objects.filter(name=self.clinic_name).first()
         if clinic is not None and Patient.objects.filter(clinic=clinic).exists():
             raise ImportRefused(
-                f"A clínica “{self.clinic_name}” já tem pacientes. A importação só é feita "
-                "numa clínica nova ou vazia, para não duplicar dados."
+                f"The clinic “{self.clinic_name}” already has patients. The import only goes "
+                "into a new or empty clinic, so no data is duplicated."
             )
         if clinic is None:
             clinic = Clinic.objects.create(name=self.clinic_name)  # gets the default types
@@ -228,9 +228,9 @@ class _Importer:
         document, original = _document(row["cpf_cnpj"], kind)
         if document and document in used:
             document, original = "", _text(row["cpf_cnpj"])
-            warnings["CPF/CNPJ repetido (guardado nas observações)"] += 1
+            warnings["Repeated CPF/CNPJ (kept in the notes)"] += 1
         elif original:
-            warnings["CPF/CNPJ inválido (guardado nas observações)"] += 1
+            warnings["Invalid CPF/CNPJ (kept in the notes)"] += 1
         if original:
             extras.append(f"CPF/CNPJ no sistema antigo: {original}")
         if document:
@@ -247,7 +247,7 @@ class _Importer:
                 extras.append(f"Telefone ({legacy}): {row[legacy]}")
                 number = ""
             elif number and len(number) < 10:
-                warnings["Telefones sem DDD (mantidos como estavam)"] += 1
+                warnings["Phones without area code (kept as they were)"] += 1
             if len(number) == 11 and number.startswith("0"):  # carrier prefix: 0 + DDD
                 number = number[1:]
             # The legacy predates the ninth mobile digit (2012-2016): old mobiles get it.
@@ -258,12 +258,12 @@ class _Importer:
         email, invalid_email = _email(row["email"])
         if invalid_email:
             extras.append(f"E-mail no sistema antigo: {invalid_email}")
-            warnings["E-mail inválido (guardado nas observações)"] += 1
+            warnings["Invalid e-mail (kept in the notes)"] += 1
 
         postal_code = digits_only(row["cep"])
         if postal_code and len(postal_code) != 8:
             extras.append(f"CEP no sistema antigo: {row['cep']}")
-            warnings["CEP incompleto (guardado nas observações)"] += 1
+            warnings["Incomplete CEP (kept in the notes)"] += 1
             postal_code = ""
 
         state = city = None
@@ -273,7 +273,7 @@ class _Importer:
             )
             if city is None:
                 extras.append(f"Cidade no sistema antigo: {city_name}/{abbreviation or '?'}")
-                warnings["Cidade não encontrada na lista do IBGE (guardada nas observações)"] += 1
+                warnings["City not in the IBGE list (kept in the notes)"] += 1
 
         sex = row["sexo"] if row["sexo"] in ("F", "M") else ""
         birth_date = _date(row["data_nasc"])
@@ -363,7 +363,9 @@ class _Importer:
             day = _date(row["data_marcar"])
             start, end = _time(row["hora_inicial"]), _time(row["hora_final"])
             if None in (practitioner, kind, day, start, end):
-                warnings["Agendamento sem profissional, tipo ou data válidos (não importado)"] += 1
+                warnings[
+                    "Appointment without a valid practitioner, type or date (not imported)"
+                ] += 1
                 continue
             # Blocked slots ("Ocupado") had no description; the schedule form requires a
             # patient or a description, so the type name keeps them editable.
@@ -375,7 +377,7 @@ class _Importer:
                 description = (
                     f"{description}\n[Sistema antigo: horário de término corrigido]".strip()
                 )
-                warnings["Agendamento com término antes do início (corrigido para 30 min)"] += 1
+                warnings["Appointment ending before it starts (set to 30 min)"] += 1
             new_ones.append(
                 Appointment(
                     clinic=practitioner.clinic,
@@ -432,7 +434,7 @@ class _Importer:
             patient = patients.get(row["id_pessoa"])
             day = _date(row["data_marcar"])
             if patient is None or day is None:
-                warnings["Rechamada de paciente inexistente ou sem data (não importada)"] += 1
+                warnings["Recall of a missing patient or without a date (not imported)"] += 1
                 continue
             description = _text(row["descricao"]) or "Rechamada"
             if len(description) > 200:
@@ -476,5 +478,5 @@ def import_dump(dump_text, clinic_name, today=None):
     """Import a legacy dump into the clinic `nome_clinica` (created if needed). All or nothing."""
     tables = read_tables(dump_text, TABLES)
     if not tables.get("pessoas"):
-        raise ImportRefused("O arquivo não tem a tabela `pessoas` do sistema antigo.")
+        raise ImportRefused("The file does not have the old system's `pessoas` table.")
     return _Importer(tables, clinic_name, today or timezone.localdate()).run()

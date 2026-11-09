@@ -174,8 +174,8 @@ def test_command_summarizes_24_hours(folder):
     output = StringIO()
     call_command("health", stdout=output)
     text = output.getvalue()
-    assert "Amostras: 2" in text and "pico 8.0%" in text
-    assert "disco: critico" in text and "Último backup: nenhum registrado" in text
+    assert "Samples: 2" in text and "peak 8.0%" in text
+    assert "disk: critical" in text and "Last backup: none recorded" in text
 
 
 def test_scale_follows_data_and_lone_point_becomes_dot(folder):

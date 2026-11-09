@@ -64,7 +64,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, confirm=False, **options):
         if not confirm:
-            raise CommandError("Nada foi apagado: rode de novo com --confirm.")
+            raise CommandError("Nothing was deleted: run it again with --confirm.")
         names = [data["name"] for data in CLINICS] + OLD_CLINICS
         usernames = [u[0] for data in CLINICS for u in data["users"]] + OLD_USERS
 
@@ -146,7 +146,7 @@ class Command(BaseCommand):
                 ),
             )
 
-        self.stdout.write(self.style.SUCCESS("Dados de teste removidos."))
-        self.stdout.write(f"Clínicas: {', '.join(c.name for c in clinics) or 'nenhuma'}")
-        self.stdout.write(f"Pacientes fictícios: {patients}")
-        self.stdout.write(f"Usuários: {', '.join(deleted_usernames) or 'nenhum'}")
+        self.stdout.write(self.style.SUCCESS("Sample data removed."))
+        self.stdout.write(f"Clinics: {', '.join(c.name for c in clinics) or 'none'}")
+        self.stdout.write(f"Fake patients: {patients}")
+        self.stdout.write(f"Users: {', '.join(deleted_usernames) or 'none'}")

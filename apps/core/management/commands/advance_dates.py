@@ -45,16 +45,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, since, confirm, **options):
         if not settings.DEMO:
-            raise CommandError("Só no servidor de demonstração (DJANGO_DEMO=1).")
+            raise CommandError("Only on the demo server (DJANGO_DEMO=1).")
         if not confirm:
-            raise CommandError("Nada foi alterado: rode de novo com --confirm.")
+            raise CommandError("Nothing was changed: run it again with --confirm.")
         try:
             start = datetime.date.fromisoformat(since)
         except ValueError as error:
-            raise CommandError(f"Data inválida: {since}") from error
+            raise CommandError(f"Invalid date: {since}") from error
         days = (timezone.localdate() - start).days // 7 * 7
         if days <= 0:
-            self.stdout.write("Menos de uma semana: nada a avançar.")
+            self.stdout.write("Less than a week: nothing to move.")
             return
 
         tables = list(date_fields())
@@ -91,7 +91,7 @@ class Command(BaseCommand):
                 editor.add_constraint(model, constraint)
         self.stdout.write(
             self.style.SUCCESS(
-                f"Datas avançadas {days // 7} semana(s) ({days} dias): "
-                f"{rows} registros em {len(tables)} tabelas."
+                f"Dates moved {days // 7} week(s) ({days} days): "
+                f"{rows} rows in {len(tables)} tables."
             )
         )

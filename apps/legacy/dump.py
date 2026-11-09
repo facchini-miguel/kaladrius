@@ -31,12 +31,12 @@ def _values(text, start):
         elif c == ";" and row is None:
             return rows, i + 1
         elif row is None:
-            raise InvalidDump(f"Caractere inesperado na posição {i}: {c!r}")
+            raise InvalidDump(f"Unexpected character at position {i}: {c!r}")
         elif c == "'":
             parts, i = [], i + 1
             while True:
                 if i >= n:
-                    raise InvalidDump("Texto sem aspas de fechamento.")
+                    raise InvalidDump("Text without a closing quote.")
                 c = text[i]
                 if c == "\\" and i + 1 < n:
                     parts.append(_ESCAPES.get(text[i + 1], text[i + 1]))
@@ -65,9 +65,9 @@ def _values(text, start):
                 try:
                     row.append(float(raw) if "." in raw else int(raw))
                 except ValueError as error:
-                    raise InvalidDump(f"Valor inválido: {raw!r}") from error
+                    raise InvalidDump(f"Invalid value: {raw!r}") from error
             i = end
-    raise InvalidDump("Fim do arquivo dentro de um INSERT.")
+    raise InvalidDump("End of file inside an INSERT.")
 
 
 def read_tables(text, tables=None):
@@ -80,10 +80,10 @@ def read_tables(text, tables=None):
         if tables is not None and table not in tables:
             continue
         if columns is None:
-            raise InvalidDump(f"INSERT sem nomes de colunas na tabela {table}.")
+            raise InvalidDump(f"INSERT without column names in the table {table}.")
         names = [name.strip().strip("`") for name in columns.split(",")]
         for row in rows:
             if len(row) != len(names):
-                raise InvalidDump(f"Linha com {len(row)} valores em {table}.")
+                raise InvalidDump(f"Row with {len(row)} values in {table}.")
             result[table].append(dict(zip(names, row, strict=True)))
     return dict(result)

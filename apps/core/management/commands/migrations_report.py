@@ -147,7 +147,7 @@ def _name_only(operation, app, before):
 
 
 def _after(operation, app, before):
-    """The project state after `operacao`, leaving `antes` as it was."""
+    """The project state after `operation`, leaving `before` as it was."""
     after = before.clone()
     operation.state_forwards(app, after)
     return after
@@ -248,12 +248,12 @@ def operation_alerts(operation, app, before, db_connection=connection):
 
 
 def analyze(keys, loader=None):
-    """A Migracao, with its SQL and the attention points of each operation, per (app, name)."""
+    """A Migration, with its SQL and the attention points of each operation, per (app, name)."""
     loader = loader or MigrationLoader(connection, ignore_no_migrations=True)
     result = []
     for app, name in keys:
         if (app, name) not in loader.disk_migrations:
-            raise CommandError(f"Migração {app}.{name} não encontrada.")
+            raise CommandError(f"Migration {app}.{name} not found.")
         migration = loader.disk_migrations[(app, name)]
         # The state right before this migration: every migration it depends on, not itself.
         state = loader.project_state((app, name), at_end=False)
@@ -275,8 +275,8 @@ def disposable_database(db_connection=connection):
     if os.environ.get("DISPOSABLE_DATABASE") == "1" or name.startswith("test_"):
         return
     raise CommandError(
-        f"--test-rollback desfaz migrações no banco {name}, e os dados delas se perdem. Só num "
-        "banco descartável: o de testes, ou com DISPOSABLE_DATABASE=1 (o CI)."
+        f"--test-rollback undoes migrations in the database {name}, and their data is lost. Only "
+        "on a throwaway database: the test one, or with DISPOSABLE_DATABASE=1 (CI)."
     )
 
 
@@ -426,7 +426,7 @@ class Command(BaseCommand):
         elif base:
             keys, changed = migrations_from_diff(base)
         else:
-            raise CommandError("Informe as migrações ou --base.")
+            raise CommandError("Give the migrations or --base.")
         if test_rollback:
             disposable_database()  # before anything, not after the analysis
         analyzed = analyze(keys)
@@ -440,4 +440,4 @@ class Command(BaseCommand):
                 file.write(markdown(analyzed, failures, changed, limit=COMMENT_LIMIT))
         self.stdout.write(report)
         if failures:
-            raise CommandError("O teste de ida e volta falhou.")
+            raise CommandError("The round-trip test failed.")
