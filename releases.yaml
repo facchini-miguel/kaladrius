@@ -4,6 +4,40 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.70.0
+  date: 2026-11-09
+  title:
+    pt-br: Títulos do painel do Django traduzidos
+    en: The Django admin's titles translated
+    es: Títulos del panel de Django traducidos
+  items:
+    - kind: fix
+      module: System
+      audience: [staff]
+      text:
+        pt-br: >
+          No painel do Django, o título, a página inicial e o módulo "Saúde do sistema" aparecem no
+          idioma de quem usa, e não mais sempre em português.
+        en: >
+          In the Django admin, the title, the home page and the "System health" module appear in
+          the user's language, no longer always in Portuguese.
+        es: >
+          En el panel de Django, el título, la página de inicio y el módulo "Salud del sistema"
+          aparecen en el idioma de quien lo usa, y ya no siempre en portugués.
+    - kind: improvement
+      module: System
+      audience: []
+      text:
+        pt-br: >
+          Os erros de validação do releases.yaml e dois avisos da importação do sistema antigo que
+          tinham ficado de fora da decisão 202 estão em inglês (decisão 203).
+        en: >
+          The releases.yaml validation errors and two legacy import warnings left out of decision
+          202 are in English (decision 203).
+        es: >
+          Los errores de validación de releases.yaml y dos avisos de la importación del sistema
+          antiguo que habían quedado fuera de la decisión 202 están en inglés (decisión 203).
+
 - version: 0.69.0
   date: 2026-11-09
   title:

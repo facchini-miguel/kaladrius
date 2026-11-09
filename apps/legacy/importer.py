@@ -393,7 +393,7 @@ class _Importer:
         for appointment in sorted(new_ones, key=lambda a: (a.practitioner.pk, a.start)):
             if appointment.start < last_end.get(appointment.practitioner.pk, appointment.start):
                 warnings[
-                    "Agendamento sobreposto a outro do mesmo profissional (não importado)"
+                    "Appointment overlapping another of the same practitioner (not imported)"
                 ] += 1
                 continue
             last_end[appointment.practitioner.pk] = appointment.end
@@ -421,8 +421,8 @@ class _Importer:
             clinic.schedule_start, clinic.schedule_end = start, end
             clinic.save(update_fields=["schedule_start", "schedule_end"])
             self.report.warnings[
-                f"Horário da agenda ampliado para {start:%H:%M}–{end:%H:%M} "
-                "(havia atendimentos fora do padrão)"
+                f"Schedule hours widened to {start:%H:%M}–{end:%H:%M} "
+                "(there were appointments outside the default)"
             ] += 1
 
     def _recalls(self, patients):

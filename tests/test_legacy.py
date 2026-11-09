@@ -131,7 +131,7 @@ def test_report(imported):
     assert (report.appointments, report.recalls, report.kinds_created) == (4, 2, 1)
     warnings = report.warnings
     assert warnings["Appointment without a valid practitioner, type or date (not imported)"] == 1
-    assert warnings["Agendamento sobreposto a outro do mesmo profissional (não importado)"] == 1
+    assert warnings["Appointment overlapping another of the same practitioner (not imported)"] == 1
     assert warnings["Appointment ending before it starts (set to 30 min)"] == 1
     assert warnings["Recall of a missing patient or without a date (not imported)"] == 1
 
@@ -140,7 +140,7 @@ def test_schedule_hours_cover_the_appointments(imported):
     report, clinic = imported
     clinic.refresh_from_db()
     assert (clinic.schedule_start, clinic.schedule_end) == (datetime.time(7, 30), datetime.time(21))
-    assert any(warning.startswith("Horário da agenda ampliado") for warning in report.warnings)
+    assert any(warning.startswith("Schedule hours widened") for warning in report.warnings)
 
 
 def test_practitioners_and_types(imported):

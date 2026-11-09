@@ -118,7 +118,7 @@ class Release:
 def version_tuple(version):
     found = _SEMVER.match(str(version))
     if not found:
-        raise InvalidReleases(f"Versão '{version}' fora do formato MAIOR.MENOR.CORREÇÃO.")
+        raise InvalidReleases(f"Version '{version}' is not in the MAJOR.MINOR.PATCH format.")
     return tuple(int(part) for part in found.groups())
 
 
@@ -128,15 +128,15 @@ def _texts(value, version, field):
     if value is None or isinstance(value, str):
         value = {SOURCE_LANGUAGE: value or ""}
     if not isinstance(value, dict):
-        raise InvalidReleases(f"{version}: '{field}' deve ser um texto ou um texto por idioma.")
+        raise InvalidReleases(f"{version}: '{field}' must be a text or one text per language.")
     languages = dict(settings.LANGUAGES)
     texts = []
     for language, text in value.items():
         if language not in languages:
-            raise InvalidReleases(f"{version}: idioma '{language}' desconhecido em '{field}'.")
+            raise InvalidReleases(f"{version}: unknown language '{language}' in '{field}'.")
         texts.append((language, " ".join(str(text or "").split())))
     if not dict(texts).get(SOURCE_LANGUAGE) and any(t for _i, t in texts):
-        raise InvalidReleases(f"{version}: '{field}' precisa do texto em português.")
+        raise InvalidReleases(f"{version}: '{field}' needs the Portuguese text.")
     return tuple(texts)
 
 
@@ -150,35 +150,34 @@ def _known_fields(raw, fields, version):
     unknown = sorted(set(raw) - fields)
     if unknown:
         raise InvalidReleases(
-            f"{version}: campo(s) desconhecido(s): {', '.join(unknown)}. "
-            f"Use: {', '.join(sorted(fields))}."
+            f"{version}: unknown field(s): {', '.join(unknown)}. Use: {', '.join(sorted(fields))}."
         )
 
 
 def _validate_item(raw, version):
     if not isinstance(raw, dict):
-        raise InvalidReleases(f"{version}: cada item deve ser um objeto.")
+        raise InvalidReleases(f"{version}: each item must be an object.")
     _known_fields(raw, ITEM_FIELDS, version)
     kind = raw.get("kind")
     if kind not in KINDS:
-        raise InvalidReleases(f"{version}: tipo '{kind}' inválido. Use: {', '.join(KINDS)}.")
+        raise InvalidReleases(f"{version}: invalid kind '{kind}'. Use: {', '.join(KINDS)}.")
     module = str(raw.get("module") or "").strip()
     texts = _texts(raw.get("text"), version, "text")
     if not module or not dict(texts).get(SOURCE_LANGUAGE):
-        raise InvalidReleases(f"{version}: todo item precisa de 'module' e 'text'.")
+        raise InvalidReleases(f"{version}: every item needs 'module' and 'text'.")
     audience = raw.get("audience")
     if not isinstance(audience, list) or not set(audience) <= AUDIENCES:
         raise InvalidReleases(
-            f"{version}: 'audience' deve ser uma lista com {sorted(AUDIENCES)} (ou vazia)."
+            f"{version}: 'audience' must be a list of {sorted(AUDIENCES)} (or empty)."
         )
     source = raw.get("source") or ""
     if source and source not in SOURCES:
-        raise InvalidReleases(f"{version}: origem '{source}' inválida. Use: {', '.join(SOURCES)}.")
+        raise InvalidReleases(f"{version}: invalid source '{source}'. Use: {', '.join(SOURCES)}.")
     pr = raw.get("pr")
     if pr is not None and (not isinstance(pr, int) or isinstance(pr, bool) or pr < 1):
-        raise InvalidReleases(f"{version}: 'pr' deve ser o número do pull request.")
+        raise InvalidReleases(f"{version}: 'pr' must be the pull request's number.")
     if source and pr is None:
-        raise InvalidReleases(f"{version}: um item do {SOURCES[source]} precisa do 'pr'.")
+        raise InvalidReleases(f"{version}: an item from {SOURCES[source]} needs the 'pr'.")
     return Item(
         kind=kind, module=module, audience=tuple(audience), texts=texts, source=source, pr=pr
     )
@@ -186,16 +185,16 @@ def _validate_item(raw, version):
 
 def _validate_release(raw):
     if not isinstance(raw, dict):
-        raise InvalidReleases("Cada versão deve ser um objeto.")
+        raise InvalidReleases("Each version must be an object.")
     version = str(raw.get("version", ""))
     _known_fields(raw, RELEASE_FIELDS, version or "?")
     version_tuple(version)
     date = raw.get("date")
     if not isinstance(date, datetime.date):
-        raise InvalidReleases(f"{version}: 'date' deve estar no formato AAAA-MM-DD.")
+        raise InvalidReleases(f"{version}: 'date' must be in the YYYY-MM-DD format.")
     items = raw.get("items")
     if not isinstance(items, list) or not items:
-        raise InvalidReleases(f"{version}: a versão precisa de pelo menos um item.")
+        raise InvalidReleases(f"{version}: the version needs at least one item.")
     return Release(
         version=version,
         date=date,
@@ -208,16 +207,16 @@ def read_releases(path):
     """Read and validate the file. Versions must be ordered from newest to oldest."""
     content = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     if not isinstance(content, list) or not content:
-        raise InvalidReleases("O arquivo deve conter uma lista com pelo menos uma versão.")
+        raise InvalidReleases("The file must hold a list with at least one version.")
     releases = [_validate_release(raw) for raw in content]
     for newer, previous in zip(releases, releases[1:], strict=False):
         if newer.key <= previous.key:
             raise InvalidReleases(
-                f"Ordem inválida: {newer.version} deveria ser maior que {previous.version}."
+                f"Wrong order: {newer.version} should be greater than {previous.version}."
             )
         if newer.date < previous.date:
             raise InvalidReleases(
-                f"Data inválida: {newer.version} tem data anterior à de {previous.version}."
+                f"Wrong date: {newer.version} has a date before that of {previous.version}."
             )
     return tuple(releases)
 

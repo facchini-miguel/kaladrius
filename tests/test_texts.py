@@ -125,3 +125,21 @@ def test_django_admin_without_english(client, django_user_model):
     client.force_login(super_user)
     page = client.get(reverse("admin:reference_data_state_changelist")).content.decode()
     assert "Select an option" not in page and "Selecione uma opção" in page
+
+
+@pytest.mark.parametrize(
+    ("language", "header", "title", "health"),
+    [
+        ("pt-br", "Kaladrius: administração", "Administração", "Saúde do sistema"),
+        ("en", "Kaladrius: administration", "Administration", "System health"),
+        ("es", "Kaladrius: administración", "Administración", "Salud del sistema"),
+    ],
+)
+def test_admin_titles_follow_the_language(language, header, title, health):
+    from django.apps import apps
+    from django.contrib import admin
+
+    with translation.override(language):
+        assert str(admin.site.site_header) == header
+        assert str(admin.site.index_title) == title
+        assert str(apps.get_app_config("monitoring").verbose_name) == health

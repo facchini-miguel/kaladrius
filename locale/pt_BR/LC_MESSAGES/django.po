@@ -2016,6 +2016,9 @@ msgstr "Anexo incluído."
 msgid "Attachment removed."
 msgstr "Anexo removido."
 
+msgid "System health"
+msgstr "Saúde do sistema"
+
 msgid "Processor"
 msgstr "Processador"
 
@@ -2765,6 +2768,13 @@ msgstr "Sistema"
 msgid "Appointment types"
 msgstr "Tipos de atendimento"
 
+msgctxt "admin site header"
+msgid "administration"
+msgstr "administração"
+
+msgid "Administration"
+msgstr "Administração"
+
 msgid "Access denied"
 msgstr "Acesso negado"
 
@@ -3108,12 +3118,6 @@ msgstr "Fornecedores"
 
 msgid "User manual"
 msgstr "Manual do usuário"
-
-msgid "System health"
-msgstr "Saúde do sistema"
-
-msgid "Administration"
-msgstr "Administração"
 
 msgid "Django admin"
 msgstr "Painel do Django"
