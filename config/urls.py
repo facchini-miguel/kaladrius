@@ -2,6 +2,9 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
+from django.utils.text import format_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.account import views as account_views
 from apps.help import views as help_views
@@ -9,9 +12,11 @@ from config import legacy_urls
 
 from .api import api
 
-admin.site.site_header = f"{settings.SYSTEM_NAME}: administração"
+admin.site.site_header = format_lazy(
+    "{}: {}", settings.SYSTEM_NAME, pgettext_lazy("admin site header", "administration")
+)
 admin.site.site_title = settings.SYSTEM_NAME
-admin.site.index_title = "Administração"
+admin.site.index_title = _("Administration")
 
 urlpatterns = [
     path("admin/", admin.site.urls),

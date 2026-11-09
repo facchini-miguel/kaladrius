@@ -83,11 +83,11 @@ def test_reading_and_filtering_by_audience(file_path, settings):
 @pytest.mark.parametrize(
     ("page_content", "message"),
     [
-        ("- version: 1.0\n  date: 2027-01-01\n  items: []", "formato"),
+        ("- version: 1.0\n  date: 2027-01-01\n  items: []", "format"),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
             "    - {kind: x, module: A, audience: [staff], text: t}",
-            "tipo",
+            "kind",
         ),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
@@ -95,16 +95,16 @@ def test_reading_and_filtering_by_audience(file_path, settings):
             "audience",
         ),
         # The format before decision 189 is refused, naming the field.
-        ("- versao: 1.0.0\n  date: 2027-01-01\n  items: []", "desconhecido.*versao"),
+        ("- versao: 1.0.0\n  date: 2027-01-01\n  items: []", "unknown.*versao"),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
             "    - {tipo: new, module: A, audience: [staff], text: t}",
-            "desconhecido.*tipo",
+            "unknown.*tipo",
         ),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
             "    - {kind: new, module: A, audience: [staff], text: t, source: robo, pr: 1}",
-            "origem",
+            "source",
         ),
         (
             "- version: 1.0.0\n  date: 2027-01-01\n  items:\n"
@@ -116,7 +116,7 @@ def test_reading_and_filtering_by_audience(file_path, settings):
             "    - {kind: new, module: A, audience: [staff], text: t}\n"
             "- version: 1.1.0\n  date: 2027-01-02\n  items:\n"
             "    - {kind: new, module: A, audience: [staff], text: t}",
-            "Ordem",
+            "Wrong order",
         ),
     ],
 )
