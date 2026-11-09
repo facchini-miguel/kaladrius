@@ -4,6 +4,32 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.70.1
+  date: 2026-11-09
+  title:
+    pt-br: Proteção do login atualizada
+    en: Login protection updated
+    es: Protección del inicio de sesión actualizada
+  items:
+    - kind: improvement
+      module: Access
+      audience: [staff]
+      source: dependabot
+      pr: 93
+      text:
+        pt-br: >
+          A biblioteca que bloqueia tentativas repetidas de senha errada (django-axes) foi
+          atualizada para a versão 9, com correções de robustez. O bloqueio continua igual: 5
+          senhas erradas bloqueiam aquele usuário naquele endereço por 1 hora.
+        en: >
+          The library that blocks repeated wrong-password attempts (django-axes) was updated to
+          version 9, with robustness fixes. The lockout stays the same: 5 wrong passwords lock
+          that user at that address for 1 hour.
+        es: >
+          La biblioteca que bloquea los intentos repetidos con contraseña incorrecta (django-axes)
+          se actualizó a la versión 9, con correcciones de robustez. El bloqueo sigue igual: 5
+          contraseñas incorrectas bloquean a ese usuario en esa dirección por 1 hora.
+
 - version: 0.70.0
   date: 2026-11-09
   title:
