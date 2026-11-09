@@ -6,7 +6,9 @@ from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.audit import events
 from apps.audit.models import AuditEntry
+from apps.audit.record import anonymize, log_event
 from apps.core.isolation import use_clinic
 from apps.core.models import Role
 from apps.patients.models import Patient
@@ -72,7 +74,8 @@ def test_permanent_deletion_removes_personal_data_from_audit(admin_a, clinic_a):
     assert "Sigilosa" not in text and "52998224725" not in text
     assert "admin_a" in text  # who did it stays
     creation = next(r for r in records if r.action == Action.CREATE)
-    assert creation.changes["name"] == ["(removido)", "(removido)"]
+    assert creation.changes["name"] == ["(removed)", "(removed)"]
+    assert creation.object_repr == f"Paciente {patient.pk} (dados removidos)"
     assert last_ones(object_repr__contains="excluídos a pedido do titular")
     # The erasure shows in the clinic's own audit log (review stage 4).
     page = admin_a.get(reverse("audit:list")).content.decode()
@@ -187,3 +190,84 @@ def test_screen_shows_field_label_also_by_old_name(admin_a, clinic_a):
     assert "<strong>nome</strong>: — → Maria" in page
     assert "<strong>profissão</strong>:  → Professora" in page
     assert "<strong>campo_que_saiu</strong>: 1 → 2" in page
+
+
+@pytest.mark.parametrize(
+    ("language", "texts"),
+    [
+        (
+            "pt-br",
+            [
+                "ana: verificação em duas etapas desativada",
+                "bia: verificação em duas etapas ativada",
+                "Paciente {pk}:</span> Paciente {pk} (dados removidos)",
+                "(removido)",
+                ">Paciente</option>",
+            ],
+        ),
+        (
+            "en",
+            [
+                "ana: two-step verification turned off",
+                "bia: two-step verification turned on",
+                "Patient {pk}:</span> Patient {pk} (data removed)",
+                "(removed)",
+                ">Patient</option>",
+            ],
+        ),
+        (
+            "es",
+            [
+                "ana: verificación en dos pasos desactivada",
+                "bia: verificación en dos pasos activada",
+                "Paciente {pk}:</span> Paciente {pk} (datos eliminados)",
+                "(eliminado)",
+                ">Paciente</option>",
+            ],
+        ),
+    ],
+)
+def test_what_the_system_wrote_shows_in_the_reader_language(
+    admin_a, clinic_a, django_user_model, language, texts
+):
+    """Decision 206: an event and its values, whatever language wrote it; the entries from
+    before it, in Portuguese, too."""
+    log_event(Action.CHANGE, clinic=clinic_a, event=events.TWO_FACTOR_OFF, values={"record": "ana"})
+    AuditEntry.objects.create(
+        clinic=clinic_a, action=Action.CHANGE, object_repr="bia: verificação em duas etapas ativada"
+    )
+    with use_clinic(clinic_a):
+        patient = Patient.objects.create(name="Maria Sigilosa")
+    anonymize(Patient, [patient.pk])
+    django_user_model.objects.filter(username="admin_a").update(language=language)
+    page = admin_a.get(reverse("audit:list")).content.decode()
+    for text in texts:
+        assert text.format(pk=patient.pk) in page
+    assert "Sigilosa" not in page
+
+
+def test_event_text_is_kept_in_the_source_language(clinic_a):
+    """The search and the Django admin find the entry by its Portuguese text, as before."""
+    from django.utils import translation
+
+    with translation.override("es"):
+        entry = log_event(
+            Action.CHANGE, clinic=clinic_a, event=events.TWO_FACTOR_ON, values={"record": "ana"}
+        )
+    assert entry.object_repr == "ana: verificação em duas etapas ativada"
+    assert (entry.event, entry.event_values) == (events.TWO_FACTOR_ON, {"record": "ana"})
+
+
+@pytest.mark.parametrize("event", sorted(events.TEXTS))
+def test_old_portuguese_texts_read_as_their_events(event):
+    """Every event's Portuguese text, written before decision 206, is read back as it."""
+    from django.utils import translation
+
+    values = {"record": "42", "clinics": "1", "patients": "2", "users": "3"}
+    values |= {"appointments": "4", "recalls": "5", "practitioners": "6", "model": "Paciente"}
+    with translation.override("pt-br"):
+        text = str(events.TEXTS[event]) % values
+    old = AuditEntry(object_repr=text, object_id="42")
+    with translation.override("en"):
+        english = str(events.TEXTS[event]) % {**values, "model": "Patient"}
+        assert events.describe(old, "Patient") == english

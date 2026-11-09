@@ -5,11 +5,13 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
 from django.utils.http import urlencode
+from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.permissions import Action, Module, requires_permission
 from apps.core.values import VALUES, code_value
 
+from . import events
 from .models import AuditEntry
 from .record import model_label
 
@@ -23,10 +25,12 @@ def _date(value):
         return None
 
 
-def record_types():
-    """Kinds of record in the filter: the audited models and the medical record documents
-    (logged by hand). Asking the database took most of the page's time once the log had
-    hundreds of thousands of entries (volume test, decision 108)."""
+@cache
+def _record_types():
+    """Kinds of record: the audited models and the medical record documents (logged by
+    hand), each by the name entries store (model_label) and its name for the reader.
+    Asking the database took most of the page's time once the log had hundreds of
+    thousands of entries (volume test, decision 108)."""
     from apps.medical_records.models import (
         Addendum,
         Attachment,
@@ -39,7 +43,21 @@ def record_types():
     from .signals import AUDITED
 
     documents = [Visit, Addendum, Certificate, Prescription, ExamRequest, Attachment]
-    return sorted({model_label(model) for model in [*AUDITED, *documents]})
+    return {model_label(model): model._meta.verbose_name for model in [*AUDITED, *documents]}
+
+
+def record_types():
+    """The filter's kinds of record as (stored name, name in the reader's language), in the
+    reader's alphabetical order."""
+    shown = [(stored, capfirst(name)) for stored, name in _record_types().items()]
+    return sorted(shown, key=lambda pair: str(pair[1]).lower())
+
+
+def record_type(stored):
+    """A stored kind of record in the reader's language; one the system no longer has shows
+    as stored."""
+    name = _record_types().get(stored)
+    return capfirst(name) if name is not None else stored
 
 
 @cache
@@ -124,8 +142,8 @@ def changed_fields(record):
     return [
         (
             labels.get(field, field),
-            _extra(field, _shown(choices.get(field), values[0])),
-            _extra(field, _shown(choices.get(field), values[1])),
+            events.shown_value(_extra(field, _shown(choices.get(field), values[0]))),
+            events.shown_value(_extra(field, _shown(choices.get(field), values[1]))),
         )
         for field, values in record.changes.items()
     ]
@@ -160,6 +178,8 @@ def audit_list(request):
     page = Paginator(records, PER_PAGE).get_page(request.GET.get("page"))
     for record in page:
         record.fields = changed_fields(record)
+        record.type_shown = record_type(record.model_name)
+        record.description = events.describe(record, record.type_shown)
     return render(
         request,
         "audit/list.html",

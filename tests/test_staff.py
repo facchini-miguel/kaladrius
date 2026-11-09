@@ -11,7 +11,8 @@ from apps.core.isolation import use_clinic
 from apps.core.models import GENERAL_MODULES, ModuleCode, Role
 from apps.core.modules import configure
 from apps.finance import services as finance_services
-from apps.finance.models import Entry
+from apps.finance.models import PAYROLL as PAYROLL_KEY
+from apps.finance.models import Category, Entry
 from apps.staff import services
 from apps.staff.models import Employee, Payroll, Salary, suggested_overtime_rate
 
@@ -126,6 +127,14 @@ def test_total_calculation():
     assert payroll.overtime_amount == Decimal("204.50")
     assert payroll.absence_deduction == Decimal("200.00")
     assert payroll.total == Decimal("3004.50")
+
+
+def test_renamed_payroll_category_is_still_suggested(clinic_a, ana, admin):
+    """Decision 205: the default is found by its key, not by its name."""
+    with use_clinic(clinic_a):
+        Category.objects.filter(key=PAYROLL_KEY).update(name="Folha")
+    page = admin.get(PAYROLL, {"month": "2026-10"})
+    assert page.context["post_form"].fields["category"].initial.name == "Folha"
 
 
 def test_save_and_post_to_finance(clinic_a, ana, admin):

@@ -30,6 +30,7 @@ from apps.recalls.models import Recall
 from apps.schedule.models import Appointment, AppointmentType
 from apps.staff.models import Employee, Payroll, Salary
 
+from . import events
 from .models import AuditEntry
 from .record import log_event, request_ip
 
@@ -166,7 +167,8 @@ def _login_failed(sender, credentials, request=None, **kwargs):
     log_event(
         Action.LOGIN_FAILED,
         ip=request_ip(request) if request is not None else None,
-        description=f"usuário informado: {name}",
+        event=events.LOGIN_FAILED,
+        values={"record": name},
     )
 
 

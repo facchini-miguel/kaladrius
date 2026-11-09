@@ -137,7 +137,7 @@ def test_audit_logs_without_copying_clinical_text(scenario):
     records = AuditEntry.objects.filter(model_name="Atendimento", object_id=visit.pk)
     assert {r.action for r in records} == {"create", "viewed"}
     content = str([r.changes for r in records])
-    assert "(conteúdo clínico)" in content
+    assert "(clinical content)" in content
     for text in ANAMNESIS.values():
         if not text.startswith("2031"):
             assert text not in content

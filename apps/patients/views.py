@@ -4,14 +4,15 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.dates import MONTHS
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 
+from apps.audit import events
 from apps.audit.models import AuditEntry
 from apps.audit.record import anonymize, log_event
-from apps.core import legislation
+from apps.core import countries, legislation
 from apps.core.permissions import Action, Module, can, requires_permission
 from apps.core.validators import normalize_cnpj
 from apps.estimates.models import Estimate, EstimateItem
@@ -270,9 +271,11 @@ def delete_patient(request, pk):
         item_ids = list(
             EstimateItem.objects.filter(estimate__in=estimate_ids).values_list("pk", flat=True)
         )
-        # Stored in Portuguese, like the rest of the data. Free-text notes may hold
-        # personal data, so they go too; the amounts and dates stay (accounting history).
-        deleted_one = f"Paciente excluído (código {code})"
+        # Written in the language of the clinic's country, like its other default records
+        # (decision 205). Free-text notes may hold personal data, so they go too; the amounts
+        # and dates stay (accounting history).
+        with translation.override(countries.by_code(request.clinic.country).language):
+            deleted_one = _("Deleted patient (code %(code)s)") % {"code": code}
         with transaction.atomic():
             estimates.delete()  # items go with them (cascade)
             appointments.update(patient=None, description=deleted_one)
@@ -297,7 +300,8 @@ def delete_patient(request, pk):
                 # Filed under the clinic, so its administrator sees the erasure in the audit
                 # log (review stage 4: with no object, it had no clinic and stayed hidden).
                 clinic=request.clinic,
-                description=f"Paciente {code}: dados pessoais excluídos a pedido do titular",
+                event=events.PERSONAL_DATA_ERASED,
+                values={"record": code},
             )
         messages.success(
             request,

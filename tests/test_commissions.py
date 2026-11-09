@@ -78,6 +78,14 @@ def pay_commission(scenario, practitioner, until=TODAY):
     )
 
 
+def test_renamed_commissions_category_is_still_suggested(scenario):
+    """Decision 205: the default is found by its key, not by its name."""
+    with use_clinic(scenario["clinic"]):
+        Category.objects.filter(pk=scenario["category"].pk).update(name="Repasses")
+    page = scenario["client"].get(reverse("finance:commission_pay", args=[scenario["dra"].pk]))
+    assert page.context["form"].initial["category"] == scenario["category"]
+
+
 def test_calculation_includes_interest_and_ignores_other_practitioners(scenario):
     receive(scenario, "100.00", scenario["dra"], interest="10.00")
     receive(scenario, "250.55", scenario["dra"])

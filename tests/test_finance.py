@@ -1,6 +1,7 @@
 """Receivables (0.15.0): installments, payments, receipts, debtors and permissions."""
 
 import datetime
+import importlib
 from decimal import Decimal
 
 import pytest
@@ -12,7 +13,15 @@ from django.utils import timezone, translation
 from apps.core.isolation import use_clinic
 from apps.core.models import Clinic, Role
 from apps.finance import services
-from apps.finance.models import Category, Entry, FinancialAccount, Installment, Payment
+from apps.finance.models import (
+    DEFAULT_CATEGORIES,
+    PAYROLL,
+    Category,
+    Entry,
+    FinancialAccount,
+    Installment,
+    Payment,
+)
 from apps.patients.models import Patient
 
 pytestmark = pytest.mark.django_db
@@ -97,6 +106,33 @@ def test_new_clinic_gets_default_accounts_and_categories():
         assert set(FinancialAccount.objects.values_list("name", flat=True)) == {"Caixa", "Banco"}
         assert Category.objects.filter(kind=Category.Kind.INCOME).count() == 3
         assert Category.objects.filter(kind=Category.Kind.EXPENSE).count() == 9
+
+
+@pytest.mark.parametrize(
+    ("country", "cash", "payroll", "group"),
+    [
+        ("BR", "Caixa", "Salários e encargos", "Pessoal"),
+        ("CO", "Caja", "Sueldos y cargas sociales", "Personal"),
+        ("US", "Cash", "Salaries and payroll taxes", "Personnel"),
+    ],
+)
+def test_default_records_are_in_the_language_of_the_clinic_country(country, cash, payroll, group):
+    """Decision 205: whatever the language of whoever registers the clinic."""
+    with translation.override("es" if country == "BR" else "pt-br"):
+        clinic = Clinic.objects.create(name="Clínica Nova", country=country)
+    with use_clinic(clinic):
+        assert FinancialAccount.objects.get(kind=FinancialAccount.Kind.CASH).name == cash
+        category = Category.objects.get(key=PAYROLL)
+        assert (category.name, category.group.name) == (payroll, group)
+        assert Category.objects.exclude(key="").count() == len(DEFAULT_CATEGORIES)
+
+
+def test_key_migration_knows_the_portuguese_defaults():
+    """The data migration keys the clinics created before decision 205, all in Portuguese."""
+    migration = importlib.import_module("apps.finance.migrations.0030_category_key")
+    with translation.override("pt-br"):
+        defaults = {(kind.value, str(name)): key for key, name, kind in DEFAULT_CATEGORIES}
+    assert migration.KEYS == defaults
 
 
 def test_currency_in_the_language_format():
