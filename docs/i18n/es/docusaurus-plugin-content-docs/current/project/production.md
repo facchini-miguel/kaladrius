@@ -4,106 +4,100 @@ sidebar_position: 4
 
 # Producción de referencia
 
-Entorno publicado en **https://kaladrius.facchini.eti.br** (acceso solo por **IPv6**), también en https://kaladrius.duckdns.org. Dirección de reserva: https://2600-1900-4020-f0b-0-0-0-0.sslip.io.
+Publicada en **https://kaladrius.facchini.eti.br** (IPv4 e IPv6), también en https://kaladrius.duckdns.org. El sitio de documentación está en **https://kaladrius-docs.facchini.eti.br**, también en https://docs.kaladrius.duckdns.org. Desde el 09/11/2026 los dos corren en la VPS del titular, gestionados con [Dokploy](https://dokploy.com) (decisión 208); antes, en una VM del free tier de Google Cloud, solo con IPv6.
 
-- **DNS:** `kaladrius.duckdns.org` (DuckDNS, gratuito) tiene solo un registro AAAA para el IPv6 de la VM. El token está en `DUCKDNS_TOKEN` en el `.env` del servidor y en el `.env.producao` local. Para reapuntar: `https://www.duckdns.org/update?domains=kaladrius&token=<token>&ipv6=<ipv6>` (con `ipv6` informado, DuckDNS no completa el IPv4). Atención: al **crear** un subdominio en el sitio, DuckDNS completa el IPv4 de quien lo creó (su casa); límpielo con `&clear=true` y vuelva a apuntar solo el `ipv6`.
-- **Documentación:** el sitio de `docs/` corre en el mismo servidor, en https://kaladrius-docs.facchini.eti.br, también en https://docs.kaladrius.duckdns.org (DuckDNS responde cualquier `*.kaladrius.duckdns.org` con el mismo IPv6, sin crear nada). El CI publica la imagen `docs` junto a la `app`; solo arranca con `COMPOSE_PROFILES=docs` y `DOCS_HOSTNAME` en el `.env` del servidor. Es público y está abierto a los buscadores desde la apertura del código (decisión 077). Para verla en su computadora: `docker compose --profile docs up --build docs` → http://localhost:3000.
-- **Dominio del titular:** `kaladrius.facchini.eti.br` y `kaladrius-docs.facchini.eti.br` son CNAMEs en Registro.br a los nombres de DuckDNS, así que siguen el IPv6 sin nada que actualizar. El servidor acepta todos los nombres: `SITE_HOSTNAME`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS` y `DOCS_HOSTNAME` son listas separadas por comas, y Caddy obtiene un certificado por nombre (decisión 084).
-- **IPv6 fijo:** dirección reservada `kaladrius-ipv6` (`2600:1900:4020:f0b::`), gratuita; no cambia al reiniciar la VM.
+- **DNS:** en Registro.br, `kaladrius` y `kaladrius-docs` tienen un registro `A` (`179.66.139.4`) y un `AAAA` (`2a02:4780:95:91b7::1`). Registro.br rechaza un CNAME y un A/AAAA con el mismo nombre en un mismo guardado: para cambiar un CNAME por A/AAAA, guarde primero la eliminación y después los registros nuevos. `kaladrius.duckdns.org` apunta a las mismas dos direcciones (`https://www.duckdns.org/update?domains=kaladrius&token=<token>&ip=<ipv4>&ipv6=<ipv6>`; el token es el `DUCKDNS_TOKEN` del `.env` del servidor), y DuckDNS responde cualquier `*.kaladrius.duckdns.org` con ellas.
+- **Nombres:** el servidor acepta todos los nombres. `SITE_HOSTNAME`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS` y `DOCS_HOSTNAME` son listas separadas por comas, y Traefik obtiene un certificado por nombre, cada uno con su propio enrutador, así que un nombre cuyo DNS aún no está listo no frena a los demás.
+- **Documentación:** pública y abierta a los buscadores desde la apertura del código (decisiones 077 y 207). Para verla en su computadora: `docker compose --profile docs up --build docs` → http://localhost:3000.
 
 ## Arquitectura
 
 ```
-git push (main) ─> GitHub Actions: pruebas ─> build ─> Artifact Registry (us-east1)
-                                                          │ la VM verifica cada 5 min
-                                                          ▼
-Navegador ──IPv6/HTTPS──> VM e2-micro "kaladrius" (us-east1-b, sin IPv4 público)
-                           ├─ caddy  (HTTPS automático Let's Encrypt, red del host)
-                           ├─ app    (Django + Gunicorn, solo en 127.0.0.1:8000)
-                           ├─ db     (PostgreSQL 16, volumen pgdata)
-                           └─ copia diaria 06:00 UTC ─> gs://kaladrius-backups
-Mantenimiento: SSH solo por el túnel IAP de Google
+git push (main) ─> GitHub Actions: pruebas, build de la docs ─> imagen en ghcr.io
+                                                                 │ el servidor revisa cada 5 min
+                                                                 ▼
+Navegador ──IPv4/IPv6, HTTPS──> VPS (Ubuntu 24.04, Hostinger, Boston, EE. UU.)
+                                 ├─ traefik  (proxy de Dokploy: HTTPS Let's Encrypt, puertos 80/443)
+                                 └─ Compose "kaladrius" de Dokploy
+                                     ├─ app   (Django + Gunicorn, imagen de ghcr.io)
+                                     ├─ db    (PostgreSQL 16, volumen pgdata)
+                                     └─ docs  (generada de docs/ de main en cada deploy)
+Respaldo diario 06:00 UTC ─> /var/backups/kaladrius (30 días)
+Mantenimiento: SSH solo con llave (sin contraseña, sin root); panel de Dokploy solo por túnel SSH
 ```
 
-## Por qué IPv6
-Google cobra el IPv4 público de las VM (US$ 0,005/hora, cerca de US$ 3,65/mes; el free tier cubre solo 1 hora/mes). El IPv6 externo es gratuito. Consecuencia: el sistema solo abre en redes con IPv6 (la mayoría de las redes móviles y muchas fijas en Brasil). Para atender cualquier red, basta agregar un IPv4 a la VM (costo arriba). Ver la [página de precios](https://cloud.google.com/vpc/network-pricing).
+## Servidor
 
-## Recursos (proyecto `medical-system-facchini`, nombre visible "Kaladrius")
+| Elemento | Valor |
+|---|---|
+| Máquina | VPS en Hostinger (Boston, EE. UU.): 8 vCPU, 32 GB de RAM, 400 GB de disco, Ubuntu 24.04 |
+| Acceso | `ssh facchini@179.66.139.4`, solo con llave; `sudo` para administrar |
+| Firewall | ufw: solo 22, 80 y 443. Docker publica puertos por fuera de ufw, así que el panel de Dokploy (3000) queda cerrado a internet por una regla en la cadena `DOCKER-USER` (`bloquear-painel-dokploy.service`) |
+| Dokploy | proyecto **Kaladrius**, Compose **kaladrius** (archivo Compose guardado en el propio Dokploy). El panel: `ssh -L 3000:localhost:3000 facchini@179.66.139.4` y después http://localhost:3000 |
+| Configuración | el entorno del Compose en Dokploy (escrito como `.env` junto al archivo Compose). Viene del `.env` de Google Cloud, sin el nombre `sslip.io` |
 
-| Recurso | Nombre | Costo |
-|---|---|---|
-| VM | `kaladrius` (e2-micro, us-east1-b, disco estándar de 30 GB, Debian 13) | Free tier |
-| Red | VPC `medical-system`, subred `medical-system-us-east1` (IPv4 interno + IPv6 externo, Private Google Access) | Gratis |
-| IPv6 fijo | `kaladrius-ipv6` (`2600:1900:4020:f0b::`, reservado) | Gratis |
-| Dominio | `kaladrius.facchini.eti.br` y `kaladrius-docs.facchini.eti.br` (dominio del titular en Registro.br, CNAMEs a DuckDNS); `kaladrius.duckdns.org` (DuckDNS) | Gratis (DuckDNS); el titular paga su dominio |
-| Firewall | `medical-system-web-ipv6` (TCP 80/443 y UDP 443 para HTTP/3, desde ::/0), `medical-system-icmpv6`, `medical-system-ssh-iap` (22 solo desde IAP) | Gratis |
-| Imágenes | Artifact Registry `kaladrius` (us-east1), limpieza automática (mantiene 5 versiones) | Free tier (0,5 GB) |
-| Copias de seguridad | `gs://kaladrius-backups` (us-east1, privado, elimina después de 30 días) | Free tier (5 GB) |
-| Cuentas de servicio | `kaladrius-vm` (lee imágenes, guarda copias), `github-ci` (publica imágenes) | Gratis |
-| GitHub → Google | Workload Identity Federation (pool `github`), solo el repositorio y la rama `main` | Gratis |
-| Alerta de presupuesto | R$ 5 (avisos en 10 %, 50 % y 100 %) | Gratis |
+El archivo Compose sigue `deploy/docker-compose.prod.yml`, con Traefik en lugar de Caddy: las etiquetas dan HTTPS a cada nombre, redirigen HTTP a HTTPS, comprimen las respuestas, quitan el encabezado `Server` y limitan el cuerpo de una solicitud a 11 MB (el mayor envío legítimo es un adjunto de 10 MB de la historia clínica, como el `request_body` del Caddyfile). La app confía en la dirección del cliente que Traefik pone al final de `X-Forwarded-For` (`DJANGO_REVERSE_PROXY=1`).
 
 ## Cómo funciona el servidor
-- `deploy/server/install.sh` es el *startup script* de la VM: instala Docker, crea 1 GB de swap, instala las tareas programadas de systemd y levanta el sistema. Puede volver a ejecutarse sin problema.
-- `deploy/server/update.sh` (cada 5 min): descarga la imagen `latest`; si es distinta de la última instalada con éxito (`/opt/kaladrius/installed-image`), extrae los archivos de `deploy/` de la imagen, actualiza las tareas de systemd y reinicia los contenedores. Si algo falla, lo intenta de nuevo en la siguiente vuelta. Las migraciones se ejecutan al iniciar la app.
-- `deploy/server/backup.sh` (diario): `pg_dump` enviado a Cloud Storage y registrado en el sistema; después, elimina los intentos de acceso rechazados con más de 30 días (`apply_retention`). Si falla, systemd lo intenta de nuevo cada 20 minutos (hasta 4 intentos en 3 horas). Si la última copia registrada tiene más de 26 horas, los superusuarios ven un aviso en la parte superior de las pantallas.
-- `deploy/server/health.sh --collect` (cada 5 min, desde la 0.22.0): lee procesador, memoria, swap, disco, red y carga con comandos de Linux (`/proc`, `df`) y la memoria y el procesador de cada contenedor (`docker stats`), y agrega una línea en `/opt/kaladrius/health/amostras.jsonl` (7 días guardados, cerca de 1,5 MB). La app lee ese archivo solo en modo lectura y muestra **Administración > Salud del sistema** a los superusuarios, con un aviso arriba de las pantallas si la recolección se detiene o si la memoria, el swap o el disco llegan al nivel crítico. La app no tiene acceso a Docker. Sin argumentos, `health.sh` muestra un informe en la terminal.
-- El compose de producción lee las variables `${...}` del `.env`, enlazado a su lado (`/opt/kaladrius/release/.env` → `../.env`). Solo la app recibe el archivo completo.
-- Configuración y contraseñas: `/opt/kaladrius/.env` (solo root). Copia local en `.env.producao`, ignorada por Git.
-- Sin claves guardadas: la VM y el CI usan tokens temporales de Google.
-- **Nombres de la decisión 147 (0.55.0).** Los scripts, las tareas programadas, los archivos de estado y las variables del `.env` tienen nombres en inglés. Producción pasó a ellos el 04/11/2026, por un puente que su `atualizar.sh` anterior cargó de la imagen nueva; las unidades y los scripts antiguos están en `/opt/kaladrius/legacy/`, el `.env` antiguo en `.env.before-147`, y el startup script de la VM es `deploy/server/install.sh`. El puente se eliminó después (decisión 152).
+
+Los scripts de `deploy/server/` corren tal como están, desde `/opt/kaladrius/bin`, con las units de systemd del repositorio. `/opt/kaladrius` los conecta al Compose de Dokploy:
+
+- `release/docker-compose.prod.yml` y `release/.env` son enlaces al archivo Compose y al `.env` de Dokploy. El `.env` da el nombre del proyecto Compose (`COMPOSE_PROJECT_NAME`), así que `docker compose -f /opt/kaladrius/release/docker-compose.prod.yml` llega a los contenedores que Dokploy levantó.
+- `/opt/kaladrius/.env` es una copia sin comillas, que `sync-env.py` vuelve a escribir antes de cada unit `kaladrius-*` (drop-in `/etc/systemd/system/kaladrius-.service.d/env.conf`). Dokploy escribe `CLAVE="valor"`, que Docker Compose entiende, pero `env_value` de `common.sh` lee la línea tal cual: con comillas, `DJANGO_DEMO="1"` nunca sería igual a `1` y las direcciones de los monitores quedarían inválidas. Cambie la configuración en Dokploy, nunca en esa copia.
+- `release/linux-package` pone los scripts en el modo de una instalación en servidor propio (decisión 140): respaldos y prueba de restauración en una carpeta local, y los sitios revisados desde el propio servidor. La imagen y las actualizaciones quedan con Dokploy.
+
+| Timer | Qué hace |
+|---|---|
+| `kaladrius-update.timer` (cada 5 min) | `update-dokploy.sh`: descarga `ghcr.io/facchini-miguel/kaladrius:latest`; si es distinta de la app en marcha, pide a Dokploy un deploy del Compose (app nueva, docs generada de nuevo de main), espera `/api/v1/health` y avisa a `MONITOR_UPDATE_URL`. Las migraciones corren cuando la app arranca. Aquí no hay la vuelta automática de la decisión 135: vea abajo |
+| `kaladrius-backup.timer` (06:00 UTC) | `backup.sh`: `pg_dump` en `/var/backups/kaladrius`, guardando `KALADRIUS_BACKUP_DAYS` (30) días; lo registra en el sistema y aplica la retención de 30 días de los inicios de sesión rechazados |
+| `kaladrius-restore-test.timer` (domingos 07:00 UTC) | `test_restore.sh`: restaura el respaldo más nuevo en una base desechable y lo revisa |
+| `kaladrius-demo-reset.timer` (07:30 UTC) | `reset_demo.sh`: el reinicio diario de la demostración (abajo) |
+| `kaladrius-health.timer` (cada 5 min) | `health.sh --collect`: las muestras de **Administración > Salud del sistema** (`/opt/kaladrius/health`) y los monitores de los sitios, certificados y recursos |
+| `backup-dokploy.timer` (05:30 UTC) | la base del propio Dokploy y `/etc/dokploy` en `/var/backups/dokploy` (14 días) |
+
+Los monitores externos (Healthchecks.io, decisión 078) son los `MONITOR_*_URL` del `.env`, los mismos de Google Cloud.
+
+**Por ahora los respaldos quedan en el disco de la VPS.** Falta elegir dónde guardar una copia fuera de ella. Los 18 respaldos del bucket de Google Cloud (26/10 al 09/11) están en `/var/backups/kaladrius/google`.
 
 ## Tareas comunes
 
 ```bash
-# Entrar al servidor (túnel IAP)
-gcloud compute ssh kaladrius --zone=us-east1-b --tunnel-through-iap
+# Entrar al servidor
+ssh facchini@179.66.139.4
 
-# En la VM: estado, logs y comandos de Django
+# En el servidor: estado, logs y comandos de Django
 cd /opt/kaladrius/release
 sudo docker compose -f docker-compose.prod.yml ps
 sudo docker compose -f docker-compose.prod.yml logs -f app
 sudo docker compose -f docker-compose.prod.yml exec app python manage.py <comando>
 
-# Forzar la actualización ahora / copia de seguridad ahora
-sudo /opt/kaladrius/bin/update.sh --force
-sudo /opt/kaladrius/bin/backup.sh
+# Actualizar ahora / respaldo ahora
+sudo systemctl start kaladrius-update.service
+sudo systemctl start kaladrius-backup.service
 
-# Salud del servidor: ahora, últimas 24 horas, contenedores y tareas programadas
+# Salud del servidor: ahora, últimas 24 horas, contenedores y timers
 sudo /opt/kaladrius/bin/health.sh
 
-# Listar las copias de seguridad (en su máquina)
-gcloud storage ls -l gs://kaladrius-backups/
+# Listar los respaldos
+sudo ls -l /var/backups/kaladrius
 ```
 
 ### Volver a una versión anterior
-Lo normal es deshacer el commit (`git revert`) en una rama y hacer el merge en `main` por pull request (`main` no acepta otra cosa, decisión 141; el admin puede enviarlo directo, saltándose el ruleset): el CI publica una imagen nueva y la VM la instala en hasta 5 minutos después del merge. En una emergencia, se puede fijar una imagen antigua en la VM (cada versión tiene la etiqueta `X.Y.Z`, que nunca cambia, y cada commit la etiqueta con los 12 primeros caracteres del SHA):
+El camino normal es revertir el commit (`git revert`) en una rama y llevarlo a `main` por pull request (`main` no recibe otra cosa, decisión 141; el administrador puede hacer push directo, pasando por encima del ruleset): el CI publica una imagen nueva y el servidor la instala hasta 5 minutos después del merge. En una emergencia, se puede fijar una imagen vieja (cada versión tiene en ghcr.io una etiqueta `X.Y.Z` que nunca se mueve, y cada commit una etiqueta con los 12 primeros caracteres del SHA): detenga `kaladrius-update.timer`, cambie el `image:` de la app en el archivo Compose de Dokploy por `ghcr.io/facchini-miguel/kaladrius:<etiqueta>` y haga el deploy. Después de corregir y publicar, vuelva a `latest` y encienda el timer de nuevo.
 
+Las migraciones no se deshacen: una versión vieja solo funciona si las migraciones nuevas son compatibles con ella (tablas nuevas, o campos que pueden quedar vacíos o tienen `db_default`, por ejemplo; el informe de migraciones de cada pull request señala el resto, decisión 139).
+
+### Restaurar un respaldo
 ```bash
-sudo systemctl stop kaladrius-update.timer   # si no, la VM vuelve a latest en 5 min
+# En el servidor (¡reemplaza la base de datos actual!)
 cd /opt/kaladrius/release
-sudo APP_IMAGE=us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:0.7.0 \
-  docker compose -f docker-compose.prod.yml up -d app
-# Después de corregir y publicar: sudo systemctl start kaladrius-update.timer
-```
-Las migraciones no se deshacen: una versión antigua solo funciona si las migraciones nuevas son compatibles con ella (agregar tablas, o campos que pueden quedar vacíos o tienen `db_default`, por ejemplo; el informe de migraciones de cada pull request marca el resto, decisión 139).
-
-### Restaurar una copia de seguridad
-```bash
-# En la VM (¡reemplaza la base de datos actual!)
-gcloud storage cp gs://kaladrius-backups/<archivo>.dump /tmp/restaurar.dump  # o descárguela en su máquina y cópiela con gcloud compute scp --tunnel-through-iap
-cd /opt/kaladrius/release
-sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < /tmp/restaurar.dump
+sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < /var/backups/kaladrius/<archivo>.dump
 ```
 
-### Probar la restauración de una copia de seguridad
-Una copia solo vale si vuelve. La prueba se ejecuta en su máquina, en un PostgreSQL temporal: descarga la copia, la restaura (falla ante cualquier error), muestra cuántos registros hay en cada tabla y la última migración, y borra todo al final. No toca el servidor ni la base de desarrollo.
+### Probar la restauración de un respaldo
+Un respaldo solo vale si vuelve. El servidor prueba el más nuevo cada domingo (`kaladrius-restore-test.timer`), en una base desechable que nunca toca la real; para probar ahora, `sudo systemctl start kaladrius-restore-test.service`. (`deploy/test_backup.sh` prueba en su máquina los respaldos de un bucket de Google Cloud, el modo de una instalación en Google Cloud.)
 
-```bash
-deploy/test_backup.sh                   # la copia más reciente
-deploy/test_backup.sh <archivo>.dump    # una específica
-```
-Hecho el 27/10/2026 con la copia del 26/10 (datos ficticios de esa época): restaurada sin errores en 9 segundos. La misma prueba mostró que la copia automática de ese día había fallado (el servidor estaba entre la 0.7.0 y la 0.8.0, sin el enlace del `.env`) y que el aviso en la web no aparecía cuando **nunca** se había registrado una copia; desde la 0.17.1 los superusuarios también ven ese caso (`DJANGO_BACKUP_MONITORED`, activado por defecto cuando `DJANGO_DEBUG` está desactivado).
+Hecho el 09/11/2026, en el paso a la VPS: el dump de producción se restauró sin errores (9 usuarios, 1.093 pacientes, 19.446 citas), y la prueba de restauración pasó con el primer respaldo de la VPS.
 
 ## Cuentas públicas de demostración
 La demostración publica una cuenta de cada perfil en el sitio del titular: `demo.recepcao`, `demo.profissional`, `demo.financeiro` y `demo.admin` (decisiones 085 y 089). Por ser de demostración, nunca cambian la contraseña, envían adjuntos, cambian el equipo o la configuración de la clínica, ni ven las IP en la auditoría. Para crearlas, o para reiniciar las contraseñas:
@@ -118,16 +112,15 @@ docker compose -f docker-compose.prod.yml exec app python manage.py demo_account
 Nunca use allí la contraseña de `DJANGO_SEED_PASSWORD`: los usuarios de prueba, incluido el administrador de prueba, la usan.
 
 ### Reinicio diario (decisión 086)
-Todos los días a las 07:30 UTC (04:30 en Brasilia, después del respaldo) el servidor restaura una **base** guardada de la demostración, deshaciendo lo que cambiaron los visitantes, y adelanta todas las fechas por las semanas enteras desde que se guardó la base, para que la agenda siempre parezca actual y cada consulta quede en el mismo día de la semana (las fechas de nacimiento no cambian). La lista de respaldos se mantiene. Solo corre con `DJANGO_DEMO=1` en el `.env` del servidor. Para activarlo, una vez:
+Todos los días a las 07:30 UTC (04:30 en Brasilia, después del respaldo) el servidor restaura una **base** guardada de la demostración, deshaciendo lo que cambiaron los visitantes, y adelanta todas las fechas por las semanas enteras desde que se guardó la base, para que la agenda siempre parezca actual y cada consulta quede en el mismo día de la semana (las fechas de nacimiento no cambian). La lista de respaldos se mantiene. Solo corre con `DJANGO_DEMO=1` en el `.env` del servidor (en Dokploy). La base es `/opt/kaladrius/demo/base.dump`, traída de Google Cloud (guardada el 07/11/2026). Para guardarla de nuevo:
 
 ```bash
-echo 'DJANGO_DEMO=1' | sudo tee -a /opt/kaladrius/.env
 sudo /opt/kaladrius/bin/reset_demo.sh --save-base
 ```
 
-Las cuentas de los **administradores del sistema** (superusuarios) se mantienen en el reinicio (decisión 118): contraseña, correo, idioma, verificación en dos pasos y códigos de recuperación quedan como estaban. El resto de la configuración **del titular** (la de la clínica, por ejemplo) vuelve a la base: después de cambiar una que debe quedar, guarde la base de nuevo (`--salvar-base`). Para reiniciar en el momento: `sudo systemctl start kaladrius-demo-reset.service`.
+Las cuentas de los **administradores del sistema** (superusuarios) se mantienen en el reinicio (decisión 118): contraseña, correo, idioma, verificación en dos pasos y códigos de recuperación quedan como estaban. El resto de la configuración **del titular** (la de la clínica, por ejemplo) vuelve a la base: después de cambiar una que debe quedar, guarde la base de nuevo (`--save-base`). Para reiniciar en el momento: `sudo systemctl start kaladrius-demo-reset.service`.
 
 ## Cuidados
-- **Datos reales de pacientes:** los datos quedan en EE. UU. (exigencia del free tier). Antes del uso real, revisar la LGPD (transferencia internacional, art. 33) o migrar a la región de São Paulo (paga).
-- El disco **estándar** es el gratuito; la consola sugiere "balanced", que se cobra.
+- **Datos reales de pacientes:** el servidor está en Estados Unidos. Antes del uso real, revisar la LGPD (transferencia internacional, art. 33) o pasar a un servidor en Brasil.
 - Con datos reales en el servidor, **no ejecute** `seed_sample_data` en producción: crea usuarios que comparten la misma contraseña (`DJANGO_SEED_PASSWORD`). Para eliminarlos, `remove_sample_data --confirm`, que nunca toca clínicas ni usuarios reales.
+- La llave de API de Dokploy (`~/.dokploy-api-key` de `facchini` en el servidor) es lo que permite a `update-dokploy.sh` hacer el deploy: cuando venza o se revoque, las actualizaciones se detienen y `MONITOR_UPDATE_URL` avisa.

@@ -69,19 +69,17 @@ Em produção, só o app recebe o `.env` inteiro; o banco recebe apenas as vari�
 
 ## Infraestrutura
 
-Regra: **somente recursos do free tier do Google Cloud** (decisão 020).
+A produção de referência roda na VPS do titular desde 09/11/2026 (decisão 208). Até então a regra era **somente recursos do free tier do Google Cloud** (decisão 020), o que deixava o servidor só com IPv6 (decisão 035).
 
 | Ambiente | Onde | Custo |
 |---|---|---|
 | Local | Docker no computador do desenvolvedor | — |
-| Nuvem (testes e produção) | VM **e2-micro** em `us-east1-b`, disco standard de 30 GB, **somente IPv6 público** (o IPv4 é cobrado). Detalhes em [deploy.md](production.md) | Grátis |
-| Backup | Cloud Storage, bucket regional nos EUA, até 5 GB | Grátis |
+| Produção (referência) | VPS na Hostinger (Boston, EUA), Ubuntu 24.04, IPv4 e IPv6, gerenciada pelo Dokploy. Detalhes em [Produção de referência](production.md) | VPS paga |
+| Backup | Pasta local na VPS (30 dias); falta escolher onde guardar uma cópia fora dela | — |
 
-**Projeto no Google Cloud:** `medical-system-facchini`, com a API do Compute Engine ativa e um **alerta de orçamento de R$ 5** (avisos em R$ 0,50, R$ 2,50 e R$ 5) para detectar qualquer cobrança.
+**CI/CD:** GitHub Actions roda lint e testes e publica a imagem no **GitHub Packages** (`ghcr.io`). O servidor verifica a cada 5 minutos e pede ao Dokploy o deploy de uma imagem nova; o CI nunca acessa o servidor.
 
-**Limites do free tier a respeitar:** 1 VM e2-micro, 30 GB de disco padrão, 5 GB no Cloud Storage, 1 GB/mês de tráfego de saída. Snapshots de disco são pagos, por isso não são usados. O IPv4 público de VMs é cobrado, por isso a VM só tem IPv6 público (decisão 035).
-
-**CI/CD:** GitHub Actions roda lint e testes e publica a imagem no **Artifact Registry** do Google (autenticação sem chave). A VM verifica a cada 5 minutos e se atualiza sozinha (o GitHub não tem IPv6, então a VM não acessaria o GHCR, e o CI não alcançaria a VM por SSH).
+Qualquer pessoa ainda pode instalar o Kaladrius no free tier do Google Cloud: veja [Free tier do Google Cloud](../installation/google-cloud.md).
 
 ## Segurança (requisitos)
 - Proteções nativas do Django ativas (CSRF, escape de XSS, ORM parametrizado, cabeçalhos de segurança). `manage.py check --deploy` sem alertas.

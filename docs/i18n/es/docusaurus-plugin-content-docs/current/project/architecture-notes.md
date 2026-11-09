@@ -69,19 +69,17 @@ En producción, solo la app recibe el `.env` completo; la base de datos recibe s
 
 ## Infraestructura
 
-Regla: **solo recursos del free tier de Google Cloud** (decisión 020).
+La producción de referencia corre en la VPS del titular desde el 09/11/2026 (decisión 208). Hasta entonces la regla era **solo recursos del free tier de Google Cloud** (decisión 020), lo que dejaba el servidor solo con IPv6 (decisión 035).
 
 | Entorno | Dónde | Costo |
 |---|---|---|
 | Local | Docker en la computadora del desarrollador | — |
-| Nube (pruebas y producción) | VM **e2-micro** en `us-east1-b`, disco estándar de 30 GB, **solo IPv6 público** (el IPv4 se cobra). Detalles en [despliegue.md](production.md) | Gratis |
-| Copias de seguridad | Cloud Storage, bucket regional en EE. UU., hasta 5 GB | Gratis |
+| Producción (referencia) | VPS en Hostinger (Boston, EE. UU.), Ubuntu 24.04, IPv4 e IPv6, gestionada con Dokploy. Detalles en [Producción de referencia](production.md) | VPS paga |
+| Copias de seguridad | Carpeta local en la VPS (30 días); falta elegir dónde guardar una copia fuera de ella | — |
 
-**Proyecto en Google Cloud:** `medical-system-facchini`, con la API de Compute Engine activa y una **alerta de presupuesto de R$ 5** (avisos en R$ 0,50, R$ 2,50 y R$ 5) para detectar cualquier cobro.
+**CI/CD:** GitHub Actions ejecuta lint y pruebas y publica la imagen en **GitHub Packages** (`ghcr.io`). El servidor revisa cada 5 minutos y pide a Dokploy el deploy de una imagen nueva; el CI nunca accede al servidor.
 
-**Límites del free tier a respetar:** 1 VM e2-micro, 30 GB de disco estándar, 5 GB en Cloud Storage, 1 GB/mes de tráfico de salida. Las instantáneas de disco se cobran, por eso no se usan. El IPv4 público de las VM se cobra, por eso la VM solo tiene IPv6 público (decisión 035).
-
-**CI/CD:** GitHub Actions ejecuta lint y pruebas y publica la imagen en **Artifact Registry** de Google (autenticación sin claves). La VM verifica cada 5 minutos y se actualiza sola (GitHub no tiene IPv6, así que la VM no llegaría a GHCR, ni el CI llegaría a la VM por SSH).
+Cualquiera puede seguir instalando Kaladrius en el free tier de Google Cloud: vea [Free tier de Google Cloud](../installation/google-cloud.md).
 
 ## Seguridad (requisitos)
 - Protecciones nativas de Django activas (CSRF, escape de XSS, ORM parametrizado, encabezados de seguridad). `manage.py check --deploy` sin alertas.

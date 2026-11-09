@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Privacy policy
 
-Version 5 · 10/31/2026
+Version 6 · 11/09/2026
 
 This policy explains how the personal data of patients, guardians, staff and suppliers is processed in **Kaladrius**, the management system the clinic uses: what data, what for, on what legal basis, who has access, where it is stored, for how long and how to exercise your rights. It follows Brazil's General Data Protection Law (LGPD, Law 13,709/2018) and the law on electronic patient records (Law 13,787/2018).
 
@@ -60,11 +60,11 @@ The data is **not** used for advertising, **not** sold, **not** subject to autom
 ## 5. Who has access
 - Only the clinic's team, with personal usernames and passwords, each according to their profile: practitioners see only their own schedule; the front desk does not see payables; finance, commissions and bank statements are for the administrator only. Everyone is bound by **professional secrecy**.
 - Each clinic sees only its own data, even when using the same system.
-- **Google Cloud**, which provides the server and keeps the backups, as a sub-processor. No other company receives the data through the system: its screens load nothing from third parties.
+- **Hostinger**, which provides the server where the system and the backups are kept, as a sub-processor. No other company receives the data through the system: its screens load nothing from third parties.
 - Public authorities, when the law or a court order requires.
 
 ## 6. Where the data is stored
-The server and backups are on **Google Cloud, in the United States** (us-east1 region). This is an international data transfer, made under art. 33 of the LGPD and Resolution CD/ANPD No. 19/2024, with the provider's contractual data protection safeguards. Communication with the system is always encrypted (HTTPS), and the provider encrypts the stored data.
+The server and backups are at **Hostinger, in the United States** (Boston). This is an international data transfer, made under art. 33 of the LGPD and Resolution CD/ANPD No. 19/2024, with the provider's contractual data protection safeguards. Communication with the system is always encrypted (HTTPS).
 
 ## 7. For how long
 - **Records, appointments, estimates and finance:** while there is a relationship with the clinic and then for **at least 20 years from the last entry**, the retention period for patient records (Law 13,787/2018, art. 6), which applies to all health professions, dentistry included, and also covers tax obligations and the clinic's legal defense. After that period, the data may be securely deleted or handed back to the patient.

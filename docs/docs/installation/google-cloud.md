@@ -39,7 +39,7 @@ Maintenance: SSH only through Google's IAP tunnel
 
 ## Steps
 
-The [reference production](../project/production.md) page records every resource of the reference installation. In short:
+Kaladrius's own demo ran this way until 2026-11-09, when it moved to a VPS (decision 208); the steps below are the ones it used. In short:
 
 1. **Project and budget.** Create a Google Cloud project and a budget alert (for example, R$ 5) so any unexpected charge is noticed.
 2. **Network.** A VPC with a subnet in the free-tier region with **external IPv6**; reserve the IPv6 address as static (free). Firewall: TCP 80/443 and UDP 443 from `::/0`, ICMPv6, and SSH (22) only from the IAP range `35.235.240.0/20`.
