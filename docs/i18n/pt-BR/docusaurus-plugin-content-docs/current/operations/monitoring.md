@@ -11,7 +11,7 @@ title: Monitoramento
 
 ```bash
 curl https://clinica.exemplo.com.br/api/v1/version
-# {"version": "0.71.1"}
+# {"version": "0.71.3"}
 ```
 
 Use em qualquer monitor de disponibilidade (UptimeRobot, Healthchecks, Uptime Kuma…) para ser avisado quando o sistema parar de responder.
@@ -35,6 +35,8 @@ O próprio servidor pode avisar você pelo [Healthchecks.io](https://healthcheck
 | `MONITOR_DOCS_URL` | Documentação no ar | 5 min / 10 min | Este site de documentação, quando o servidor roda ele, não responde em algum dos endereços dele (todos os nomes de `DOCS_HOSTNAME`) |
 
 Você é avisado quando um sinal informa falha ou **para de chegar**, o que também cobre o servidor inteiro desligado. Sem essas variáveis, nada é enviado.
+
+**Uma parada planejada não avisa** (decisão 209): enquanto o reinício noturno da demonstração ou uma atualização reinicia o sistema, o servidor não manda sinal nenhum sobre os sites (sistema, certificado e documentação). Um check só avisa se a parada passar do seu período e tolerância (15 minutos). Um certificado que não pôde ser lido é lido de novo alguns segundos depois antes de contar como falha.
 
 ## Avisos dentro do sistema
 

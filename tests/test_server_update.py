@@ -58,6 +58,8 @@ restore_compose_from() {{ log "compose de $(cat "$IMAGENS/$(echo "$1" | tr '/:' 
 save_previous_compose() {{ log "guardar compose"; }}
 reload_caddy() {{ log caddy; }}
 notify_monitor() {{ log "monitor $1 ${{2:-ok}}"; }}
+begin_maintenance() {{ log "manutencao inicio"; }}
+end_maintenance() {{ [ -f "$DIR/fim" ] || {{ log "manutencao fim"; touch "$DIR/fim"; }}; }}
 # Answers from $DIR/saude, one per line (0 = up, 1 = down); up when it runs out.
 system_up() {{
   local resposta
@@ -97,6 +99,7 @@ def server(tmp_path):
 
         def run(self, *args):
             (tmp_path / "log").write_text("")
+            (tmp_path / "fim").unlink(missing_ok=True)
             environment = {
                 "PATH": f"{tmp_path / 'path'}:/usr/bin:/bin",
                 "IMAGENS": str(tmp_path / "imagens"),
@@ -140,6 +143,10 @@ def test_new_version_that_starts_becomes_the_next_previous(server):
     assert server.read("installed-image") == ["B", "D"]
     assert server.local_id("registro/app:previous") == "B"
     assert log[-1] == "monitor MONITOR_UPDATE_URL ok"
+    # Decision 209: health.sh is told the restart is on purpose, until the system answers.
+    start = log.index("manutencao inicio")
+    assert log[start + 1] == "compose up -d --remove-orphans com B"
+    assert log.index("saude 0") < log.index("manutencao fim")
     # Pulled by digest (the Linux package), the image :previous named is never "dangling":
     # removed by id, the docs image still in use kept.
     assert server.read("removidas") == ["A"]
@@ -164,6 +171,9 @@ def test_new_version_that_fails_rolls_back_and_is_refused(server):
     assert server.read("refused-image") == ["B", "D"]
     assert server.local_id("registro/app:previous") == "A"
     assert log[-1] == "monitor MONITOR_UPDATE_URL fail"
+    # The maintenance ends once, after the rollback and before the failure is told.
+    assert log.count("manutencao fim") == 1
+    assert log.index("manutencao fim") == len(log) - 2
 
     # Next runs: the refused version is not tried again, and the monitor stays red.
     code, log = server.run()

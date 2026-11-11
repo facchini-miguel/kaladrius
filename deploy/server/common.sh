@@ -96,6 +96,22 @@ if [ -d /opt/medical-system ] && [ ! -e "$DIR" ] && [ -z "${MIGRATING:-}" ]; the
   exit 1
 fi
 
+# The system stops on purpose for a moment (the demo reset, an update): while this file holds
+# the time it began, health.sh tells the external monitor nothing about the sites, rather than
+# a failure (decision 209). The monitor waits its period and grace time (15 minutes) before it
+# warns, so a short stop goes unnoticed and a long one is still reported. A file older than
+# MAINTENANCE_MINUTES is ignored: a script that died without removing it never silences
+# health.sh for good.
+MAINTENANCE_FLAG=${MAINTENANCE_FLAG:-$DIR/maintenance}
+MAINTENANCE_MINUTES=${MAINTENANCE_MINUTES:-30}
+begin_maintenance() { date +%s > "$MAINTENANCE_FLAG"; }
+end_maintenance() { rm -f "$MAINTENANCE_FLAG"; }
+in_maintenance() {
+  local began
+  began=$(cat "$MAINTENANCE_FLAG" 2>/dev/null) || return 1
+  [[ "$began" =~ ^[0-9]+$ ]] && [ $(($(date +%s) - began)) -lt $((MAINTENANCE_MINUTES * 60)) ]
+}
+
 # Signal to an external monitor such as Healthchecks.io (decision 078). $1 names the .env
 # variable with the check's address (MONITOR_SYSTEM_URL, MONITOR_BACKUP_URL); $2 "fail"
 # reports a failure. Does nothing when the variable is not set, and never fails the caller.

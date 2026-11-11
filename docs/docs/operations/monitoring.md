@@ -11,7 +11,7 @@ title: Monitoring
 
 ```bash
 curl https://clinic.example.com/api/v1/version
-# {"version": "0.71.1"}
+# {"version": "0.71.3"}
 ```
 
 Use it in any uptime monitor (UptimeRobot, Healthchecks, Uptime Kuma…) to be warned when the system stops answering.
@@ -35,6 +35,8 @@ The server can warn you by itself through [Healthchecks.io](https://healthchecks
 | `MONITOR_DOCS_URL` | Documentation up | 5 min / 10 min | This documentation site, when the server runs it, does not answer at one of its addresses (every name in `DOCS_HOSTNAME`) |
 
 You are warned when a signal reports a failure or **stops arriving**, which also covers the whole server being off. Without these variables, nothing is sent.
+
+**A planned stop does not warn** (decision 209): while the nightly demo reset or an update restarts the system, the server sends no signal about the sites (system, certificate and documentation). A check only warns if the stop lasts past its period and grace (15 minutes). A certificate that cannot be read is read once more a few seconds later before it counts as a failure.
 
 ## Warnings inside the system
 

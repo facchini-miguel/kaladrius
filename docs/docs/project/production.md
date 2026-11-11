@@ -38,6 +38,8 @@ Maintenance: SSH with a key only (no password, no root); Dokploy's panel only th
 
 The Compose file follows `deploy/docker-compose.prod.yml`, with Traefik in Caddy's place: the labels give HTTPS for each name, redirect HTTP to HTTPS, compress the responses, drop the `Server` header and cap a request body at 11 MB (the largest legitimate upload is a 10 MB medical record attachment, like the Caddyfile's `request_body`). The app trusts the client address Traefik puts last in `X-Forwarded-For` (`DJANGO_REVERSE_PROXY=1`).
 
+**The documentation does not depend on the app** (decision 209): its routers use their own Traefik middlewares (`kaladrius-docs-comprime`, `kaladrius-docs-sem-server`, `kaladrius-docs-https`), declared on the `docs` service. When they used the ones declared on `app`, Traefik dropped the documentation's routers whenever the app stopped (the nightly reset, every update). `update-dokploy.sh`, like `reset_demo.sh`, marks the stop as maintenance, so `health.sh` does not report it.
+
 ## How the server works
 
 The scripts of `deploy/server/` run as they are, from `/opt/kaladrius/bin`, with the systemd units of the repository. `/opt/kaladrius` links them to the Dokploy Compose:
@@ -112,7 +114,7 @@ docker compose -f docker-compose.prod.yml exec app python manage.py demo_account
 Never use the `DJANGO_SEED_PASSWORD` password there: the seed users, the seed administrator included, share it.
 
 ### Nightly reset (decision 086)
-Every day at 07:30 UTC (04:30 in Brasília, after the backup) the server restores a saved **base** of the demo, dropping what visitors changed, and moves every date forward by the whole weeks since the base was saved, so the schedule always looks current and each appointment keeps its weekday (birth dates do not move). The list of backups is kept. It only runs with `DJANGO_DEMO=1` in the server `.env` (in Dokploy). The base is `/opt/kaladrius/demo/base.dump`, brought from Google Cloud (saved on 2026-11-07). To save it again:
+Every day at 07:30 UTC (04:30 in Brasília, after the backup) the server restores a saved **base** of the demo, dropping what visitors changed, and moves every date forward by the whole weeks since the base was saved, so the schedule always looks current and each appointment keeps its weekday (birth dates do not move). The list of backups is kept. It only runs with `DJANGO_DEMO=1` in the server `.env` (in Dokploy). The base is `/opt/kaladrius/demo/base.dump`, brought from Google Cloud (saved on 2026-11-07) and saved again on the VPS on 2026-11-11, right after a reset, so the reset no longer replays the migrations since 0.62 (decision 209). Its date (`base-date`) stays 2026-11-07, the date of the appointments in it: a base saved right after a reset still holds the dates of the base before it, since the reset moves them only after a whole week. To save it again:
 
 ```bash
 sudo /opt/kaladrius/bin/reset_demo.sh --save-base

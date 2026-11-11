@@ -9,7 +9,7 @@
 #                        external monitor.
 set -euo pipefail
 export LC_ALL=C  # numbers with a dot, whatever the server's language
-source "$(dirname "$0")/common.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 HEALTH_DIR="$DIR/health"
 SAMPLES="$HEALTH_DIR/samples.jsonl"
@@ -138,10 +138,14 @@ all_answer() {
 }
 
 # No certificate of these hostnames expires in less than 14 days: Caddy renews them about 30
-# days before, so 14 days left means renewing is failing.
+# days before, so 14 days left means renewing is failing. A certificate that cannot be read
+# counts as 0 days, so it is read once more a few seconds later before failing: one connection
+# lost while the proxy reloads its routes is not an expiry (decision 209).
 certificates_ok() {
   local host
   for host in "$@"; do
+    [ "$(certificate_days "$host")" -ge 14 ] && continue
+    sleep 5
     [ "$(certificate_days "$host")" -ge 14 ] || return 1
   done
 }
@@ -151,6 +155,11 @@ certificates_ok() {
 # Every hostname is checked (SITE_HOSTNAME and DOCS_HOSTNAME may list several, decision 134).
 check_sites() {
   local -a sites docs
+  # Stopped on purpose (the demo reset, an update): no signal at all this time (decision 209).
+  if in_maintenance; then
+    echo "Maintenance in progress (demo reset or update): the sites are not signaled this time."
+    return 0
+  fi
   mapfile -t sites < <(hosts_of SITE_HOSTNAME)
   mapfile -t docs < <(hosts_of DOCS_HOSTNAME)
   # The system, with its database (/api/v1/health answers 503 when the database does not).
@@ -173,6 +182,9 @@ resources_ok() {
   disk_pct=$((100 * disk_used / (disk_total > 0 ? disk_total : 1)))
   [ "$memory_pct" -lt 95 ] && [ "$swap_pct" -lt 80 ] && [ "$disk_pct" -lt 90 ]
 }
+
+# Sourced by the tests, which call the functions themselves.
+[ "${BASH_SOURCE[0]}" = "$0" ] || return 0
 
 case "${1:-}" in
   --collect | --coletar)

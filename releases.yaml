@@ -4,6 +4,32 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.71.3
+  date: 2026-11-11
+  title:
+    pt-br: Sem alarme falso nas paradas planejadas
+    en: No false alarms on planned stops
+    es: Sin falsas alarmas en las paradas planificadas
+  items:
+    - kind: fix
+      module: System
+      audience: [staff]
+      text:
+        pt-br: >
+          Os avisos de sistema fora do ar não disparam mais durante uma atualização ou o reinício
+          noturno da demonstração, quando o sistema para de propósito por alguns segundos. O aviso
+          de certificado HTTPS confere de novo antes de alertar, então uma leitura que falhou uma
+          vez não vira alarme.
+        en: >
+          The system-down warnings no longer go off during an update or the nightly demo reset,
+          when the system stops on purpose for a few seconds. The HTTPS certificate warning checks
+          again before alerting, so one failed read no longer becomes an alarm.
+        es: >
+          Los avisos de sistema caído ya no se disparan durante una actualización o el reinicio
+          nocturno de la demostración, cuando el sistema se detiene a propósito por unos segundos.
+          El aviso de certificado HTTPS vuelve a comprobar antes de alertar, así que una lectura
+          que falló una vez ya no se vuelve una alarma.
+
 - version: 0.71.2
   date: 2026-11-09
   title:
