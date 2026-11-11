@@ -220,3 +220,22 @@ def test_dependabot_items_show_marked(file_path, settings, client, django_user_m
         assert rows[1].endswith("Feito pelo projeto.")
     finally:
         releases.all_releases.cache_clear()
+
+
+def test_every_kind_has_its_color():
+    """The badge of each kind is colored by its CSS class (kind-<code>). The codes became English
+    in decision 199 and the CSS kept the Portuguese ones: the badges went white on white."""
+    import re
+
+    css = (settings.BASE_DIR / "static" / "css" / "app.css").read_text(encoding="utf-8")
+    colored = set(re.findall(r"\.kind-([a-z]+) \{ background-color", css))
+    assert colored == set(releases.KINDS)
+
+
+@pytest.mark.django_db
+def test_whats_new_page_shows_the_kind_badges(client, django_user_model):
+    user = django_user_model.objects.create_user(username="caio", password="senha-de-teste-123")
+    client.force_login(user)
+    page = client.get(reverse("whats_new")).content.decode()
+    for kind in releases.KINDS:
+        assert f'class="badge kind-{kind} me-2"' in page

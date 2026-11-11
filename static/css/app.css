@@ -10,10 +10,10 @@ main {
 }
 
 /* Item type colors on the What's new page */
-.kind-novo { background-color: #198754; }
-.kind-melhoria { background-color: #0d6efd; }
-.kind-correcao { background-color: #fd7e14; }
-.kind-seguranca { background-color: #dc3545; }
+.kind-new { background-color: #198754; }
+.kind-improvement { background-color: #0d6efd; }
+.kind-fix { background-color: #fd7e14; }
+.kind-security { background-color: #dc3545; }
 
 /* Color swatch (practitioner color on the schedule) */
 .color-swatch {
