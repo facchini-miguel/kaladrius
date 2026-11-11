@@ -50,4 +50,12 @@ manage record_backup "$name" "$size" -- registrar_backup "$name" "$size" \
 manage apply_retention -- aplicar_retencao \
   || echo "Warning: the old records could not be deleted."
 
+write_metrics backup <<EOF
+# HELP kaladrius_backup_last_success_timestamp_seconds When the last daily backup finished.
+# TYPE kaladrius_backup_last_success_timestamp_seconds gauge
+kaladrius_backup_last_success_timestamp_seconds $(date +%s)
+# HELP kaladrius_backup_size_bytes Size of the last daily backup.
+# TYPE kaladrius_backup_size_bytes gauge
+kaladrius_backup_size_bytes $size
+EOF
 notify_monitor MONITOR_BACKUP_URL

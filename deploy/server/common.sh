@@ -112,6 +112,24 @@ in_maintenance() {
   [[ "$began" =~ ^[0-9]+$ ]] && [ $(($(date +%s) - began)) -lt $((MAINTENANCE_MINUTES * 60)) ]
 }
 
+# Numbers of the last backup, demo reset, restore test and update, for a Prometheus on the same
+# server (decision 211): node-exporter reads every *.prom of this folder (its textfile
+# collector). Without one, the files are just a few bytes nobody reads.
+METRICS_DIR=${METRICS_DIR:-$DIR/metrics}
+
+# write_metrics <name> < lines: replaces $METRICS_DIR/<name>.prom with the Prometheus text read
+# from stdin, atomically, so a reader never sees half a file. Never fails the caller.
+write_metrics() {
+  local tmp
+  {
+    mkdir -p "$METRICS_DIR" &&
+      tmp=$(mktemp "$METRICS_DIR/.$1.XXXXXX") &&
+      cat > "$tmp" &&
+      chmod 644 "$tmp" &&
+      mv -f "$tmp" "$METRICS_DIR/$1.prom"
+  } 2>/dev/null || { cat > /dev/null; echo "Warning: metrics $1 not written." >&2; }
+}
+
 # Signal to an external monitor such as Healthchecks.io (decision 078). $1 names the .env
 # variable with the check's address (MONITOR_SYSTEM_URL, MONITOR_BACKUP_URL); $2 "fail"
 # reports a failure. Does nothing when the variable is not set, and never fails the caller.
