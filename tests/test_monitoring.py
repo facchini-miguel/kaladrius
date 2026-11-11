@@ -113,15 +113,23 @@ def test_chart_breaks_the_line_at_the_gap(folder):
     assert svg.count("<polyline") == 2
 
 
-def test_screen_for_everyone_without_technical_details(folder, clinic_a, create_user, client_for):
+@pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER, Role.FINANCE, Role.ADMIN])
+def test_screen_only_for_system_administrators(folder, clinic_a, create_user, client_for, role):
+    """Decision 210: the rest of the team, the clinic's admin included, neither sees the link
+    nor opens the page."""
     folder(sample(5))
-    reception = client_for(create_user("recepcao", clinic_a, Role.FRONT_DESK))
-    assert 'href="/system/health/"' in reception.get(reverse("home")).content.decode()
-    page = reception.get(reverse("monitoring:health"))
-    assert page.status_code == 200
-    content = page.content.decode()
-    assert "<svg" in content and "Nenhum backup registrado" in content
-    assert "Maiores tabelas" not in content and "health.sh" not in content
+    member = client_for(create_user("membro", clinic_a, role))
+    assert 'href="/system/health/"' not in member.get(reverse("home")).content.decode()
+    assert member.get(reverse("monitoring:health")).status_code == 403
+
+
+def test_system_administrator_finds_it_under_administration(folder, superuser):
+    folder(sample(5))
+    home = superuser.get(reverse("home")).content.decode()
+    administration = home[home.index("Administração") :]
+    assert 'href="/system/health/"' in administration
+    content = superuser.get(reverse("monitoring:health")).content.decode()
+    assert "<svg" in content and "Maiores tabelas" in content and "health.sh" in content
 
 
 def test_screen_with_samples(folder, superuser):

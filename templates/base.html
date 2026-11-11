@@ -120,13 +120,13 @@
               <li><a class="dropdown-item" href="{{ docs_url }}" target="_blank" rel="noopener">{% translate "Documentation" %}</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{% url 'whats_new' %}">{% translate "What's new" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'monitoring:health' %}">{% translate "System health" %}</a></li>
             </ul>
           </li>
           {% if user.is_superuser %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Administration" %}</a>
             <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'monitoring:health' %}">{% translate "System health" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'admin:index' %}">{% translate "Django admin" %}</a></li>
             </ul>
           </li>

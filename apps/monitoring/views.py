@@ -1,6 +1,7 @@
 import datetime
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db import connection
 from django.shortcuts import render
 from django.utils import timezone
@@ -69,8 +70,10 @@ def _database():
 
 @login_required
 def health_dashboard(request):
-    """Server health for every logged-in user (0.26.0). The database tables and the server
-    command are shown to superusers only."""
+    """Server health, for the system administrators (superusers) only (decision 210): the rest
+    of the team gets a refusal, and the menu does not show it to them."""
+    if not request.user.is_superuser:
+        raise PermissionDenied
     period = request.GET.get("period", "1h")
     if period not in PERIODS:
         period = "1h"

@@ -52,7 +52,7 @@ kaladrius exec app python manage.py changepassword <user name>
 
 ## The server is slow or ran out of memory
 
-On 1 GB of RAM, keep the swap on. Everyone sees the memory, swap and disk in **Help > System health** (Google Cloud installation). With more users, use 2 GB.
+On 1 GB of RAM, keep the swap on. The system administrator sees the memory, swap and disk in **Administration > System health** (Google Cloud installation). With more users, use 2 GB.
 
 ## Where are the files of the system?
 
