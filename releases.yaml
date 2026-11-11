@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.72.1
+  date: 2026-11-11
+  title:
+    pt-br: Números da operação para o painel de monitoramento
+    en: Operations numbers for the monitoring dashboard
+    es: Números de la operación para el panel de monitoreo
+  items:
+    - kind: improvement
+      module: System
+      audience: [staff]
+      text:
+        pt-br: >
+          O backup diário, o teste de restauração, o reinício da demonstração e as atualizações
+          registram quando rodaram e quanto levaram, para um painel de monitoramento (Grafana) no
+          mesmo servidor mostrar tudo num lugar só.
+        en: >
+          The daily backup, the restore test, the demo reset and the updates record when they ran
+          and how long they took, so a monitoring dashboard (Grafana) on the same server shows
+          everything in one place.
+        es: >
+          El backup diario, la prueba de restauración, el reinicio de la demostración y las
+          actualizaciones registran cuándo se ejecutaron y cuánto tardaron, para que un panel de
+          monitoreo (Grafana) en el mismo servidor muestre todo en un solo lugar.
+
 - version: 0.72.0
   date: 2026-11-11
   title:

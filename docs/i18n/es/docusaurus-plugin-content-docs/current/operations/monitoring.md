@@ -11,7 +11,7 @@ title: Monitoreo
 
 ```bash
 curl https://clinica.ejemplo.com/api/v1/version
-# {"version": "0.72.0"}
+# {"version": "0.72.1"}
 ```
 
 Úselo en cualquier monitor de disponibilidad (UptimeRobot, Healthchecks, Uptime Kuma…) para recibir un aviso cuando el sistema deje de responder.
@@ -35,6 +35,8 @@ El propio servidor puede avisarle mediante [Healthchecks.io](https://healthcheck
 | `MONITOR_DOCS_URL` | Documentación funcionando | 5 min / 10 min | Este sitio de documentación, cuando el servidor lo corre, no responde en alguna de sus direcciones (todos los nombres de `DOCS_HOSTNAME`) |
 
 Se le avisa cuando una señal informa una falla o **deja de llegar**, lo que también cubre el servidor entero apagado. Sin estas variables, no se envía nada.
+
+**Números para un Prometheus en el mismo servidor** (decisión 211): después de cada ejecución, el backup diario, la prueba de restauración, el reinicio de la demostración y la actualización escriben sus números en `/opt/kaladrius/metrics/*.prom` (`kaladrius_backup_last_success_timestamp_seconds`, `kaladrius_backup_size_bytes`, `kaladrius_restore_test_last_success_timestamp_seconds`, `kaladrius_demo_reset_duration_seconds`, `kaladrius_demo_reset_downtime_seconds`, `kaladrius_update_last_success_timestamp_seconds`…). Apunte el colector textfile de node-exporter a esa carpeta (`--collector.textfile.directory`) para graficarlos; sin él, son unos bytes que nadie lee.
 
 **Una parada planificada no avisa** (decisión 209): mientras el reinicio nocturno de la demostración o una actualización reinicia el sistema, el servidor no envía ninguna señal sobre los sitios (sistema, certificado y documentación). Un check solo avisa si la parada supera su período y tolerancia (15 minutos). Un certificado que no se pudo leer se lee otra vez unos segundos después antes de contar como falla.
 

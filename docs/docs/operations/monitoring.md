@@ -11,7 +11,7 @@ title: Monitoring
 
 ```bash
 curl https://clinic.example.com/api/v1/version
-# {"version": "0.72.0"}
+# {"version": "0.72.1"}
 ```
 
 Use it in any uptime monitor (UptimeRobot, Healthchecks, Uptime Kuma…) to be warned when the system stops answering.
@@ -35,6 +35,8 @@ The server can warn you by itself through [Healthchecks.io](https://healthchecks
 | `MONITOR_DOCS_URL` | Documentation up | 5 min / 10 min | This documentation site, when the server runs it, does not answer at one of its addresses (every name in `DOCS_HOSTNAME`) |
 
 You are warned when a signal reports a failure or **stops arriving**, which also covers the whole server being off. Without these variables, nothing is sent.
+
+**Numbers for a Prometheus on the same server** (decision 211): after each run, the daily backup, the restore test, the demo reset and the update write their numbers to `/opt/kaladrius/metrics/*.prom` (`kaladrius_backup_last_success_timestamp_seconds`, `kaladrius_backup_size_bytes`, `kaladrius_restore_test_last_success_timestamp_seconds`, `kaladrius_demo_reset_duration_seconds`, `kaladrius_demo_reset_downtime_seconds`, `kaladrius_update_last_success_timestamp_seconds`…). Point node-exporter's textfile collector at that folder (`--collector.textfile.directory`) to chart them; without one, they are a few bytes nobody reads.
 
 **A planned stop does not warn** (decision 209): while the nightly demo reset or an update restarts the system, the server sends no signal about the sites (system, certificate and documentation). A check only warns if the stop lasts past its period and grace (15 minutes). A certificate that cannot be read is read once more a few seconds later before it counts as a failure.
 
