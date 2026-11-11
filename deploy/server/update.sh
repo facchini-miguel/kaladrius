@@ -48,6 +48,7 @@ roll_back() {
   echo "The system did not answer with the new version: going back to the previous one." >&2
   if ! docker image inspect "$PREVIOUS_APP_IMAGE" >/dev/null 2>&1; then
     echo "No previous version kept: fix it by hand." >&2
+    end_maintenance
     notify_monitor MONITOR_UPDATE_URL fail
     exit 1
   fi
@@ -62,6 +63,7 @@ roll_back() {
   else
     echo "Not even the previous version answered: fix it by hand." >&2
   fi
+  end_maintenance
   notify_monitor MONITOR_UPDATE_URL fail
   exit 1
 }
@@ -106,8 +108,12 @@ if [ "$current" != "$installed" ] || [ -n "$force" ]; then
     echo "No $DIR/.env: configure the server before starting the system."
     exit 0
   fi
+  # The app restarts: health.sh does not report the moment it is down (decision 209).
+  begin_maintenance
+  trap end_maintenance EXIT
   compose up -d --remove-orphans
   system_up || roll_back "$current"
+  end_maintenance
   # Recorded only after the system answered: until then every run tries again.
   echo "$current" > "$INSTALLED_IMAGE"
   # The image :previous named until now and a refused one are not needed any more.

@@ -53,7 +53,7 @@ db 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -qc "\copy core_backup TO STDOUT"
 # The system administrators' accounts (decision 118). A table that does not exist yet (an
 # older version) just leaves its file empty.
 accounts=$(mktemp -d)
-trap 'rm -rf "$backups" "$accounts"; compose start app >/dev/null 2>&1 || true' EXIT
+trap 'rm -rf "$backups" "$accounts"; compose start app >/dev/null 2>&1 || true; end_maintenance' EXIT
 keep() {  # keep <file> <query>; \copy takes one line, so the query is joined first
   local query="${2//$'\n'/ }"
   db "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -qc \"\\copy ($query) TO STDOUT\"" \
@@ -65,6 +65,8 @@ keep two_factor "SELECT u.username, d.secret, d.active, d.activated_at, d.last_s
 keep codes "SELECT u.username, c.digest, c.used_at
   FROM account_recovery_code c JOIN core_user u ON u.id = c.user_id WHERE u.is_superuser"
 
+# The site is down until the migrations finish: health.sh does not report it (decision 209).
+begin_maintenance
 compose stop app
 # A clean schema: tables created by later versions are not left behind; the app's migrate
 # creates them again when it starts.
@@ -82,6 +84,7 @@ for _ in $(seq 1 60); do
   compose exec -T app python manage.py migrate --check >/dev/null 2>&1 && break
   sleep 5
 done
+end_maintenance
 sql <<'SQL'
 TRUNCATE core_backup;
 SQL
