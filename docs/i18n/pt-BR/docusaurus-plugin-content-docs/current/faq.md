@@ -52,7 +52,7 @@ kaladrius exec app python manage.py changepassword <usuário>
 
 ## O servidor está lento ou ficou sem memória
 
-Com 1 GB de RAM, mantenha o swap ligado. Todos veem memória, swap e disco em **Ajuda > Saúde do sistema** (instalação no Google Cloud). Com mais usuários, use 2 GB.
+Com 1 GB de RAM, mantenha o swap ligado. O administrador do sistema vê memória, swap e disco em **Administração > Saúde do sistema** (instalação no Google Cloud). Com mais usuários, use 2 GB.
 
 ## Onde ficam os arquivos do sistema?
 

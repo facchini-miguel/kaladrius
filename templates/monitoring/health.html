@@ -76,7 +76,6 @@
   {% endif %}
   <div class="col-lg-6">
     <h2 class="h5">{% blocktranslate with size=database.size|filesizeformat %}Database · {{ size }}{% endblocktranslate %}</h2>
-    {% if user.is_superuser %}
     <table class="table table-sm bg-white">
       <thead><tr><th>{% translate "Largest tables" %}</th><th class="text-end">{% translate "Rows" %}</th><th class="text-end">{% translate "Size" %}</th></tr></thead>
       <tbody>
@@ -85,10 +84,9 @@
         {% endfor %}
       </tbody>
     </table>
-    {% endif %}
     <p class="small">{% if backup %}{% blocktranslate with when=backup.timestamp|date:"SHORT_DATETIME_FORMAT" size=backup.size|filesizeformat %}Last backup: {{ when }} ({{ size }}).{% endblocktranslate %}{% else %}{% translate "No backup recorded." %}{% endif %}</p>
   </div>
 </div>
 
-<p class="text-body-secondary small">{% translate "The numbers come from Linux commands on the server, every 5 minutes, and are kept for 7 days." %}{% if user.is_superuser %} {% translate "To see the report in the terminal:" %} <code>sudo /opt/kaladrius/bin/health.sh</code>{% endif %}</p>
+<p class="text-body-secondary small">{% translate "The numbers come from Linux commands on the server, every 5 minutes, and are kept for 7 days." %} {% translate "To see the report in the terminal:" %} <code>sudo /opt/kaladrius/bin/health.sh</code></p>
 {% endblock %}
