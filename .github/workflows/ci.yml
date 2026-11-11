@@ -112,9 +112,8 @@ jobs:
   # GitHub Release of each new version (decision 119): after the image is published, the version
   # of pyproject.toml (the top of releases.yaml, the tests check they match) gets its tag vX.Y.Z
   # and its release in English, from release_notes, when they do not exist yet. Nobody has to
-  # remember. With a SITE_TOKEN secret (a fine-grained token with Actions: write on
-  # facchini-miguel/facchini.eti.br), the owner's site is rebuilt right away to show it;
-  # without one, the site's hourly build picks it up.
+  # remember. The owner's site (facchini-miguel/facchini.eti.br, on the VPS) shows it within 10
+  # minutes by itself: it rebuilds every 10 minutes (decision 212), so no token is needed.
   release:
     needs: [publish, linux-package]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -124,9 +123,6 @@ jobs:
     env:
       DJANGO_SECRET_KEY: ci-only-never-use-in-production
       DJANGO_DEBUG: "0"
-      # Only whether the secret exists, so tokens reach just the steps that use them, never
-      # "pip install", which runs third-party code (decision 132).
-      HAS_SITE_TOKEN: ${{ secrets.SITE_TOKEN != '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -158,9 +154,3 @@ jobs:
             --notes-file notes.md --latest \
             "dist/kaladrius_${VERSION}-1_amd64.deb" "dist/kaladrius-${VERSION}-1.x86_64.rpm" \
             "dist/kaladrius-${VERSION}-1-x86_64.pkg.tar.zst" dist/SHA256SUMS
-          echo "SITE_OUTDATED=1" >> "$GITHUB_ENV"
-      - name: Rebuild the owner's site
-        if: env.SITE_OUTDATED == '1' && env.HAS_SITE_TOKEN == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.SITE_TOKEN }}
-        run: gh workflow run publish.yml -R facchini-miguel/facchini.eti.br
