@@ -123,6 +123,11 @@ if [ "$current" != "$installed" ] || [ -n "$force" ]; then
   save_previous_compose
   docker image prune -f >/dev/null
   remove_images "$old" "$current"
+  write_metrics update <<EOF
+# HELP kaladrius_update_last_success_timestamp_seconds When the system was last updated.
+# TYPE kaladrius_update_last_success_timestamp_seconds gauge
+kaladrius_update_last_success_timestamp_seconds $(date +%s)
+EOF
   echo "System updated: $(docker image inspect --format \
     '{{if .RepoDigests}}{{index .RepoDigests 0}}{{else}}{{.Id}}{{end}}' "$APP_IMAGE")"
 fi

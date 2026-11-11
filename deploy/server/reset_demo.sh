@@ -40,6 +40,7 @@ if [ -n "$save_base" ]; then
 fi
 
 [ -s "$BASE" ] || { echo "No base: run $0 --save-base first" >&2; exit 1; }
+started=$(date +%s)
 
 backups=$(mktemp)
 # Whatever happens, the app comes back up (an empty or partial database is still better
@@ -67,6 +68,7 @@ keep codes "SELECT u.username, c.digest, c.used_at
 
 # The site is down until the migrations finish: health.sh does not report it (decision 209).
 begin_maintenance
+stopped=$(date +%s)
 compose stop app
 # A clean schema: tables created by later versions are not left behind; the app's migrate
 # creates them again when it starts.
@@ -85,6 +87,7 @@ for _ in $(seq 1 60); do
   sleep 5
 done
 end_maintenance
+back=$(date +%s)
 sql <<'SQL'
 TRUNCATE core_backup;
 SQL
@@ -122,5 +125,16 @@ SQL
 since=$(cat "$BASE_DATE")
 manage advance_dates --since "$since" --confirm -- avancar_datas --desde "$since" --confirmar
 
+write_metrics demo_reset <<EOF
+# HELP kaladrius_demo_reset_last_success_timestamp_seconds When the last nightly demo reset finished.
+# TYPE kaladrius_demo_reset_last_success_timestamp_seconds gauge
+kaladrius_demo_reset_last_success_timestamp_seconds $(date +%s)
+# HELP kaladrius_demo_reset_duration_seconds How long the last demo reset took.
+# TYPE kaladrius_demo_reset_duration_seconds gauge
+kaladrius_demo_reset_duration_seconds $(($(date +%s) - started))
+# HELP kaladrius_demo_reset_downtime_seconds How long the demo was down in the last reset.
+# TYPE kaladrius_demo_reset_downtime_seconds gauge
+kaladrius_demo_reset_downtime_seconds $((back - stopped))
+EOF
 notify_monitor MONITOR_DEMO_URL
 echo "Demo reset."

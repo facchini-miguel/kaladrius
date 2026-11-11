@@ -57,7 +57,7 @@ Los scripts de `deploy/server/` corren tal como están, desde `/opt/kaladrius/bi
 | `kaladrius-health.timer` (cada 5 min) | `health.sh --collect`: las muestras de **Administración > Salud del sistema** (`/opt/kaladrius/health`) y los monitores de los sitios, certificados y recursos |
 | `backup-dokploy.timer` (05:30 UTC) | la base del propio Dokploy y `/etc/dokploy` en `/var/backups/dokploy` (14 días) |
 
-Los monitores externos (Healthchecks.io, decisión 078) son los `MONITOR_*_URL` del `.env`, los mismos de Google Cloud.
+Los monitores externos (Healthchecks.io, decisión 078) son los `MONITOR_*_URL` del `.env`, los mismos de Google Cloud. Por dentro, el Prometheus y el Grafana del VPS (https://grafana.facchini.eti.br, repositorio `facchini-miguel/grafana.facchini.eti.br`) muestran la máquina, los contenedores, Traefik, la base (rol `monitoring`, solo estadísticas) y, por `/opt/kaladrius/metrics`, los backups, reinicios, pruebas de restauración y actualizaciones (decisión 211).
 
 **Por ahora los respaldos quedan en el disco de la VPS.** Falta elegir dónde guardar una copia fuera de ella. Los 18 respaldos del bucket de Google Cloud (26/10 al 09/11) están en `/var/backups/kaladrius/google`.
 

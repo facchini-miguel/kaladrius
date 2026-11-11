@@ -59,6 +59,7 @@ save_previous_compose() {{ log "guardar compose"; }}
 reload_caddy() {{ log caddy; }}
 notify_monitor() {{ log "monitor $1 ${{2:-ok}}"; }}
 begin_maintenance() {{ log "manutencao inicio"; }}
+write_metrics() {{ log "metricas $1 $(grep -v '^#' | cut -d' ' -f1 | tr '\n' ' ')"; }}
 end_maintenance() {{ [ -f "$DIR/fim" ] || {{ log "manutencao fim"; touch "$DIR/fim"; }}; }}
 # Answers from $DIR/saude, one per line (0 = up, 1 = down); up when it runs out.
 system_up() {{
@@ -143,6 +144,8 @@ def test_new_version_that_starts_becomes_the_next_previous(server):
     assert server.read("installed-image") == ["B", "D"]
     assert server.local_id("registro/app:previous") == "B"
     assert log[-1] == "monitor MONITOR_UPDATE_URL ok"
+    # Decision 211: the update's time, for the operations dashboard.
+    assert "metricas update kaladrius_update_last_success_timestamp_seconds " in log
     # Decision 209: health.sh is told the restart is on purpose, until the system answers.
     start = log.index("manutencao inicio")
     assert log[start + 1] == "compose up -d --remove-orphans com B"

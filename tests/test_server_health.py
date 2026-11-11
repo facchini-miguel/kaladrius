@@ -110,3 +110,23 @@ def test_certificate_expiring_fails(server):
     (server.dir / "days").write_text("10\n10\n")
     log, _ = server.run()
     assert "monitor MONITOR_CERTIFICATE_URL fail" in log
+
+
+def test_write_metrics_replaces_the_file_whole(server):
+    """Decision 211: node-exporter reads $DIR/metrics/*.prom; a file is replaced at once."""
+    call = (
+        'METRICS_DIR="$DIR/metrics"; printf "a 1\\n" | write_metrics backup; '
+        'printf "a 2\\nb 3\\n" | write_metrics backup'
+    )
+    server.run(call)
+    folder = server.dir / "metrics"
+    assert (folder / "backup.prom").read_text() == "a 2\nb 3\n"
+    assert [p.name for p in folder.iterdir()] == ["backup.prom"]  # no temporary file left
+    assert oct((folder / "backup.prom").stat().st_mode)[-3:] == "644"
+
+
+def test_write_metrics_never_fails_the_script(server):
+    (server.dir / "metrics").write_text("not a folder")
+    call = 'METRICS_DIR="$DIR/metrics/x"; echo "a 1" | write_metrics backup; echo after'
+    _, out = server.run(call)
+    assert out.strip().endswith("after")

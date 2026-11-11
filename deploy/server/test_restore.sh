@@ -80,5 +80,10 @@ if [ -n "$require_clinic" ]; then
   [ "$clinics" -ge 1 ]
 fi
 
+write_metrics restore_test <<EOF
+# HELP kaladrius_restore_test_last_success_timestamp_seconds When the last restore test passed.
+# TYPE kaladrius_restore_test_last_success_timestamp_seconds gauge
+kaladrius_restore_test_last_success_timestamp_seconds $(date +%s)
+EOF
 notify_monitor MONITOR_RESTORE_URL
 echo "Restore test finished."
