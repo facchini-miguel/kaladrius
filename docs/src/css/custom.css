@@ -18,3 +18,38 @@
   --ifm-color-primary-lighter: #9ec5fe;
   --ifm-color-primary-lightest: #cfe2ff;
 }
+
+/* Language menu with flags: the same SVG flags as the system (static/img/flags). Docusaurus puts
+   each language's code in the link's lang attribute; the menu button shows the page's own. */
+.dropdown__link[lang]::before,
+.menu__link[lang]::before,
+.navbar__item.dropdown > .navbar__link:has(> svg)::before {
+  content: "";
+  display: inline-block;
+  width: 1.4em;
+  height: 1em;
+  margin-right: 0.5em;
+  vertical-align: -0.12em;
+  background: center / cover no-repeat;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 15%);
+}
+.dropdown__link[lang="en"]::before,
+.menu__link[lang="en"]::before,
+html[lang="en"] .navbar__item.dropdown > .navbar__link:has(> svg)::before {
+  background-image: url("/img/flags/en.svg");
+}
+.dropdown__link[lang="pt-BR"]::before,
+.menu__link[lang="pt-BR"]::before,
+html[lang="pt-BR"] .navbar__item.dropdown > .navbar__link:has(> svg)::before {
+  background-image: url("/img/flags/pt-BR.svg");
+}
+.dropdown__link[lang="es"]::before,
+.menu__link[lang="es"]::before,
+html[lang="es"] .navbar__item.dropdown > .navbar__link:has(> svg)::before {
+  background-image: url("/img/flags/es.svg");
+}
+/* The flag takes the globe icon's place in the menu button. */
+.navbar__item.dropdown > .navbar__link > svg {
+  display: none;
+}
