@@ -11,7 +11,7 @@ title: Monitoramento
 
 ```bash
 curl https://clinica.exemplo.com.br/api/v1/version
-# {"version": "0.71.3"}
+# {"version": "0.72.0"}
 ```
 
 Use em qualquer monitor de disponibilidade (UptimeRobot, Healthchecks, Uptime Kuma…) para ser avisado quando o sistema parar de responder.
@@ -49,7 +49,7 @@ Os superusuários veem um aviso no topo das telas quando:
 
 ## Saúde do sistema (instalação no Google Cloud)
 
-A cada 5 minutos, `deploy/server/health.sh --collect` lê processador, memória, swap, disco, rede, carga e a memória e o processador de cada container, e acrescenta uma linha em `/opt/kaladrius/health/amostras.jsonl` (7 dias guardados, cerca de 1,5 MB). Todos veem em **Ajuda > Saúde do sistema**, com gráficos das últimas horas e dias; as tabelas do banco e o comando do servidor aparecem só para superusuários. O app só lê o arquivo; não tem acesso ao Docker.
+A cada 5 minutos, `deploy/server/health.sh --collect` lê processador, memória, swap, disco, rede, carga e a memória e o processador de cada container, e acrescenta uma linha em `/opt/kaladrius/health/amostras.jsonl` (7 dias guardados, cerca de 1,5 MB). Só os administradores do sistema (superusuários) veem, em **Administração > Saúde do sistema** (decisão 210), com gráficos das últimas horas e dias, as tabelas do banco e o comando do servidor. O app só lê o arquivo; não tem acesso ao Docker.
 
 No servidor, `sudo /opt/kaladrius/bin/health.sh` mostra um relatório: agora, últimas 24 horas, containers e agendamentos.
 

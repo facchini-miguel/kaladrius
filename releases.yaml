@@ -4,6 +4,53 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.72.0
+  date: 2026-11-11
+  title:
+    pt-br: Saúde do sistema só para o administrador e bandeiras na documentação
+    en: System health for the administrator only, and flags in the documentation
+    es: Salud del sistema solo para el administrador y banderas en la documentación
+  items:
+    - kind: improvement
+      module: Permissions
+      audience: [staff]
+      text:
+        pt-br: >
+          A tela Saúde do sistema (processador, memória, disco e banco do servidor) passa a ser só
+          do administrador do sistema, no menu Administração. O resto da equipe, o administrador da
+          clínica incluído, não a vê mais no menu Ajuda.
+        en: >
+          The System health page (the server's processor, memory, disk and database) is now for the
+          system administrator only, in the Administration menu. The rest of the team, the
+          clinic's administrator included, no longer sees it in the Help menu.
+        es: >
+          La pantalla Salud del sistema (procesador, memoria, disco y base del servidor) pasa a ser
+          solo del administrador del sistema, en el menú Administración. El resto del equipo, el
+          administrador de la clínica incluido, ya no la ve en el menú Ayuda.
+    - kind: fix
+      module: What's new
+      audience: [staff]
+      text:
+        pt-br: >
+          Nas Novidades, as etiquetas Novo, Melhoria, Correção e Segurança voltaram a aparecer com
+          as suas cores; desde a versão 0.66.0 elas ficavam brancas sobre branco.
+        en: >
+          On What's new, the New, Improvement, Fix and Security badges show with their colors
+          again; since version 0.66.0 they were white on white.
+        es: >
+          En Novedades, las etiquetas Nuevo, Mejora, Corrección y Seguridad vuelven a mostrarse con
+          sus colores; desde la versión 0.66.0 quedaban blancas sobre blanco.
+    - kind: improvement
+      module: Documentation
+      audience: [staff]
+      text:
+        pt-br: >
+          O menu de idiomas da documentação mostra a bandeira de cada idioma.
+        en: >
+          The documentation's language menu shows each language's flag.
+        es: >
+          El menú de idiomas de la documentación muestra la bandera de cada idioma.
+
 - version: 0.71.3
   date: 2026-11-11
   title:

@@ -11,7 +11,7 @@ title: Monitoring
 
 ```bash
 curl https://clinic.example.com/api/v1/version
-# {"version": "0.71.3"}
+# {"version": "0.72.0"}
 ```
 
 Use it in any uptime monitor (UptimeRobot, Healthchecks, Uptime Kuma…) to be warned when the system stops answering.
@@ -49,7 +49,7 @@ Superusers see a warning at the top of every page when:
 
 ## System health (Google Cloud installation)
 
-Every 5 minutes, `deploy/server/health.sh --collect` reads CPU, memory, swap, disk, network, load and the memory and CPU of each container, and appends a line to `/opt/kaladrius/health/amostras.jsonl` (7 days kept, about 1.5 MB). Everyone sees it in **Help > System health**, with charts of the last hours and days; the database tables and the server command are shown to superusers only. The app only reads the file; it has no access to Docker.
+Every 5 minutes, `deploy/server/health.sh --collect` reads CPU, memory, swap, disk, network, load and the memory and CPU of each container, and appends a line to `/opt/kaladrius/health/amostras.jsonl` (7 days kept, about 1.5 MB). Only the system administrators (superusers) see it, in **Administration > System health** (decision 210), with charts of the last hours and days, the database tables and the server command. The app only reads the file; it has no access to Docker.
 
 On the server, `sudo /opt/kaladrius/bin/health.sh` prints a report: now, last 24 hours, containers and timers.
 
