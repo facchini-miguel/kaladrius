@@ -11,6 +11,8 @@
 /.dockerignore                  @facchini-miguel
 /docker-compose.yml             @facchini-miguel
 /deploy/                        @facchini-miguel
+/docs/Dockerfile                @facchini-miguel
+/docs/Caddyfile                 @facchini-miguel
 
 # Dependencies and the Python version
 /.python-version                @facchini-miguel
