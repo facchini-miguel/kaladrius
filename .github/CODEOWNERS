@@ -1,0 +1,26 @@
+# Structural files. A pull request that changes any of them needs an approval
+# from @facchini-miguel before it can be merged (ruleset "Protect main").
+# Everything else (features, templates, translations, docs, tests) is merged
+# once CI passes.
+
+# CI, Dependabot and this file
+/.github/                       @facchini-miguel
+
+# Containers, packages and the server
+/Dockerfile                     @facchini-miguel
+/.dockerignore                  @facchini-miguel
+/docker-compose.yml             @facchini-miguel
+/deploy/                        @facchini-miguel
+
+# Dependencies and the Python version
+/.python-version                @facchini-miguel
+/requirements*.in               @facchini-miguel
+/requirements*.txt              @facchini-miguel
+
+# Database schema
+/apps/*/migrations/             @facchini-miguel
+
+# Access control and settings
+/config/settings.py             @facchini-miguel
+/apps/account/middleware.py     @facchini-miguel
+/apps/*/permissions.py          @facchini-miguel
