@@ -4,6 +4,31 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.72.2
+  date: 2026-11-17
+  title:
+    pt-br: Bibliotecas atualizadas
+    en: Libraries updated
+    es: Bibliotecas actualizadas
+  items:
+    - kind: security
+      module: System
+      audience: [staff]
+      source: dependabot
+      pr: 107
+      text:
+        pt-br: >
+          Bibliotecas do sistema atualizadas (Django, API, acesso ao banco, páginas em Markdown e
+          dados fictícios da demonstração), com correções de segurança. Nada muda para quem usa o
+          sistema.
+        en: >
+          System libraries updated (Django, API, database access, Markdown pages and the demo's
+          made-up data), with security fixes. Nothing changes for users.
+        es: >
+          Bibliotecas del sistema actualizadas (Django, API, acceso a la base, páginas en Markdown y
+          datos ficticios de la demostración), con correcciones de seguridad. Nada cambia para quien
+          usa el sistema.
+
 - version: 0.72.1
   date: 2026-11-11
   title:
