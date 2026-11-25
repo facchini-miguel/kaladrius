@@ -12,6 +12,8 @@ name: Lint
 
 on:
   push:
+  # dependabot-release.yml starts it on its branch (decision 219)
+  workflow_dispatch:
 
 permissions:
   contents: read

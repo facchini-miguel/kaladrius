@@ -1,0 +1,87 @@
+# The version of what Dependabot brought (decision 219). After every push to main it looks for the
+# Dependabot pull requests merged since the last version that change what is shipped (the app
+# image, the Linux packages, the documentation site); for them it writes the next PATCH version
+# (.github/dependabot_release.py: pyproject.toml, the READMEs, What's new in releases.yaml) and
+# opens or updates its pull request, on the versao-bibliotecas branch. Merging that pull request
+# publishes the version (ci.yml's publish and release jobs) and the reference server installs it.
+# The owner asked for it: "a ideia de gerar a versao sera depois do merge, e quem controla sera um
+# workflow? isso".
+#
+# The branch is the workflow's: it writes it again from main whenever main changes, so do not
+# commit to it. A pull request closed without merging does not come back for the same Dependabot
+# pull requests (the marker at the end of its body).
+#
+# A push or a pull request made with the GITHUB_TOKEN starts no workflow, so this one starts the
+# checks the ruleset requires (CI, Image age) and the lint on the branch, by workflow_dispatch;
+# their runs count for the pull request, which has the same commit. Needs "Allow GitHub Actions to
+# create and approve pull requests" (Settings > Actions > General).
+name: Dependabot release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write       # the versao-bibliotecas branch
+  pull-requests: write  # its pull request
+  actions: write        # its checks, started by workflow_dispatch
+
+concurrency:
+  group: versao-bibliotecas
+
+env:
+  # Dependabot pull requests merged before it are left alone: 0.72.3 is the last version written
+  # by hand for them (and #110, #111 came after it).
+  START: v0.72.3
+  BRANCH: versao-bibliotecas
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0  # the history since START, and its tag
+          # This job pushes its branch: the exception to decision 132.
+          persist-credentials: true
+      - name: The next version, when Dependabot brought something
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/dependabot_release.py "$START" "$RUNNER_TEMP/release"
+      - name: Its pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          out="$RUNNER_TEMP/release"
+          [ -f "$out/body.md" ] || exit 0
+          title="$(head -n 1 "$out/title.txt")"
+          mark="$(grep -o '<!-- dependabot-release: [0-9,]* -->' "$out/body.md")"
+          owner="${GITHUB_REPOSITORY%%/*}"
+          pulls() { gh api "repos/$GITHUB_REPOSITORY/pulls?state=$1&head=$owner:$BRANCH&per_page=100" --jq "$2"; }
+          if pulls closed '.[] | select(.merged_at == null) | .body' | grep -qF "$mark"; then
+            echo "A pull request with these Dependabot pull requests was closed without merging."
+            exit 0
+          fi
+          number="$(pulls open '.[0].number // empty')"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -q -c "$BRANCH"
+          git commit -qam "$title"
+          if [ -n "$number" ] && git fetch -q origin "$BRANCH" \
+            && [ "$(git rev-parse 'HEAD^{tree}')" = "$(git rev-parse 'FETCH_HEAD^{tree}')" ]; then
+            echo "#$number already has this version."
+            exit 0
+          fi
+          git push -q -f origin "HEAD:refs/heads/$BRANCH"
+          if [ -n "$number" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/pulls/$number" -f title="$title" \
+              -F body=@"$out/body.md" --jq .html_url
+          else
+            gh api "repos/$GITHUB_REPOSITORY/pulls" -f title="$title" -f head="$BRANCH" -f base=main \
+              -F body=@"$out/body.md" --jq .html_url
+          fi
+          for workflow in ci.yml image-age.yml lint.yml; do
+            gh workflow run "$workflow" --ref "$BRANCH"
+          done

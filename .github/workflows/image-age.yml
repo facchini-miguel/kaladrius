@@ -16,6 +16,8 @@ on:
   pull_request:
     # labeled/unlabeled: the skip-cooldown label runs the check again.
     types: [opened, synchronize, reopened, labeled, unlabeled]
+  # dependabot-release.yml starts it on its branch (decision 219)
+  workflow_dispatch:
 
 permissions:
   contents: read

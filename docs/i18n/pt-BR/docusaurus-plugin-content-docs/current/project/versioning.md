@@ -89,5 +89,6 @@ GET /api/v1/releases?since=1.4.0&audience=patient
    docker compose exec app python manage.py release_notes X.Y.Z            # texto
    ```
 4. O CI valida o `releases.yaml` (formato, versão maior que a anterior, data, os três idiomas) antes do deploy.
+5. **As atualizações do Dependabot ganham a versão sozinhas** (decisão 219): depois do merge de um pull request do Dependabot, o `.github/workflows/dependabot-release.yml` abre o pull request da próxima versão de CORREÇÃO (`Release X.Y.Z: libraries updated`), com o `pyproject.toml`, os READMEs e uma novidade por pull request do Dependabot no `releases.yaml` (`source: dependabot`, o `pr` dele, as bibliotecas que chegam à imagem). Outro pull request do Dependabot mesclado antes dele entra na mesma versão. O merge dele publica a versão como qualquer outra. O branch dele, `versao-bibliotecas`, é do workflow: não faça commits nele. Uma versão escrita à mão (passo 1) também cobre os pull requests do Dependabot mesclados antes dela.
 
 O servidor lê o `releases.yaml` uma vez e guarda em memória. Em desenvolvimento, depois de editá-lo, reinicie o app (`docker compose restart app`).

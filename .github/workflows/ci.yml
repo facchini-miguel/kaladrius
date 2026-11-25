@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # dependabot-release.yml starts it on its branch (decision 219)
+  workflow_dispatch:
 
 permissions:
   contents: read
