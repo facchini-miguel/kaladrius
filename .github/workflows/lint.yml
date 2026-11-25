@@ -1,7 +1,13 @@
-# Lint on every commit of every branch (decision 137): its own check, "Lint / ruff", next to the
-# CI's, so a branch pushed before its pull request is opened is checked too. The CI's tests job
-# runs the same lint again before publishing, also on pull requests from forks, whose pushes do
-# not run workflows here (no pull_request trigger: it showed a second, skipped "ruff").
+# Lint on every commit of every branch (decision 137): its own check, next to the CI's, so a branch
+# pushed before its pull request is opened is checked too. The CI's tests job runs the same lint again
+# before publishing, also on pull requests from forks, whose pushes do not run workflows here (no
+# pull_request trigger: it showed a second, skipped "ruff").
+#
+# The lint is the owner's shared workflow (decision 215): the copy for the public repositories in
+# facchini-miguel/facchini.eti.br (its source is facchini-miguel/arauto's, private), pinned to a
+# commit. It runs "ruff check --output-format=github ." and "ruff format --check .", with ruff from
+# requirements-dev.txt at the lock's version and hashes (decision 136), and checks out without
+# credentials (decision 132). The check shows as "Lint / ruff / ruff".
 name: Lint
 
 on:
@@ -12,18 +18,6 @@ permissions:
 
 jobs:
   ruff:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-        with:
-          persist-credentials: false  # no step uses git credentials (decision 132)
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
-        with:
-          python-version-file: .python-version
-      # Only ruff, at the version and hashes of the lock (decision 136); it has no dependencies.
-      - name: Ruff from the lock
-        run: |
-          sed -n '/^ruff==/,/^[a-z]/p' requirements-dev.txt | sed '$ { /^[a-z]/d }' > ruff.txt
-          pip install --no-deps --require-hashes -r ruff.txt
-      - name: Lint
-        run: ruff check --output-format=github . && ruff format --check .
+    uses: facchini-miguel/facchini.eti.br/.github/workflows/reusable-lint.yml@0fec8e18718cf2f8acb3ef31fb6e775af104132c
+    with:
+      ruff-from: requirements-dev.txt
