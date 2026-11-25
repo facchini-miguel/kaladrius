@@ -78,9 +78,10 @@ jobs:
       - name: Install on Debian, Ubuntu, Fedora, openSUSE and Arch Linux
         run: deploy/package/test_install.sh
 
-  # Publishes the image to GitHub Packages, ghcr.io (decision 076): the reference server picks it up
-  # within 5 minutes (decision 208), and anyone installing Kaladrius uses it too. Only after the
-  # documentation site builds, since the server builds it from main when the image changes.
+  # Publishes the image to GitHub Packages, ghcr.io (decision 076), and anyone installing Kaladrius
+  # uses it. The reference server installs a new version (the X.Y.Z tag) within 5 minutes of its
+  # release, below (decisions 208 and 217), and builds the documentation site from the version's
+  # tag: so the image is published only after the documentation site builds.
   publish:
     needs: [tests, docs]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

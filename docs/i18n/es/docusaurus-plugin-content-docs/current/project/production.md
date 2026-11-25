@@ -13,15 +13,15 @@ Publicada en **https://kaladrius.facchini.eti.br** (IPv4 e IPv6), también en ht
 ## Arquitectura
 
 ```
-git push (main) ─> GitHub Actions: pruebas, build de la docs ─> imagen en ghcr.io
+git push (main) ─> GitHub Actions: pruebas, build de la docs ─> imagen en ghcr.io (:X.Y.Z), release vX.Y.Z
                                                                  │ el servidor revisa cada 5 min
                                                                  ▼
 Navegador ──IPv4/IPv6, HTTPS──> VPS (Ubuntu 24.04, Hostinger, Boston, EE. UU.)
                                  ├─ traefik  (proxy de Dokploy: HTTPS Let's Encrypt, puertos 80/443)
                                  └─ Compose "kaladrius" de Dokploy
-                                     ├─ app   (Django + Gunicorn, imagen de ghcr.io)
+                                     ├─ app   (Django + Gunicorn, ghcr.io/…/kaladrius:X.Y.Z)
                                      ├─ db    (PostgreSQL 16, volumen pgdata)
-                                     └─ docs  (generada de docs/ de main en cada deploy)
+                                     └─ docs  (generada de docs/ de la etiqueta vX.Y.Z en cada deploy)
 Respaldo diario 06:00 UTC ─> /var/backups/kaladrius (30 días)
 Mantenimiento: SSH solo con llave (sin contraseña, sin root); panel de Dokploy solo por túnel SSH
 ```
@@ -42,7 +42,7 @@ El archivo Compose sigue `deploy/docker-compose.prod.yml`, con Traefik en lugar 
 
 ## Cómo funciona el servidor
 
-Los scripts de `deploy/server/` corren tal como están, desde `/opt/kaladrius/bin`, con las units de systemd del repositorio. `/opt/kaladrius` los conecta al Compose de Dokploy:
+Los scripts de `deploy/server/` corren tal como están, desde `/opt/kaladrius/bin`, con las units de systemd del repositorio; `deploy/server/dokploy/` tiene lo que solo usa la VPS: la unit de actualización (`update-dokploy.sh` en lugar de `update.sh`), `sync-env.py` y su drop-in. `/opt/kaladrius` los conecta al Compose de Dokploy:
 
 - `release/docker-compose.prod.yml` y `release/.env` son enlaces al archivo Compose y al `.env` de Dokploy. El `.env` da el nombre del proyecto Compose (`COMPOSE_PROJECT_NAME`), así que `docker compose -f /opt/kaladrius/release/docker-compose.prod.yml` llega a los contenedores que Dokploy levantó.
 - `/opt/kaladrius/.env` es una copia sin comillas, que `sync-env.py` vuelve a escribir antes de cada unit `kaladrius-*` (drop-in `/etc/systemd/system/kaladrius-.service.d/env.conf`). Dokploy escribe `CLAVE="valor"`, que Docker Compose entiende, pero `env_value` de `common.sh` lee la línea tal cual: con comillas, `DJANGO_DEMO="1"` nunca sería igual a `1` y las direcciones de los monitores quedarían inválidas. Cambie la configuración en Dokploy, nunca en esa copia.
@@ -50,7 +50,7 @@ Los scripts de `deploy/server/` corren tal como están, desde `/opt/kaladrius/bi
 
 | Timer | Qué hace |
 |---|---|
-| `kaladrius-update.timer` (cada 5 min) | `update-dokploy.sh`: descarga `ghcr.io/facchini-miguel/kaladrius:latest`; si es distinta de la app en marcha, pide a Dokploy un deploy del Compose (app nueva, docs generada de nuevo de main), espera `/api/v1/health` y avisa a `MONITOR_UPDATE_URL`. Las migraciones corren cuando la app arranca. Aquí no hay la vuelta automática de la decisión 135: vea abajo |
+| `kaladrius-update.timer` (cada 5 min) | `update-dokploy.sh` (decisión 217): el Compose nombra una **versión**, nunca `latest`: la app es `ghcr.io/facchini-miguel/kaladrius:X.Y.Z` y la docs se genera de la etiqueta `vX.Y.Z`. Cuando el release más nuevo del repositorio en GitHub (que el CI crea una vez publicada la imagen de la versión) es más nuevo, el script descarga esa imagen, cambia esas dos líneas por la API de Dokploy, hace el deploy y espera a que `/api/v1/health` responda con la base y esa versión. Nunca baja de versión solo. Si la versión no arranca, vuelve el Compose anterior, la versión queda rechazada hasta que salga una más nueva y `MONITOR_UPDATE_URL` avisa la falla (como la decisión 135). Las migraciones corren cuando la app arranca y no se deshacen. Un merge que no sube la versión no cambia nada en producción |
 | `kaladrius-backup.timer` (06:00 UTC) | `backup.sh`: `pg_dump` en `/var/backups/kaladrius`, guardando `KALADRIUS_BACKUP_DAYS` (30) días; lo registra en el sistema y aplica la retención de 30 días de los inicios de sesión rechazados |
 | `kaladrius-restore-test.timer` (domingos 07:00 UTC) | `test_restore.sh`: restaura el respaldo más nuevo en una base desechable y lo revisa |
 | `kaladrius-demo-reset.timer` (07:30 UTC) | `reset_demo.sh`: el reinicio diario de la demostración (abajo) |
@@ -85,7 +85,7 @@ sudo ls -l /var/backups/kaladrius
 ```
 
 ### Volver a una versión anterior
-El camino normal es revertir el commit (`git revert`) en una rama y llevarlo a `main` por pull request (`main` no recibe otra cosa, decisión 141; el administrador puede hacer push directo, pasando por encima del ruleset): el CI publica una imagen nueva y el servidor la instala hasta 5 minutos después del merge. En una emergencia, se puede fijar una imagen vieja (cada versión tiene en ghcr.io una etiqueta `X.Y.Z` que nunca se mueve, y cada commit una etiqueta con los 12 primeros caracteres del SHA): detenga `kaladrius-update.timer`, cambie el `image:` de la app en el archivo Compose de Dokploy por `ghcr.io/facchini-miguel/kaladrius:<etiqueta>` y haga el deploy. Después de corregir y publicar, vuelva a `latest` y encienda el timer de nuevo.
+El camino normal es revertir el commit (`git revert`) en una rama, subir la versión y llevarlo a `main` por pull request (`main` no recibe otra cosa, decisión 141; el administrador puede hacer push directo, pasando por encima del ruleset): el CI publica la versión nueva y el servidor la instala hasta 5 minutos después de su release. En una emergencia, vuelva a mano a una versión anterior (cada versión tiene en ghcr.io una etiqueta `X.Y.Z` que nunca se mueve): `sudo /opt/kaladrius/bin/update-dokploy.sh X.Y.Z` la instala, del mismo modo y con las mismas comprobaciones, y la **retiene**: el timer la deja ahí. Después de corregir y publicar, `sudo /opt/kaladrius/bin/update-dokploy.sh --release` vuelve a seguir la versión más nueva. `--check` solo dice lo que haría una ejecución.
 
 Las migraciones no se deshacen: una versión vieja solo funciona si las migraciones nuevas son compatibles con ella (tablas nuevas, o campos que pueden quedar vacíos o tienen `db_default`, por ejemplo; el informe de migraciones de cada pull request señala el resto, decisión 139).
 
