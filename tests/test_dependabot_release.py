@@ -49,7 +49,11 @@ DEV = "-r requirements.txt\ncoverage==7.17.2\nruff==0.17.4\n"
 
 
 class Repository:
-    """A git repository with the project's version files, where pull requests get merged."""
+    """A git repository with the project's version files, where pull requests get merged.
+
+    Its releases.yaml is the project's, which names real pull requests (#110 and #111 since
+    0.72.4), and a named one is left alone: the tests merge numbers far above the real ones
+    (9xxxx), except the one that checks exactly that (#107)."""
 
     def __init__(self, path):
         self.path = path
@@ -139,7 +143,7 @@ def test_only_names_and_versions_of_the_body_reach_releases_yaml():
 
 def test_the_merged_dependabot_pull_requests_get_the_next_version(repository):
     repository.merge(
-        110,
+        90110,
         {
             "requirements.txt": bump("psycopg==3.3.8", "psycopg==3.3.9"),
             "requirements-dev.txt": bump("coverage==7.17.2", "coverage==7.17.3"),
@@ -148,33 +152,33 @@ def test_the_merged_dependabot_pull_requests_get_the_next_version(repository):
         GROUP_BODY,
     )
     repository.merge(
-        111,
+        90111,
         {"requirements.txt": bump("gunicorn==26.2.0", "gunicorn==27.0.1")},
         "Bump gunicorn from 26.2.0 to 27.0.1",
     )
     # Not shipped: the workflows, the development tools; not Dependabot's: the owner's.
     repository.merge(
-        112,
+        90112,
         {".github/workflows/ci.yml": "x"},
         "Bump the acoes group",
         branch="dependabot/github_actions/acoes",
     )
     repository.merge(
-        113,
+        90113,
         {"requirements-dev.txt": bump("ruff==0.17.4", "ruff==0.17.5")},
         "Bump ruff from 0.17.4 to 0.17.5",
     )
-    repository.merge(114, {"apps/x.py": "x = 1\n"}, "A change", login="facchini-miguel")
+    repository.merge(90114, {"apps/x.py": "x = 1\n"}, "A change", login="facchini-miguel")
 
     current = repository.version()
     version, pulls = repository.write()
-    assert [pull.number for pull in pulls] == [110, 111]
+    assert [pull.number for pull in pulls] == [90110, 90111]
     assert version == release.next_version(current)
     newest = releases.read_releases(repository.path / "releases.yaml")[0]
     assert newest.version == version and newest.date == DAY
     assert [(item.source, item.pr, item.kind, item.module) for item in newest.items] == [
-        ("dependabot", 110, "improvement", "System"),
-        ("dependabot", 111, "improvement", "System"),
+        ("dependabot", 90110, "improvement", "System"),
+        ("dependabot", 90111, "improvement", "System"),
     ]
     texts = dict(newest.items[0].texts)
     assert set(texts) == {"pt-br", "en", "es"}, "a test of the project requires the three"
@@ -190,7 +194,7 @@ def test_the_merged_dependabot_pull_requests_get_the_next_version(repository):
 
 def test_after_its_version_is_merged_nothing_is_pending(repository):
     repository.merge(
-        111,
+        90111,
         {"requirements.txt": bump("gunicorn==26.2.0", "gunicorn==27.0.1")},
         "Bump gunicorn from 26.2.0 to 27.0.1",
     )
@@ -203,33 +207,33 @@ def test_after_its_version_is_merged_nothing_is_pending(repository):
         "-q",
         "--no-ff",
         "-m",
-        "Merge pull request #115 from owner/versao-bibliotecas",
+        "Merge pull request #90115 from owner/versao-bibliotecas",
         "versao-bibliotecas",
     )
     assert repository.pending() == []
 
     repository.merge(
-        116,
+        90116,
         {"requirements.txt": bump("pyotp==2.10.0", "pyotp==2.12.0")},
         "Bump pyotp from 2.10.0 to 2.12.0",
     )
-    assert [pull.number for pull in repository.pending()] == [116]
+    assert [pull.number for pull in repository.pending()] == [90116]
     assert release.next_version(repository.version()) == release.next_version(version)
 
 
 def test_a_version_written_by_hand_covers_what_came_before_it(repository):
     repository.merge(
-        110, {"requirements.txt": bump("psycopg==3.3.8", "psycopg==3.3.9")}, GROUP, GROUP_BODY
+        90110, {"requirements.txt": bump("psycopg==3.3.8", "psycopg==3.3.9")}, GROUP, GROUP_BODY
     )
     current = repository.version()
     repository.merge(
-        117,
+        90117,
         {"pyproject.toml": bump(f'version = "{current}"', 'version = "9.0.0"')},
         "Release 9.0.0",
         login="facchini-miguel",
         branch="nova-versao",
     )
-    assert repository.pending() == [], "#110 went out in 9.0.0"
+    assert repository.pending() == [], "#90110 went out in 9.0.0"
 
 
 def test_already_in_releases_yaml_is_left_alone(repository):
@@ -242,7 +246,7 @@ def test_already_in_releases_yaml_is_left_alone(repository):
 def test_documentation_security_and_long_lists(repository):
     rows = "".join(f"| [lib{n}](x) | `1.{n}` | `2.{n}` |\n" for n in range(8))
     repository.merge(
-        120,
+        90120,
         {"docs/package-lock.json": "{}"},
         "Bump the documentacao-menores group",
         rows + "\nFixes CVE-2026-12345.",
