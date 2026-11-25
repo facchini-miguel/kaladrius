@@ -1,0 +1,33 @@
+# The 7-day cooldown of the images a pull request brings (decision 216): every image it adds or
+# changes must have been published at least 7 days ago, and its digest must be the tag's current
+# one. Dependabot already waits 7 days (decision 143) when the registry gives a date; this check
+# also holds what comes without one, or by hand. Every third-party image names its digest
+# (decision 138, require-digest); the project's own images (${APP_IMAGE...}, ${DOCS_IMAGE...})
+# are left out, CI builds them. The "skip-cooldown" label (an urgent fix the owner decided) turns
+# the failure into a warning.
+#
+# It is the owner's shared workflow: the copy for the public repositories in
+# facchini-miguel/facchini.eti.br (its source is facchini-miguel/arauto's, private), pinned to a
+# commit, like the lint (decision 215). The check shows as "Image age / image-age / image-age".
+# tests/test_docker_images.py checks that its sources name every file with an image.
+name: Image age
+
+on:
+  pull_request:
+    # labeled/unlabeled: the skip-cooldown label runs the check again.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  image-age:
+    uses: facchini-miguel/facchini.eti.br/.github/workflows/reusable-image-age.yml@0fec8e18718cf2f8acb3ef31fb6e775af104132c
+    with:
+      sources: |
+        compose docker-compose.yml
+        compose deploy/docker-compose.prod.yml
+        dockerfile Dockerfile
+        dockerfile docs/Dockerfile
+      require-digest: true
+      ignore: '^\$\{'

@@ -9,6 +9,7 @@ them by a bare tag: they read the pinned image from the Dockerfile or the produc
 file instead."""
 
 import re
+from fnmatch import fnmatch
 from pathlib import Path
 
 import pytest
@@ -94,6 +95,28 @@ def test_same_image_in_the_compose_files():
             by_repository.setdefault(_repository(image), {})[file] = image
     divergent = {r: a for r, a in by_repository.items() if len(set(a.values())) > 1}
     assert not divergent, divergent
+
+
+def test_image_age_reads_every_file_with_an_image():
+    """Decision 216: the image-age check (.github/workflows/image-age.yml, the owner's shared
+    workflow pinned to a commit) reads every file that names an image, so an image added in a new
+    file does not skip the 7-day cooldown; it requires the digest (decision 138) and leaves out
+    only the project's own images, named by a variable."""
+    workflow = ROOT_DIR / ".github" / "workflows" / "image-age.yml"
+    if not workflow.exists():  # inside the image, which leaves .github out
+        pytest.skip(".github is not in the image")
+    text = workflow.read_text()
+    shared = r"facchini-miguel/facchini\.eti\.br/\.github/workflows/reusable-image-age\.yml"
+    assert re.search(rf"uses: {shared}@[0-9a-f]{{40}}\n", text), "the shared check, at a commit"
+    inputs = yaml.safe_load(text)["jobs"]["image-age"]["with"]
+    assert inputs["require-digest"] is True
+    assert inputs["ignore"] == r"^\$\{", "only the images named by a variable are left out"
+    sources = [line.split() for line in inputs["sources"].splitlines() if line.strip()]
+    for file, image in _images():
+        kind = "dockerfile" if "Dockerfile" in Path(file).name else "compose"
+        assert any(k == kind and fnmatch(file, glob) for k, glob in sources), (
+            f"{file} ({image}) is not in image-age.yml's sources"
+        )
 
 
 def test_scripts_and_ci_use_no_loose_tag():
