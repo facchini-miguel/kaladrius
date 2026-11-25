@@ -1,0 +1,11 @@
+# The reference production's update on the VPS (decisions 208 and 217): in place of
+# deploy/server/kaladrius-update.service (update.sh), which the Google Cloud and Linux package
+# installations use. The timer is deploy/server/kaladrius-update.timer.
+[Unit]
+Description=Kaladrius: install the newest version (the VPS, Dokploy)
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/kaladrius/bin/update-dokploy.sh

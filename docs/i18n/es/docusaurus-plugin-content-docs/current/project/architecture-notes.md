@@ -77,7 +77,7 @@ La producción de referencia corre en la VPS del titular desde el 09/11/2026 (de
 | Producción (referencia) | VPS en Hostinger (Boston, EE. UU.), Ubuntu 24.04, IPv4 e IPv6, gestionada con Dokploy. Detalles en [Producción de referencia](production.md) | VPS paga |
 | Copias de seguridad | Carpeta local en la VPS (30 días); falta elegir dónde guardar una copia fuera de ella | — |
 
-**CI/CD:** GitHub Actions ejecuta lint y pruebas y publica la imagen en **GitHub Packages** (`ghcr.io`). El servidor revisa cada 5 minutos y pide a Dokploy el deploy de una imagen nueva; el CI nunca accede al servidor.
+**CI/CD:** GitHub Actions ejecuta lint y pruebas y publica la imagen en **GitHub Packages** (`ghcr.io`). El servidor revisa cada 5 minutos y pide a Dokploy el deploy de una versión nueva (decisión 217); el CI nunca accede al servidor.
 
 Cualquiera puede seguir instalando Kaladrius en el free tier de Google Cloud: vea [Free tier de Google Cloud](../installation/google-cloud.md).
 

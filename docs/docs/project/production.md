@@ -13,15 +13,15 @@ Published at **https://kaladrius.facchini.eti.br** (IPv4 and IPv6), also at http
 ## Architecture
 
 ```
-git push (main) ─> GitHub Actions: tests, docs build ─> image on ghcr.io
+git push (main) ─> GitHub Actions: tests, docs build ─> image on ghcr.io (:X.Y.Z), release vX.Y.Z
                                                           │ the server checks every 5 min
                                                           ▼
 Browser ──IPv4/IPv6, HTTPS──> VPS (Ubuntu 24.04, Hostinger, Boston, US)
                                ├─ traefik  (Dokploy's proxy: Let's Encrypt HTTPS, ports 80/443)
                                └─ Dokploy Compose "kaladrius"
-                                   ├─ app   (Django + Gunicorn, image from ghcr.io)
+                                   ├─ app   (Django + Gunicorn, ghcr.io/…/kaladrius:X.Y.Z)
                                    ├─ db    (PostgreSQL 16, volume pgdata)
-                                   └─ docs  (built from docs/ of main when deploying)
+                                   └─ docs  (built from docs/ of the tag vX.Y.Z when deploying)
 Daily backup 06:00 UTC ─> /var/backups/kaladrius (30 days)
 Maintenance: SSH with a key only (no password, no root); Dokploy's panel only through an SSH tunnel
 ```
@@ -42,7 +42,7 @@ The Compose file follows `deploy/docker-compose.prod.yml`, with Traefik in Caddy
 
 ## How the server works
 
-The scripts of `deploy/server/` run as they are, from `/opt/kaladrius/bin`, with the systemd units of the repository. `/opt/kaladrius` links them to the Dokploy Compose:
+The scripts of `deploy/server/` run as they are, from `/opt/kaladrius/bin`, with the systemd units of the repository; `deploy/server/dokploy/` has what only the VPS uses: the update unit (`update-dokploy.sh` in place of `update.sh`), `sync-env.py` and its drop-in. `/opt/kaladrius` links them to the Dokploy Compose:
 
 - `release/docker-compose.prod.yml` and `release/.env` are links to Dokploy's Compose file and `.env`. The `.env` names the Compose project (`COMPOSE_PROJECT_NAME`), so `docker compose -f /opt/kaladrius/release/docker-compose.prod.yml` reaches the containers Dokploy started.
 - `/opt/kaladrius/.env` is a copy without quotes, which `sync-env.py` writes again before every `kaladrius-*` unit (drop-in `/etc/systemd/system/kaladrius-.service.d/env.conf`). Dokploy writes `KEY="value"`, which Docker Compose reads, but `env_value` in `common.sh` reads the line as it is: with quotes, `DJANGO_DEMO="1"` would never match `1` and the monitor addresses would be invalid. Change settings in Dokploy, never in this copy.
@@ -50,7 +50,7 @@ The scripts of `deploy/server/` run as they are, from `/opt/kaladrius/bin`, with
 
 | Timer | What it does |
 |---|---|
-| `kaladrius-update.timer` (every 5 min) | `update-dokploy.sh`: pulls `ghcr.io/facchini-miguel/kaladrius:latest`; when it differs from the running app, asks Dokploy for a deploy of the Compose (new app, docs built again from main), waits for `/api/v1/health` and tells `MONITOR_UPDATE_URL`. Migrations run when the app starts. There is no automatic rollback (decision 135) here: see below |
+| `kaladrius-update.timer` (every 5 min) | `update-dokploy.sh` (decision 217): the Compose names a **version**, never `latest`: the app is `ghcr.io/facchini-miguel/kaladrius:X.Y.Z` and the docs are built from the tag `vX.Y.Z`. When the repository's newest GitHub release (which CI creates once the version's image is published) is newer, the script pulls that image, changes those two lines through Dokploy's API, deploys and waits until `/api/v1/health` answers with the database and that version. It never goes down by itself. If the version does not come up, the previous Compose goes back, the version is refused until a newer one, and `MONITOR_UPDATE_URL` reports the failure (as decision 135). Migrations run when the app starts and are not undone. A merge that does not raise the version changes nothing in production |
 | `kaladrius-backup.timer` (06:00 UTC) | `backup.sh`: `pg_dump` to `/var/backups/kaladrius`, keeping `KALADRIUS_BACKUP_DAYS` (30) days; records it in the system and applies the 30-day retention of refused logins |
 | `kaladrius-restore-test.timer` (Sundays 07:00 UTC) | `test_restore.sh`: restores the newest backup into a throwaway database and checks it |
 | `kaladrius-demo-reset.timer` (07:30 UTC) | `reset_demo.sh`: the nightly reset of the demo (below) |
@@ -85,7 +85,7 @@ sudo ls -l /var/backups/kaladrius
 ```
 
 ### Rolling back to a previous version
-The normal way is to revert the commit (`git revert`) on a branch and merge it into `main` through a pull request (`main` takes nothing else, decision 141; the admin may push it straight, bypassing the ruleset): CI publishes a new image and the server installs it within 5 minutes of the merge. In an emergency, an old image can be pinned (each version has an `X.Y.Z` tag on ghcr.io that never moves, and each commit a tag with the first 12 characters of its SHA): stop `kaladrius-update.timer`, change the app's `image:` in the Compose file in Dokploy to `ghcr.io/facchini-miguel/kaladrius:<tag>` and deploy. After fixing and publishing, put `latest` back and start the timer again.
+The normal way is to revert the commit (`git revert`) on a branch, raise the version and merge it into `main` through a pull request (`main` takes nothing else, decision 141; the admin may push it straight, bypassing the ruleset): CI publishes the new version and the server installs it within 5 minutes of its release. In an emergency, go back to an earlier version by hand (each version has an `X.Y.Z` tag on ghcr.io that never moves): `sudo /opt/kaladrius/bin/update-dokploy.sh X.Y.Z` installs it, the same way and with the same checks, and **holds** it: the timer leaves it there. After fixing and publishing, `sudo /opt/kaladrius/bin/update-dokploy.sh --release` follows the newest version again. `--check` only says what a run would do.
 
 Migrations are not undone: an old version only works if the new migrations are compatible with it (adding tables, or fields that may be empty or have a `db_default`, for example; the migration report on each pull request flags the rest, decision 139).
 

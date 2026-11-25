@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.72.3
+  date: 2026-11-25
+  title:
+    pt-br: O servidor de referência instala versões, não a imagem mais nova
+    en: The reference server installs versions, not the newest image
+    es: El servidor de referencia instala versiones, no la imagen más nueva
+  items:
+    - kind: improvement
+      module: System
+      audience: [staff]
+      text:
+        pt-br: >
+          A demonstração pública passa a rodar uma versão (0.72.3), e não a imagem mais nova do
+          registro: ela só muda quando sai uma versão nova, e volta sozinha para a anterior se a
+          nova não responder. Nada muda no uso, nas telas nem nos dados.
+        en: >
+          The public demo now runs a version (0.72.3), not the registry's newest image: it only
+          changes when a new version comes out, and goes back by itself to the previous one if the
+          new one does not answer. Nothing changes in use, on the screens or in the data.
+        es: >
+          La demostración pública pasa a ejecutar una versión (0.72.3), y no la imagen más nueva del
+          registro: solo cambia cuando sale una versión nueva, y vuelve sola a la anterior si la
+          nueva no responde. Nada cambia en el uso, en las pantallas ni en los datos.
+
 - version: 0.72.2
   date: 2026-11-17
   title:
