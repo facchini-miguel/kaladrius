@@ -4,6 +4,46 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.72.4
+  date: 2026-11-25
+  title:
+    pt-br: Bibliotecas atualizadas
+    en: Libraries updated
+    es: Bibliotecas actualizadas
+  items:
+    - kind: improvement
+      module: System
+      audience: [staff]
+      source: dependabot
+      pr: 110
+      text:
+        pt-br: >
+          Bibliotecas do sistema atualizadas: argon2-cffi-bindings 26.1.0 → 26.2.0, faker 40.52.0 →
+          40.54.0, psycopg 3.3.8 → 3.3.9, psycopg-binary 3.3.8 → 3.3.9, pyotp 2.10.0 → 2.12.0. Nada
+          muda para quem usa o sistema.
+        en: >
+          System libraries updated: argon2-cffi-bindings 26.1.0 → 26.2.0, faker 40.52.0 → 40.54.0,
+          psycopg 3.3.8 → 3.3.9, psycopg-binary 3.3.8 → 3.3.9, pyotp 2.10.0 → 2.12.0. Nothing
+          changes for users.
+        es: >
+          Bibliotecas del sistema actualizadas: argon2-cffi-bindings 26.1.0 → 26.2.0, faker 40.52.0
+          → 40.54.0, psycopg 3.3.8 → 3.3.9, psycopg-binary 3.3.8 → 3.3.9, pyotp 2.10.0 → 2.12.0.
+          Nada cambia para quien usa el sistema.
+    - kind: improvement
+      module: System
+      audience: [staff]
+      source: dependabot
+      pr: 111
+      text:
+        pt-br: >
+          Bibliotecas do sistema atualizadas: gunicorn 26.2.0 → 27.0.1. Nada muda para quem usa o
+          sistema.
+        en: >
+          System libraries updated: gunicorn 26.2.0 → 27.0.1. Nothing changes for users.
+        es: >
+          Bibliotecas del sistema actualizadas: gunicorn 26.2.0 → 27.0.1. Nada cambia para quien usa
+          el sistema.
+
 - version: 0.72.3
   date: 2026-11-25
   title:
