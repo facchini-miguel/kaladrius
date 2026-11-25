@@ -73,13 +73,17 @@ def test_ci_checks_the_locks():
 
 
 def test_commit_lint_uses_the_locked_ruff():
-    """Decision 137: the Lint workflow runs on every push and installs ruff from the lock,
-    with its hashes, for the Python of .python-version."""
+    """Decisions 137 and 215: the Lint workflow runs on every push and calls the owner's shared
+    lint (the public copy in facchini-miguel/facchini.eti.br), pinned to a commit, with the ruff of
+    requirements-dev.txt: the shared workflow installs that pin with its hashes."""
     file = ROOT_DIR / ".github" / "workflows" / "lint.yml"
     if not file.exists():  # inside the image, which leaves .github out
         pytest.skip(".github is not in the image")
     lint = file.read_text()
-    assert "\n  push:\n" in lint
-    assert "python-version-file: .python-version" in lint and "python-version:" not in lint
-    assert "requirements-dev.txt" in lint and "--require-hashes" in lint
-    assert "ruff check" in lint and "ruff format --check" in lint
+    assert "\non:\n  push:\n" in lint
+    shared = r"facchini-miguel/facchini\.eti\.br/\.github/workflows/reusable-lint\.yml"
+    assert re.search(rf"uses: {shared}@[0-9a-f]{{40}}\n", lint), "the shared lint, at a commit"
+    assert "ruff-from: requirements-dev.txt" in lint
+    lock = (ROOT_DIR / "requirements-dev.txt").read_text()
+    hashed = r"^ruff==\S+ \\\n\s+--hash=sha256:[0-9a-f]{64}"
+    assert re.search(hashed, lock, re.M), "ruff in the lock, with its hashes"
